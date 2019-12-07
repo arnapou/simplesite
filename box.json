@@ -1,7 +1,7 @@
 {
     "chmod": "0755",
     "main": "src/main.php",
-    "output": "site/simple_site.phar",
+    "output": "site/simplesite.phar",
     "compression": "GZ",
     "intercept": true,
     "directories": [

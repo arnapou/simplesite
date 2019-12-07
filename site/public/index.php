@@ -1,6 +1,6 @@
 <?php
 
-include __DIR__ . '/../simple_site.phar';
+include __DIR__ . '/../simplesite.phar';
 
 \Arnapou\SimpleSite\run(
     [
