@@ -24,6 +24,10 @@ class RouteCollections implements ServiceFactory
      */
     private $collections = [];
     /**
+     * @var array
+     */
+    private $names = [];
+    /**
      * @var RouteCollection
      */
     private $main;
@@ -45,16 +49,15 @@ class RouteCollections implements ServiceFactory
 
     public function addRoute(Controller $controller, string $path, callable $callable, string $name): Route
     {
-        $path   = '/' . ltrim($path, '/');
-        $route  = new class($path, ['_controller' => $callable]) extends Route {
+        $path  = '/' . ltrim($path, '/');
+        $route = new class($path, ['_controller' => $callable]) extends Route {
             public function setDefaults(array $defaults)
             {
                 $defaults = array_merge($this->getDefaults(), $defaults);
                 return parent::setDefaults($defaults);
             }
         };
-        $prefix = substr(\get_class($controller), 0, 4) === 'Cms\\' ? 'cms_' : '';
-        return $this->add($prefix . $name, $route, $controller->routePriority());
+        return $this->add($name, $route, $controller->routePriority());
     }
 
     public function add($name, Route $route, int $priority): Route
@@ -62,8 +65,20 @@ class RouteCollections implements ServiceFactory
         if (!\array_key_exists($priority, $this->collections)) {
             $this->collections[$priority] = new RouteCollection();
         }
-        $this->collections[$priority]->add($name, $route);
+        $this->collections[$priority]->add($this->ensureUniqueName($name), $route);
         return $route;
+    }
+
+    private function ensureUniqueName($name)
+    {
+        $unique = $name;
+        $index  = 1;
+        while (isset($this->names[$unique])) {
+            $unique = "${name}_${index}";
+            $index++;
+        }
+        $this->names[$unique] = $unique;
+        return $unique;
     }
 
     public function merge(): RouteCollection

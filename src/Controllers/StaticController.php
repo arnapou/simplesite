@@ -22,7 +22,7 @@ class StaticController extends Controller
 
     public function routePriority(): int
     {
-        return PHP_INT_MAX;
+        return 100;
     }
 
     public function configure(): void

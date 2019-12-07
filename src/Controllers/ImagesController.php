@@ -33,4 +33,8 @@ class ImagesController extends Controller
         }
         throw new ResourceNotFoundException();
     }
+    public function routePriority(): int
+    {
+        return 100;
+    }
 }

@@ -49,11 +49,11 @@ abstract class Controller implements PhpCode
 
     protected function render($view, $context = []): Response
     {
-        $context = array_merge($context, $this->renderContext($view));
+        $context = array_merge($context, $this->yamlContext($view));
         return new Response($this->container->TwigEnvironment()->render($view, $context));
     }
 
-    private function renderContext(string $view): array
+    protected function yamlContext(string $view): array
     {
         try {
             $yamlFile = substr($view, 0, -\strlen(Utils::extension($view))) . 'yaml';
