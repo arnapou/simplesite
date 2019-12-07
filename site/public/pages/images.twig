@@ -1,0 +1,34 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Images</h1>
+
+    <p>Un petit outil de resize d'image basique est intégré au système du site.</p>
+
+    <p>Le resize est fait sur la plus grande largeur et l'image resizée est mise en cache.<br>
+        L'image en cache est mise à jour automatiquement si l'image d'origine change.</p>
+
+
+    <h3 class="mt-5">Exemple d'image brute</h3>
+
+    <ul>
+        <li>Code twig : <code>{% verbatim %}&lt;img src="{{ asset('../assets/twig.png') }}"&gt;{% endverbatim %}</code></li>
+        <li>Aperçu : <img src="{{ asset('../assets/twig.png', 50) }}"></li>
+    </ul>
+
+
+    <h3 class="mt-5">Exemple d'image resizée</h3>
+
+    <ul>
+        <li>Code twig : <code>{% verbatim %}&lt;img src="{{ thumbnail('../assets/twig.png', 200) }}"&gt;{% endverbatim %}</code></li>
+        <li>Aperçu : <img src="{{ thumbnail('../assets/twig.png', 200) }}"></li>
+    </ul>
+
+
+    <style>
+        img {
+            vertical-align: top;
+        }
+    </style>
+{% endblock %}
