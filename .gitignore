@@ -5,3 +5,4 @@ demo/cache
 composer.lock
 .php_cs.cache
 githubhook.log
+site/data/compteur.ip.php
