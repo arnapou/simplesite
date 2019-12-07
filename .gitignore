@@ -4,3 +4,4 @@ cache
 demo/cache
 composer.lock
 .php_cs.cache
+githubhook.log
