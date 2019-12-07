@@ -5,8 +5,7 @@
     "compression": "GZ",
     "intercept": true,
     "directories": [
-        "src",
-        "templates"
+        "src"
     ],
     "finder": [
         {

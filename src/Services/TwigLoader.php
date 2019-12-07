@@ -22,7 +22,7 @@ class TwigLoader implements ServiceFactory
     {
         $loader = new FilesystemLoader();
         $loader->addPath($container->Config()->path_public());
-        $loader->addPath(__DIR__ . '/../../templates', 'internal');
+        $loader->addPath(__DIR__ . '/../Views', 'internal');
 
         $registerNamespace = function (string $namespace, string $configName) use ($container, $loader) {
             try {
