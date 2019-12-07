@@ -1,0 +1,25 @@
+#
+# base de variables disponibles en global dans le twig
+#
+
+-
+  id: url_arnapou
+  value: 'http://arnapou.net/'
+-
+  id: url_github
+  value: 'https://github.com/arnapou/simplesite'
+-
+  id: url_twig
+  value: 'https://twig.symfony.com/'
+-
+  id: url_yaml
+  value: 'https://fr.wikipedia.org/wiki/YAML'
+-
+  id: url_php
+  value: 'https://www.php.net/'
+-
+  id: url_http_foundation
+  value: 'https://symfony.com/doc/current/components/http_foundation.html'
+-
+  id: url_routing
+  value: 'https://symfony.com/doc/current/components/routing.html'

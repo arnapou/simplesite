@@ -1,0 +1,24 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Pages d'erreur</h1>
+
+    <p>On ne considère à ce stade que les <code>404</code> et les <code>500</code></p>
+
+    <p>Il existe des pages préconfigurées pour cela, exemples :</p>
+    <ul>
+        <li><a href="{{ path('je_plante') }}">Une page qui plante</a> pour visualiser la page 500 par défaut.</li>
+        <li><a href="/je_n_existe_pas">Une page qui n'existe pas</a> pour visualiser une page 404 personnalisée.</li>
+    </ul>
+
+    <p>Pour personnaliser les pages d'erreur, il suffit d'avoir un dossier de templates configuré via <code>path_templates</code>
+        et de définir les fichiers twig suivants dans ce dossier :</p>
+
+    <ul>
+        <li><code>error.404.twig</code></li>
+        <li><code>error.500.twig</code></li>
+    </ul>
+
+
+{% endblock %}

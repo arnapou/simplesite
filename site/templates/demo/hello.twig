@@ -1,0 +1,10 @@
+{% extends "@templates/base.twig" %}
+
+
+{% block content %}
+    <h1>Hello {{ name }} !</h1>
+
+    <p>YAML context parsed and json_encoded :</p>
+    <pre class="border p-2">{{ hello | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}</pre>
+
+{% endblock %}

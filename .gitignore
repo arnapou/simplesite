@@ -1,0 +1,6 @@
+.idea
+vendor
+cache
+demo/cache
+composer.lock
+.php_cs.cache

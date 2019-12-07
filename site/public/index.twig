@@ -1,0 +1,44 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Arnapou Simple site</h1>
+
+    <h2>Pré-requis</h2>
+
+    <p>Avant toute chose, techniquement, il est nécessaire d'avoir une plateforme en PHP 7.2+</p>
+        <p>Si vous voulez profiter du maximum de possibilités, il vous faudra connaitre :</p>
+
+    <ul>
+        <li>évidemment : HTML, CSS, voire JS</li>
+        <li>le format de fichier <a href="{{ url_yaml }}" target="_blank">YAML</a></li>
+        <li>le templating <a href="{{ url_twig }}" target="_blank">Twig</a></li>
+        <li>le langage de programmation <a href="{{ url_php }}" target="_blank">PHP</a></li>
+        <li>le composant <a href="{{ url_http_foundation }}" target="_blank">HttpFoundation</a> de symfony</li>
+        <li>web rewriting (cette démo est fournie avec un <code>.htaccess</code> de base)</li>
+    </ul>
+
+    <p>Mais il est tout à fait possible de faire un simple site statique twig.</p>
+
+    <p>Le mini-framework est compilé dans un fichier <code>.phar</code> de moins de 1 Mo facile à copier.<br>
+        Il a uniquement ces dépendances :</p>
+    <ul>
+        <li><a href="https://github.com/arnapou/pfdb" target="_blank">arnapou/pfdb</a></li>
+        <li><a href="https://github.com/Seldaek/monolog" target="_blank">monolog/monolog</a></li>
+        <li><a href="https://github.com/symfony/cache" target="_blank">symfony/cache</a></li>
+        <li><a href="https://github.com/symfony/http-foundation" target="_blank">symfony/http-foundation</a></li>
+        <li><a href="https://github.com/twigphp/Twig" target="_blank">twig/twig</a></li>
+    </ul>
+
+    <h2>Etat d'esprit</h2>
+
+    <ul>
+        <li>simple</li>
+        <li>léger</li>
+        <li>maintenance facile</li>
+        <li>pérenne</li>
+        <li>fallbacks automatiques</li>
+        <li>maximum d'ouverture</li>
+    </ul>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Datas</h1>
+
+    <p>Les datas sont stockées dans des "tables" dans des fichiers à plat en <a href="{{ url_yaml }}">YAML</a>.</p>
+
+    <p>Les fichiers sont dans le dossier de la config <code>path_data</code> et ont le nom suivant <code>table.&lt;nom_de_table&gt;.yaml</code></p>
+
+    <p>Exemple du fichier fourni dans cette démo <code>table.persons.yaml</code> :</p>
+    <pre style="overflow: auto;max-height: 15rem;background: #f9f9f9" class="border pl-2">{{ source('@data/table.persons.yaml') }}</pre>
+
+    <p>Pour y accéder on utilise <a href="https://github.com/arnapou/pfdb" target="_blank">arnapou/pfdb</a> qui permet de faire des recherches, des groupements, des tris et aussi de modifier les données.<br>
+        La documentation est en ligne sur <a href="http://pfdb.arnapou.net/" target="_blank">pfdb.arnapou.net</a> : tout ce qui est faisable en code PHP est faisable dans twig à travers l'objet <code>app.db</code>.</p>
+
+    <h3>Retrouver un élément à partir de son id</h3>
+
+    <p>
+        L'élément ayant pour id 5<br>
+        {% verbatim %}<code><span class="text-muted">{{ </span>app.db.table('persons').get(5)<span class="text-muted"> | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}</span></code>{% endverbatim %}
+    </p>
+
+    <pre>{{ app.db.table('persons').get(5) | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}</pre>
+
+    <h3>Lister</h3>
+
+    <p>
+        5 lignes à partir de la dizième<br>
+        {% verbatim %}<code><span class="text-muted">{% for person in </span>app.db.table('persons').find.limit(10, 5)<span class="text-muted"> %}</span></code>{% endverbatim %}
+    </p>
+
+    <table class="table table-sm">
+        <tbody>
+        {% for person in app.db.table('persons').find.limit(10, 5) %}
+            <tr>
+                <td class="col-3">{{ person.id }}</td>
+                <td class="col-3">{{ person.name }}</td>
+                <td class="col-3">{{ person.gender }}</td>
+                <td class="col-3">{{ person.language }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Chercher et trier</h3>
+
+    <p>
+        Les noms contenant <code>an</code> puis trié par nom<br>
+        {% verbatim %}<code><span class="text-muted">{% for person in </span>app.db.table('persons').find(app.db.expr.contains('name', 'an')).sort('name')<span class="text-muted"> %}</span></code>{% endverbatim %}
+    </p>
+
+    <table class="table table-sm">
+        <tbody>
+        {% for person in app.db.table('persons').find(app.db.expr.contains('name', 'an')).sort('name') %}
+            <tr>
+                <td class="col-3">{{ person.id }}</td>
+                <td class="col-3">{{ person.name }}</td>
+                <td class="col-3">{{ person.gender }}</td>
+                <td class="col-3">{{ person.language }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

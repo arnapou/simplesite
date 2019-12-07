@@ -1,0 +1,219 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Templating Twig</h1>
+
+    <h2>Syntaxe</h2>
+
+    <p>Exemples de base :</p>
+    <ul>
+        {% verbatim %}
+            <li><code>{{ foo.bar }}</code> variable</li>
+            <li><code>{% set foo = 'foo' %}</code> affectation de variable</li>
+            <li><code>{{ name|striptags|title }}</code> filtres</li>
+            <li><code>{% for item in items %}...{% endfor %}</code> boucle sur des élements</li>
+        {% endverbatim %}
+        <li>le reste sur <a href="{{ url_twig }}">documentation officielle</a></li>
+    </ul>
+
+    <h2>Les templates</h2>
+
+    <p>Si vous voulez utiliser des templates twig non accessibles depuis le dossier public, vous devez utiliser un
+        dossier de templates à part dans la config du site via le paramètre <code>path_templates</code>.<br>
+        Ce dossier a comme nom de namespace twig <code>templates</code>.<br>
+        Si vous n'utilisez pas de namespace, twig cherchera les fichiers dans le dossier <code>path_public</code></p>
+
+    <p>Exemple d'héritage de template : {% verbatim %}<code>{% extends "@templates/base.twig" %}</code>{% endverbatim %}</p>
+
+
+    <h2>Fourni avec ce projet de site</h2>
+
+    <h3>Variables</h3>
+
+    <table class="table table-sm">
+        <thead>
+        <tr>
+            <th></th>
+            <th>description</th>
+            <th>exemple</th>
+            <th>résultat</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>app</code></td>
+            <td colspan="3">variable du conteneur de services</td>
+        </tr>
+        <tr>
+            <td><code>app.compteur</code></td>
+            <td>service qui gère le calcul d'un pseudo nombre de visites uniques par IP</td>
+            <td>{% verbatim %}<code>{{ app.compteur }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.compteur }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>app.db</code></td>
+            <td rowspan="2">objet de db qui permet d'accéder à toutes les tables yaml</td>
+            <td>{% verbatim %}<code>{{ app.db.table('persons').get(10).name }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.db.table('persons').get(10).name }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ app.db.table('persons')|length }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.db.table('persons')|length }}</td>
+        </tr>
+        <tr>
+            <td><code>app.logger</code></td>
+            <td>pour logger des choses</td>
+            <td>{% verbatim %}<code>{{ app.logger.info('Hello World !') }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.logger.info('Hello World !') }}</td>
+        </tr>
+        <tr>
+            <td rowspan="3"><code>app.request</code></td>
+            <td rowspan="3">objet <code>Request</code> de symfony <a href="{{ url_http_foundation }}">HttpFoundation</a></td>
+            <td>{% verbatim %}<code>{{ app.request.pathinfo }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.request.pathinfo }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ app.request.basepath }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.request.basepath }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ app.request.uri }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.request.uri }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>app.session</code></td>
+            <td rowspan="2">objet <code>Session</code> de symfony <a href="{{ url_http_foundation }}">HttpFoundation</a></td>
+            <td>{% verbatim %}<code>{{ app.session.set('test', 42) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.session.set('test', 42) }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ app.session.get('test') }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.session.get('test') }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>app.urlgenerator</code></td>
+            <td rowspan="2">objet <code>UrlGenerator</code> de symfony <a href="{{ url_routing }}">Routing</a></td>
+            <td>{% verbatim %}<code>{{ app.urlgenerator.generate('static_page', { path: 'pages/templating' }) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.urlgenerator.generate('static_page', { path: 'pages/templating' }) }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ app.urlgenerator.generate('static_dir', { path: 'pages' }) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.urlgenerator.generate('static_dir', { path: 'pages' }) }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>app.config</code></td>
+            <td rowspan="2">config du site</td>
+            <td>{% verbatim %}<code>{{ app.config.name }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.config.name }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ app.config.log_max_files }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ app.config.log_max_files }}</td>
+        </tr>
+        </tbody>
+
+    </table>
+
+    <h3 class="mt-5">Fonctions</h3>
+
+    <table class="table table-sm">
+        <thead>
+        <tr>
+            <th></th>
+            <th>description</th>
+            <th>exemple</th>
+            <th>résultat</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>asset</code></td>
+            <td>calcule le chemin d'un asset</td>
+            <td>{% verbatim %}<code>{{ asset('../assets/twig.png') }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ asset('../assets/twig.png') }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>path</code></td>
+            <td rowspan="2">calcule le chemin d'un lien <br><small>(équivalent plus simple que <code>app.urlgenerator</code>)</small></td>
+            <td>{% verbatim %}<code>{{ path('static_dir', { path: 'pages' }) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ path('static_dir', { path: 'pages' }) }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ path('static_page', { path: 'pages/templating' }) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ path('static_page', { path: 'pages/templating' }) }}</td>
+        </tr>
+        <tr>
+            <td><code>path_dir</code></td>
+            <td>raccourci de <code>path('static_dir', ...)</code></td>
+            <td>{% verbatim %}<code>{{ path_dir('pages') }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ path_dir('pages') }}</td>
+        </tr>
+        <tr>
+            <td><code>path_page</code></td>
+            <td>raccourci de <code>path('static_page', ...)</code></td>
+            <td>{% verbatim %}<code>{{ path_page('pages/templating') }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ path_page('pages/templating') }}</td>
+        </tr>
+        <tr>
+            <td><code>thumbnail</code></td>
+            <td>transforme le chemin d'une image vers celui de sa miniature</td>
+            <td>{% verbatim %}<code>{{ thumbnail('../assets/twig.png', 50) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ thumbnail('../assets/twig.png', 50) }}</td>
+        </tr>
+        </tbody>
+
+    </table>
+
+    <h3 class="mt-5">Filtres</h3>
+
+    <table class="table table-sm">
+        <thead>
+        <tr>
+            <th></th>
+            <th>description</th>
+            <th>exemple</th>
+            <th>résultat</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>thumbnail</code></td>
+            <td>transforme le chemin d'une image vers celui de sa miniature</td>
+            <td>{% verbatim %}<code>{{ '../assets/twig.png'|thumbnail(50) }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ '../assets/twig.png'|thumbnail(50) }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>emojis</code></td>
+            <td>affiche des emojis pour certains textes</td>
+            <td>{% verbatim %}<code>{{ ':)'|emojis }}</code>{% endverbatim %}</td>
+            <td class="text-info">{{ ':)'|emojis }}</td>
+        </tr>
+        <tr>
+            <td>à utiliser plutôt sur des gros textes</td>
+            <td>{% verbatim %}<pre><code style="color: #e83e8c">{% apply emojis %}
+    :D    :d     :)    :-)    :s
+    :S    :(     :-(   :p     :P
+    :o    :O     :B    :|     :/
+    ;(    ;-(    ;)    ;-)    :!:
+    :?:   :lol:  ^^    ==>    =D
+    oO    Oo     o_O   ^(     (?)
+    ^)    :fear:
+{% endapply %}</code></pre>{% endverbatim %}</td>
+            <td class="text-info"><pre>{% apply emojis %}
+    :D    :d     :)    :-)    :s
+    :S    :(     :-(   :p     :P
+    :o    :O     :B    :|     :/
+    ;(    ;-(    ;)    ;-)    :!:
+    :?:   :lol:  ^^    ==>    =D
+    oO    Oo     o_O   ^(     (?)
+    ^)    :fear:
+{% endapply %}</pre>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+
+{% endblock %}

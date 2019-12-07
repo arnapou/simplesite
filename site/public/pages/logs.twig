@@ -1,0 +1,26 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Logs</h1>
+
+    <p>Le site log un certain nombre de choses comme les 404, les 500, etc ...</p>
+
+    <p>Le dossier de log est dans l'option de config <code>path_logs</code> et s'il n'est pas défini on utilise le sous dossier <code>logs</code> de l'option <code>path_cache</code></p>
+
+    <p>Une rétention de plusieurs jours est gardée et configurable avec l'option <code>log_max_files</code>.</p>
+
+    <p>On peut choisir le niveau de log avec l'option <code>log_level</code> qui doit avoir une des valeurs suivantes :</p>
+
+    <ul>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_DEBUG</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_INFO</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_NOTICE</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_WARNING</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_ERROR</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_CRITICAL</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_ALERT</code></li>
+        <li><code><span class="text-muted">Arnapou\SimpleSite\Core\</span>Config::LOG_EMERGENCY</code></li>
+    </ul>
+
+{% endblock %}
