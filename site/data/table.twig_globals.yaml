@@ -6,8 +6,8 @@
   id: url_arnapou
   value: 'http://arnapou.net/'
 -
-  id: url_github
-  value: 'https://github.com/arnapou/simplesite'
+  id: url_gitlab
+  value: 'https://gitlab.com/arnapou/simplesite'
 -
   id: url_twig
   value: 'https://twig.symfony.com/'
