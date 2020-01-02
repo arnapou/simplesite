@@ -32,6 +32,6 @@ function run(array $config)
         }
     );
 
-    $kernel = new Kernel(new Config($config), Request::createFromGlobals());
+    $kernel = new Kernel(new Config($config));
     $kernel->handle(Request::createFromGlobals())->send();
 }

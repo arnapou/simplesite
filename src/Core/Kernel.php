@@ -35,7 +35,7 @@ class Kernel
      */
     private $eventListener;
 
-    public function __construct(Config $config, Request $request)
+    public function __construct(Config $config)
     {
         $this->config        = $config;
         $this->eventListener = new EventListener();
