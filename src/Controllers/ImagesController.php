@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -26,8 +24,9 @@ class ImagesController extends Controller
             ->setRequirement('ext', '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]');
     }
 
-    public function routeImage(string $path, int $size, string $ext)
+    public function routeImage(string $path, string $size, string $ext)
     {
+        $size = (int)$size;
         if ($size > 16 && $size <= 1500) {
             if ($response = $this->container()->Image()->thumbnail($path, $ext, $size)) {
                 return $response;
@@ -35,6 +34,7 @@ class ImagesController extends Controller
         }
         throw new ResourceNotFoundException();
     }
+
     public function routePriority(): int
     {
         return 100;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -128,6 +126,8 @@ class Image
             $w1 = imagesx($img);
             $h1 = imagesy($img);
             [$w2, $h2] = $this->newSize($w1, $h1, $size);
+            $w2  = (int)$w2;
+            $h2  = (int)$h2;
             $dst = imagecreate($w2, $h2);
             imagecopyresampled($dst, $img, 0, 0, 0, 0, $w2, $h2, $w1, $h1);
             return $dst;
@@ -149,14 +149,14 @@ class Image
         throw new \RuntimeException();
     }
 
-    private function fileResponse($content, $ext, $filemtime): Response
+    private function fileResponse(string $content, string $ext, int $filemtime): Response
     {
         $response = new Response($content);
         $response->headers->set('Content-Type', $this->mimeTypes[$ext]);
         $response->setCache(
             [
                 'etag'          => base64_encode(hash('sha256', $content, true)),
-                'last_modified' => \DateTime::createFromFormat('U', $filemtime),
+                'last_modified' => \DateTime::createFromFormat('U', (string)$filemtime),
                 'max_age'       => 864000,
                 's_maxage'      => 864000,
                 'public'        => true,

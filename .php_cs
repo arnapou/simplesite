@@ -21,7 +21,7 @@ return PhpCsFixer\Config::create()
             'combine_consecutive_unsets'            => true,
             'combine_nested_dirname'                => true, // php 7.0
             'concat_space'                          => ['spacing' => 'one'],
-            'declare_strict_types'                  => true, // php 7.0
+            // 'declare_strict_types'                  => true, // php 7.0
             // 'heredoc_indentation'                   => true, // php 7.3
             'native_function_casing'                => true,
             'no_alias_functions'                    => true,
