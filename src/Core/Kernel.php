@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -16,7 +18,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Throwable;
 
 class Kernel
 {
@@ -70,7 +71,7 @@ class Kernel
             $container->Logger()->warning('404 Not Found');
             $response = $this->error($container, 404, $exception);
             $this->eventListener->dispatch(self::onError404, $event = new Event($container, $response));
-        } catch (Throwable $exception) {
+        } catch (\Throwable $exception) {
             $container->Logger()->error('500 Internal Error', ['exception' => Utils::dump_throwable($exception)]);
             $response = $this->error($container, 500, $exception);
             $this->eventListener->dispatch(self::onError500, $event = new Event($container, $response));
@@ -115,7 +116,7 @@ class Kernel
             ];
 
             $html = $container->TwigEnvironment()->render("@templates/error.$code.twig", $context);
-        } catch (Throwable $exception) {
+        } catch (\Throwable $exception) {
             $html = $container->TwigEnvironment()->render("@internal/error.$code.twig", $context);
         }
         return new Response($html, $code);

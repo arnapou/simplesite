@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,7 +13,6 @@
 
 namespace Arnapou\SimpleSite;
 
-use Exception;
 use Phar;
 
 class Utils
@@ -265,7 +266,7 @@ class Utils
 
     public static function in_phar(): bool
     {
-        return class_exists(Phar::class) && Phar::running();
+        return class_exists(\Phar::class) && \Phar::running();
     }
 
     public static function find_php_files(string $path): array
@@ -291,7 +292,7 @@ class Utils
             return true;
         }
         if (!is_writable($path)) {
-            throw new Exception("The path '$path' is not writable.");
+            throw new \Exception("The path '$path' is not writable.");
         }
         return false;
     }
