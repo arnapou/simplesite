@@ -59,8 +59,9 @@ class FallbackController extends Controller
             ]
         );
     }
+
     public function routePriority(): int
     {
-        return 100;
+        return 0;
     }
 }

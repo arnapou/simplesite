@@ -20,11 +20,6 @@ class StaticController extends Controller
 {
     protected $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php'];
 
-    public function routePriority(): int
-    {
-        return 100;
-    }
-
     public function configure(): void
     {
         $this->addRoute('{path}/', [$this, 'routeStaticDir'], 'static_dir')->setRequirement('path', '.*');
@@ -73,5 +68,10 @@ class StaticController extends Controller
             return $this->redirect($basePath . "$path/", 301);
         }
         throw new ResourceNotFoundException();
+    }
+
+    public function routePriority(): int
+    {
+        return 100;
     }
 }

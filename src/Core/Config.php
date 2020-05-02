@@ -17,13 +17,13 @@ use Monolog\Logger;
 
 class Config
 {
-    const LOG_DEBUG = Logger::DEBUG;
-    const LOG_INFO = Logger::INFO;
-    const LOG_NOTICE = Logger::NOTICE;
-    const LOG_WARNING = Logger::WARNING;
-    const LOG_ERROR = Logger::ERROR;
-    const LOG_CRITICAL = Logger::CRITICAL;
-    const LOG_ALERT = Logger::ALERT;
+    const LOG_DEBUG     = Logger::DEBUG;
+    const LOG_INFO      = Logger::INFO;
+    const LOG_NOTICE    = Logger::NOTICE;
+    const LOG_WARNING   = Logger::WARNING;
+    const LOG_ERROR     = Logger::ERROR;
+    const LOG_CRITICAL  = Logger::CRITICAL;
+    const LOG_ALERT     = Logger::ALERT;
     const LOG_EMERGENCY = Logger::EMERGENCY;
 
     /**

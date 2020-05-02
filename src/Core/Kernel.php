@@ -19,8 +19,8 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 
 class Kernel
 {
-    public const onRun = 'onRun';
-    public const onRequest = 'onRequest';
+    public const onRun      = 'onRun';
+    public const onRequest  = 'onRequest';
     public const onResponse = 'onResponse';
     public const onError404 = 'onError404';
     public const onError500 = 'onError500';

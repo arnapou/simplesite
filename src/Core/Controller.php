@@ -34,7 +34,7 @@ abstract class Controller implements PhpCode
 
     public function routePriority(): int
     {
-        return 0;
+        return 10;
     }
 
     protected function addRoute($path, callable $controller, ?string $name = null): Route

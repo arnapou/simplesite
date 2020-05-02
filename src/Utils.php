@@ -15,11 +15,11 @@ use Phar;
 
 class Utils
 {
-    private const EMOJIS_PASS1 = [
+    private const EMOJIS_PASS1        = [
         '>:)' => '&#x1F620;', // mad
         '<:|' => '&#x1F633;', // flushed
     ];
-    private const EMOJIS_PASS2 = [
+    private const EMOJIS_PASS2        = [
         ':D'     => '&#x1F604;', // 😄 biggrin
         ':d'     => '&#x1F604;', // 😄 biggrin
         ':)'     => '&#x1F60A;', // 😊 smile
