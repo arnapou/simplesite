@@ -8,7 +8,7 @@ build: update
 	php -d "phar.readonly=Off" ./bin/box build
 
 update:
-	php bin/composer update
+	php bin/composer update --optimize-autoloader --no-interaction --classmap-authoritative
 
 php-cs-fixer:
 	php bin/php-cs-fixer fix --config=.php_cs --verbose --using-cache=no
