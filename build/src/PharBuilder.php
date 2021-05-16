@@ -96,11 +96,17 @@ __HALT_COMPILER(); ?>";
             $destPathname = BUILD_TMPDIR . substr($file->getPathname(), \strlen(PROJECT_DIR));
 
             $this->mkdir(\dirname($destPathname));
-            file_put_contents($destPathname, php_strip_whitespace($file->getPathname()));
-            // copy($file->getPathname(), $destPathname);
+            if ('php' === strtolower($file->getExtension())) {
+                file_put_contents($destPathname, php_strip_whitespace($file->getPathname()));
+            } else {
+                copy($file->getPathname(), $destPathname);
+            }
         }
     }
 
+    /**
+     * @return \Iterator<\SplFileInfo>
+     */
     public function allfiles(): BuildFilesIterator
     {
         return new BuildFilesIterator();
