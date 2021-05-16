@@ -18,18 +18,18 @@ use Twig\Loader\FilesystemLoader;
 
 class TwigLoader implements ServiceFactory
 {
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): FilesystemLoader
     {
         $loader = new FilesystemLoader();
         $loader->addPath($container->Config()->path_public());
         $loader->addPath(__DIR__ . '/../Views', 'internal');
 
-        $registerNamespace = function (string $namespace, string $configName) use ($container, $loader) {
+        $registerNamespace = static function (string $namespace, string $configName) use ($container, $loader): void {
             try {
                 if ($path = $container->Config()->$configName()) {
                     $loader->addPath($path, $namespace);
                 }
-            } catch (ConfigException $exception) {
+            } catch (ConfigException) {
             }
         };
 

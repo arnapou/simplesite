@@ -44,39 +44,33 @@ use Twig\Loader\LoaderInterface;
  */
 class ServiceContainer
 {
-    /**
-     * @var array
-     */
-    private $services = [];
-    /**
-     * @var array
-     */
-    private $classes = [];
+    private array $services = [];
+    private array $classes = [];
 
     public function __construct(string $path, string $namespace)
     {
-        foreach (Utils::find_php_files($path) as $file) {
+        foreach (Utils::findPhpFiles($path) as $file) {
             $baseclass = basename($file, '.php');
             $classname = "$namespace\\$baseclass";
-            $aliases   = array_map('strtolower', \call_user_func([$classname, 'aliases']));
+            $aliases = array_map('strtolower', \call_user_func([$classname, 'aliases']));
             $aliases[] = strtolower($baseclass);
             foreach ($aliases as $alias) {
-                $this->classes[strtolower($alias)] = [$classname, $aliases];
+                $this->classes[$alias] = [$classname, $aliases];
             }
         }
     }
 
-    public function add($name, $instance)
+    public function add(string $name, object $instance): void
     {
         $this->services[strtolower($name)] = $instance;
     }
 
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments = []): object
     {
         return $this->get($name);
     }
 
-    public function get($id)
+    public function get(string $id): object
     {
         $id = strtolower($id);
         if (!isset($this->services[$id])) {
@@ -88,6 +82,7 @@ class ServiceContainer
                 $this->services[strtolower($alias)] = $this->services[$id];
             }
         }
+
         return $this->services[$id];
     }
 }

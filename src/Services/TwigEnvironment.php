@@ -19,20 +19,20 @@ use Twig\Extension\DebugExtension;
 
 class TwigEnvironment implements ServiceFactory
 {
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): Environment
     {
         Utils::mkdir($cache = $container->Config()->path_cache() . '/twig');
 
         $environment = new Environment(
             $container->TwigLoader(),
             [
-                'debug'            => true,
-                'charset'          => 'UTF-8',
+                'debug' => true,
+                'charset' => 'UTF-8',
                 'strict_variables' => false,
-                'autoescape'       => 'html',
-                'cache'            => $cache,
-                'auto_reload'      => true,
-                'optimizations'    => -1,
+                'autoescape' => 'html',
+                'cache' => $cache,
+                'auto_reload' => true,
+                'optimizations' => -1,
             ]
         );
         $environment->addExtension(new DebugExtension());

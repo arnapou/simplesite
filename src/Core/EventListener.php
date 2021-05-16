@@ -13,25 +13,22 @@ namespace Arnapou\SimpleSite\Core;
 
 class EventListener
 {
-    /**
-     * @var array
-     */
-    private $listeners = [];
+    private array $listeners = [];
 
-    public function dispatch($eventName, ?Event $event = null)
+    public function dispatch(string $eventName, ?Event $event = null): void
     {
-        $callables = isset($this->listeners[$eventName]) ? $this->listeners[$eventName] : [];
+        $callables = $this->listeners[$eventName] ?? [];
         foreach ($callables as $callable) {
             $callable($event);
         }
     }
 
-    public function addListener($eventName, callable $callable)
+    public function addListener(string $eventName, callable $callable): void
     {
         $this->listeners[$eventName][] = $callable;
     }
 
-    public function clear()
+    public function clear(): void
     {
         $this->listeners = [];
     }

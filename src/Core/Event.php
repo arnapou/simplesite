@@ -16,23 +16,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Event
 {
-    /**
-     * @var Request
-     */
-    private $request;
-    /**
-     * @var Response|null
-     */
-    private $response;
-    /**
-     * @var ServiceContainer
-     */
-    private $container;
+    private Request          $request;
+    private ?Response        $response = null;
+    private ServiceContainer $container;
 
     public function __construct(ServiceContainer $container, ?Response $response)
     {
-        $this->request   = $container->Request();
-        $this->response  = $response;
+        $this->request = $container->Request();
+        $this->response = $response;
         $this->container = $container;
     }
 
@@ -54,6 +45,7 @@ class Event
     public function setResponse(?Response $response): self
     {
         $this->response = $response;
+
         return $this;
     }
 }

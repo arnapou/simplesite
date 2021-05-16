@@ -16,10 +16,11 @@ use Arnapou\SimpleSite\Core\ServiceFactory;
 
 class RequestContext implements ServiceFactory
 {
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): \Symfony\Component\Routing\RequestContext
     {
         $context = new \Symfony\Component\Routing\RequestContext();
         $context->fromRequest($container->Request());
+
         return $context;
     }
 

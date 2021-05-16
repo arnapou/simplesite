@@ -18,7 +18,10 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 class StaticController extends Controller
 {
-    protected $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php'];
+    /**
+     * @var string[]
+     */
+    protected array $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php'];
 
     public function configure(): void
     {
@@ -26,7 +29,7 @@ class StaticController extends Controller
         $this->addRoute('{path}', [$this, 'routeStaticPage'], 'static_page')->setRequirement('path', '.+');
     }
 
-    public function routeStaticDir(string $path = '')
+    public function routeStaticDir(string $path = ''): Response
     {
         $pathPublic = $this->container()->Config()->path_public();
 
@@ -40,21 +43,22 @@ class StaticController extends Controller
         throw new ResourceNotFoundException();
     }
 
-    protected function render($view, $context = []): Response
+    protected function render(string $view, array $context = []): Response
     {
-        if (substr($view, -4) === '.php') {
+        if ('.php' === substr($view, -4)) {
             throw new ResourceNotFoundException();
         }
+
         return parent::render($view, $context);
     }
 
-    public function routeStaticPage(string $path = '')
+    public function routeStaticPage(string $path = ''): Response
     {
         $pathPublic = $this->container()->Config()->path_public();
-        $basePath   = $this->container()->Request()->getBasePath() . '/';
+        $basePath = $this->container()->Request()->getBasePath() . '/';
 
         $extension = Utils::extension($path);
-        if (\in_array($extension, $this->extensions)) {
+        if (\in_array($extension, $this->extensions, true)) {
             return $this->redirect($basePath . substr($path, 0, -\strlen($extension) - 1));
         }
 
@@ -64,9 +68,11 @@ class StaticController extends Controller
                 return $this->render("$path.$extension");
             }
         }
+
         if (is_dir($realpath)) {
             return $this->redirect($basePath . "$path/", 301);
         }
+
         throw new ResourceNotFoundException();
     }
 

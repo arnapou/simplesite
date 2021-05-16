@@ -11,46 +11,47 @@
 
 namespace Arnapou\SimpleSite;
 
+use Arnapou\SimpleSite\Exception\SimplesiteException;
 use Phar;
 
 class Utils
 {
-    private const EMOJIS_PASS1        = [
+    private const EMOJIS_PASS1 = [
         '>:)' => '&#x1F620;', // mad
         '<:|' => '&#x1F633;', // flushed
     ];
-    private const EMOJIS_PASS2        = [
-        ':D'     => '&#x1F604;', // 😄 biggrin
-        ':d'     => '&#x1F604;', // 😄 biggrin
-        ':)'     => '&#x1F60A;', // 😊 smile
-        ':-)'    => '&#x1F60A;', // 😊 smile
-        ':s'     => '&#x1F615;', // 😕 confused
-        ':S'     => '&#x1F615;', // 😕 confused
-        ':('     => '&#x1F61E;', // 😞 sad
-        ':-('    => '&#x1F61E;', // 😞 sad
-        ':p'     => '&#x1F601;', // 😁 razz
-        ':P'     => '&#x1F601;', // 😁 razz
-        ':o'     => '&#x1F62E;', // 😮 surprise
-        ':O'     => '&#x1F62E;', // 😮 surprise
-        ':B'     => '&#x1F60E;', // 😎 cool
-        ':|'     => '&#x1F610;', // 😐 neutral
-        ':/'     => '&#x1F614;', // 😔 rolleyes
-        ';('     => '&#x1F62D;', // 😭 cry
-        ';-('    => '&#x1F62D;', // 😭 cry
-        ';)'     => '&#x1F609;', // 😉 wink
-        ';-)'    => '&#x1F609;', // 😉 wink
-        ':!:'    => '&#x2757;',  // ❗ exclaim
-        ':?:'    => '&#x2753;',  // ❓ question
-        ':lol:'  => '&#x1F606;', // 😆 lol
-        '^^'     => '&#x1F606;', // 😆 lol
-        '==>'    => '&#x1F846;', // 🡆 arrow
-        '=D'     => '&#x1F603;', // 😃 mrgreen
-        'oO'     => '&#x1F632;', // 😲 eek
-        'Oo'     => '&#x1F632;', // 😲 eek
-        'o_O'    => '&#x1F632;', // 😲 eek
-        '^('     => '&#x1F608;', // 😈 evil
-        '(?)'    => '&#x2753;',  // ❓ idea
-        '^)'     => '&#x1F608;', // 😈 twisted
+    private const EMOJIS_PASS2 = [
+        ':D' => '&#x1F604;', // 😄 biggrin
+        ':d' => '&#x1F604;', // 😄 biggrin
+        ':)' => '&#x1F60A;', // 😊 smile
+        ':-)' => '&#x1F60A;', // 😊 smile
+        ':s' => '&#x1F615;', // 😕 confused
+        ':S' => '&#x1F615;', // 😕 confused
+        ':(' => '&#x1F61E;', // 😞 sad
+        ':-(' => '&#x1F61E;', // 😞 sad
+        ':p' => '&#x1F601;', // 😁 razz
+        ':P' => '&#x1F601;', // 😁 razz
+        ':o' => '&#x1F62E;', // 😮 surprise
+        ':O' => '&#x1F62E;', // 😮 surprise
+        ':B' => '&#x1F60E;', // 😎 cool
+        ':|' => '&#x1F610;', // 😐 neutral
+        ':/' => '&#x1F614;', // 😔 rolleyes
+        ';(' => '&#x1F62D;', // 😭 cry
+        ';-(' => '&#x1F62D;', // 😭 cry
+        ';)' => '&#x1F609;', // 😉 wink
+        ';-)' => '&#x1F609;', // 😉 wink
+        ':!:' => '&#x2757;',  // ❗ exclaim
+        ':?:' => '&#x2753;',  // ❓ question
+        ':lol:' => '&#x1F606;', // 😆 lol
+        '^^' => '&#x1F606;', // 😆 lol
+        '==>' => '&#x1F846;', // 🡆 arrow
+        '=D' => '&#x1F603;', // 😃 mrgreen
+        'oO' => '&#x1F632;', // 😲 eek
+        'Oo' => '&#x1F632;', // 😲 eek
+        'o_O' => '&#x1F632;', // 😲 eek
+        '^(' => '&#x1F608;', // 😈 evil
+        '(?)' => '&#x2753;',  // ❓ idea
+        '^)' => '&#x1F608;', // 😈 twisted
         ':fear:' => '&#x1F631;', // 😱 fear
     ];
     private const UTF8_REMOVE_ACCENTS = [
@@ -262,76 +263,91 @@ class Utils
         'Ĕ' => 'e',
     ];
 
-    public static function in_phar(): bool
+    public static function inPhar(): bool
     {
         return class_exists(\Phar::class) && \Phar::running();
     }
 
-    public static function find_php_files(string $path): array
+    public static function findPhpFiles(string $path): array
     {
         // mandatory to use opendir family functions inside a Phar
         $files = [];
         if ($dh = opendir($path)) {
             while ($file = readdir($dh)) {
-                if (substr($file, -4) === '.php') {
+                if ('.php' === substr($file, -4)) {
                     $files[] = $path . '/' . $file;
                 }
             }
             closedir($dh);
         }
         sort($files);
+
         return $files;
     }
 
-    public static function mkdir(string $path): bool
+    public static function mkdir(string $path): ?string
     {
+        if ('' === $path) {
+            return null;
+        }
+
+        $path = self::trimRightSlash($path);
+
         if (!is_dir($path)) {
-            mkdir($path, 0777, true);
-            return true;
+            if (!mkdir($path, 0777, true) && !is_dir($path)) {
+                throw new SimplesiteException(sprintf('Directory "%s" was not created', $path));
+            }
+
+            return $path;
         }
+
         if (!is_writable($path)) {
-            throw new \Exception("The path '$path' is not writable.");
+            throw new SimplesiteException("The path '$path' is not writable.");
         }
-        return false;
+
+        return $path;
     }
 
-    public static function dump_throwable(\Throwable $throwable): array
+    public static function throwableToArray(\Throwable $throwable): array
     {
-        $array            = [];
-        $array['class']   = \get_class($throwable);
+        $array = [];
+        $array['class'] = \get_class($throwable);
         $array['message'] = $throwable->getMessage();
-        $array['file']    = $throwable->getFile() . '(' . $throwable->getLine() . ')';
+        $array['file'] = $throwable->getFile() . '(' . $throwable->getLine() . ')';
         if ($throwable->getCode()) {
             $array['code'] = $throwable->getCode();
         }
         $array['trace'] = explode("\n", $throwable->getTraceAsString());
+
         if ($throwable->getPrevious()) {
-            $array['previous'] = self::dump_throwable($throwable->getPrevious());
+            $array['previous'] = self::throwableToArray($throwable->getPrevious());
         }
+
         return $array;
     }
 
     public static function extension(string $filename): string
     {
-        return substr($filename, -10) === '.html.twig'
+        return '.html.twig' === substr($filename, -10)
             ? 'html.twig'
             : pathinfo($filename, PATHINFO_EXTENSION);
     }
 
-    public static function no_slash(string $path): string
+    public static function trimRightSlash(string $path): string
     {
         return rtrim(rtrim($path, '\\'), '/');
     }
 
-    public static function minify_html(string $source): string
+    public static function minifyHtml(string $source): string
     {
         $blocks = [];
 
         // protection
-        $protection = function ($matches) use ($blocks) {
-            $num          = \count($blocks);
-            $key          = "@@PROTECTED:$num:@@";
+        $protection = static function (array $matches) use ($blocks): string {
+            $num = \count($blocks);
+            $key = "@@PROTECTED:$num:@@";
             $blocks[$key] = $matches[0];
+
             return $key;
         };
 
@@ -342,9 +358,7 @@ class Utils
         // minify
         $source = trim(preg_replace('/((?<!\?>)\n)[\s]+/m', '\1', $source));
         $source = preg_replace('#<!---.*?--->#si', '', $source);
-        $source = str_replace("\t", '', $source);
-        $source = str_replace("\n", '', $source);
-        $source = str_replace("\r", '', $source);
+        $source = str_replace(["\t", "\n", "\r"], '', $source);
 
         // restoration before return
         return strtr($source, $blocks);
@@ -352,12 +366,11 @@ class Utils
 
     public static function emojis(string $text): string
     {
-        $text = str_replace('http://', 'http$$//', $text);
-        $text = str_replace('https://', 'https$$//', $text);
+        $text = str_replace(['http://', 'https://'], ['http$$//', 'https$$//'], $text);
         $text = strtr($text, self::EMOJIS_PASS1);
         $text = strtr($text, self::EMOJIS_PASS2);
-        $text = str_replace('http$$//', 'http://', $text);
-        $text = str_replace('https$$//', 'https://', $text);
+        $text = str_replace(['http$$//', 'https$$//'], ['http://', 'https://'], $text);
+
         return $text;
     }
 
@@ -367,6 +380,101 @@ class Utils
         $text = strtr($text, self::UTF8_REMOVE_ACCENTS);
         $text = preg_replace('![^a-z0-9-]!', '-', $text);
         $text = preg_replace('!--+!', '-', $text);
+
         return trim($text, '-');
+    }
+
+    public static function defaultErrorReporting(): void
+    {
+        error_reporting(E_ALL & ~E_USER_DEPRECATED);
+    }
+
+    public static function defaultShutdownHandler(): callable
+    {
+        return static function (): void {
+            $error = error_get_last();
+            if (!empty($error['message'])) {
+                throw new \ErrorException($error['message'], 0, $error['type'] ?? 0, $error['file'] ?? '', $error['line'] ?? 0);
+            }
+        };
+    }
+
+    public static function defaultExceptionHandler(): callable
+    {
+        return static function (\Throwable $exception): void {
+            if ($exception instanceof \Exception || $exception instanceof \Error) {
+                if (PHP_SAPI === 'cli') {
+                    self::throwableToText($exception);
+                } else {
+                    self::throwableToHtml($exception);
+                }
+            }
+        };
+    }
+
+    public static function defaultErrorHandler(): callable
+    {
+        return static function (int $errno, string $errstr, string $errfile, int $errline): void {
+            switch ($errno) {
+                case E_ERROR:
+                case E_PARSE:
+                case E_CORE_ERROR:
+                case E_CORE_WARNING:
+                case E_COMPILE_ERROR:
+                case E_COMPILE_WARNING:
+                case E_USER_ERROR:
+                    error_clear_last();
+                    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+                case E_WARNING:
+                case E_NOTICE:
+                case E_USER_WARNING:
+                case E_USER_NOTICE:
+                case E_STRICT:
+                case E_RECOVERABLE_ERROR:
+                case E_DEPRECATED:
+                case E_USER_DEPRECATED:
+                default:
+                    // we ignore it
+            }
+        };
+    }
+
+    private static function throwableToHtml(\Throwable $exception): void
+    {
+        echo '<pre style="color: red">';
+        echo '<div class="alert alert-danger" role="alert">';
+        self::throwableToText($exception);
+        echo '</div>';
+        echo '</pre>';
+    }
+
+    public static function throwableToText(\Throwable $exception): void
+    {
+        while ($exception) {
+            echo '  class: ' . \get_class($exception) . "\n";
+            echo 'message: ' . $exception->getMessage() . "\n";
+            echo '   file: ' . $exception->getFile() . "\n";
+            echo '   line: ' . $exception->getLine() . "\n";
+            if ($exception->getCode()) {
+                echo '   code: ' . $exception->getCode() . "\n";
+            }
+            echo '  trace: ' . ltrim(self::traceAsStringWithMarginLeft($exception, '         ')) . "\n";
+            if ($exception = $exception->getPrevious()) {
+                echo "\n";
+            }
+        }
+    }
+
+    private static function traceAsStringWithMarginLeft(\Throwable $exception, string $margin): string
+    {
+        return implode(
+            "\n",
+            array_map(
+                static function (string $line) use ($margin): string {
+                    return $margin . trim($line);
+                },
+                explode("\n", trim($exception->getTraceAsString()))
+            )
+        );
     }
 }

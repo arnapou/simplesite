@@ -11,6 +11,6 @@
 
 namespace Arnapou\SimpleSite\Exception;
 
-class Exception extends \Exception
+class SimplesiteException extends \Exception
 {
 }

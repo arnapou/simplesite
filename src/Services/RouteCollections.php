@@ -22,22 +22,16 @@ class RouteCollections implements ServiceFactory
     /**
      * @var RouteCollection[]
      */
-    private $collections = [];
-    /**
-     * @var array
-     */
-    private $names = [];
-    /**
-     * @var RouteCollection
-     */
-    private $main;
+    private array           $collections = [];
+    private array           $names = [];
+    private RouteCollection $main;
 
-    public function __construct()
+    private function __construct()
     {
         $this->main = new RouteCollection();
     }
 
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): self
     {
         return new self();
     }
@@ -49,35 +43,39 @@ class RouteCollections implements ServiceFactory
 
     public function addRoute(Controller $controller, string $path, callable $callable, string $name): Route
     {
-        $path  = '/' . ltrim($path, '/');
+        $path = '/' . ltrim($path, '/');
         $route = new class($path, ['_controller' => $callable]) extends Route {
             public function setDefaults(array $defaults)
             {
                 $defaults = array_merge($this->getDefaults(), $defaults);
+
                 return parent::setDefaults($defaults);
             }
         };
+
         return $this->add($name, $route, $controller->routePriority());
     }
 
-    public function add($name, Route $route, int $priority): Route
+    public function add(string $name, Route $route, int $priority): Route
     {
         if (!\array_key_exists($priority, $this->collections)) {
             $this->collections[$priority] = new RouteCollection();
         }
         $this->collections[$priority]->add($this->ensureUniqueName($name), $route);
+
         return $route;
     }
 
-    private function ensureUniqueName($name)
+    private function ensureUniqueName(string $name): string
     {
         $unique = $name;
-        $index  = 1;
+        $index = 1;
         while (isset($this->names[$unique])) {
             $unique = "${name}_${index}";
-            $index++;
+            ++$index;
         }
         $this->names[$unique] = $unique;
+
         return $unique;
     }
 
@@ -87,6 +85,7 @@ class RouteCollections implements ServiceFactory
         foreach ($this->collections as $collection) {
             $this->main->addCollection($collection);
         }
+
         return $this->main;
     }
 

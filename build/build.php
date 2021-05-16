@@ -9,14 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Arnapou\SimpleSite\Core;
+namespace Arnapou\SimpleSite\Build;
 
-interface ServiceFactory
-{
-    public static function factory(ServiceContainer $container): object;
+require __DIR__ . '/config.php';
 
-    /**
-     * @return string[]
-     */
-    public static function aliases(): array;
-}
+$builder = new PharBuilder();
+$builder->build($argv[1] ?? null);

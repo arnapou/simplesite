@@ -1,14 +1,29 @@
-.PHONY: help
-help:
-	@$(MAKE) -p : 2>/dev/null | egrep -v -e '^#' -e '^Makefile|^help' | egrep '^[[:alnum:]][[:alnum:]\.-]+\:' | sed -e 's/:.*//g' | sort
 
-# ----------------------------------------
+COMPOSER_OPTIONS=--optimize-autoloader --no-interaction --classmap-authoritative
 
-build: update
-	php -d "phar.readonly=Off" ./bin/box build
+PHAR_FILENAME=site/simplesite.phar
+
+default: composer
+	$(shell echo "<?php require __DIR__.'/../src/main.php';" > site/simplesite.phar)
+	vendor/bin/php-cs-fixer fix
+	vendor/bin/psalm --no-cache
+#	vendor/bin/phpunit
+
+build: default prebuild
+	php -d "phar.readonly=Off" ./build/build.php ${PHAR_FILENAME}
+	@ls -lah --color ${PHAR_FILENAME}
+	@make -s composer
+
+build-printfiles: default prebuild
+	php -d "phar.readonly=Off" ./build/printfiles.php
+	@make -s composer
+
+composer:
+	composer install ${COMPOSER_OPTIONS} --quiet
 
 update:
-	php bin/composer update --optimize-autoloader --no-interaction --classmap-authoritative
+	composer update ${COMPOSER_OPTIONS}
 
-php-cs-fixer:
-	php bin/php-cs-fixer fix --config=.php_cs --verbose --using-cache=no
+prebuild:
+	rm -Rf vendor
+	composer install ${COMPOSER_OPTIONS} --quiet --no-dev

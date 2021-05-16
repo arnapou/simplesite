@@ -16,7 +16,7 @@ use Arnapou\SimpleSite\Core\ServiceFactory;
 
 class UrlGenerator implements ServiceFactory
 {
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): \Symfony\Component\Routing\Generator\UrlGenerator
     {
         return new \Symfony\Component\Routing\Generator\UrlGenerator(
             $container->RouteCollections()->get(),

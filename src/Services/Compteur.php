@@ -19,50 +19,47 @@ use Arnapou\SimpleSite\Core\ServiceFactory;
 
 class Compteur implements ServiceFactory
 {
-    private const COUNT = 'COUNT';
-    /**
-     * @var Table
-     */
-    private $table;
-    /**
-     * @var int
-     */
-    private $number;
+    private Table $table;
+    private int   $number;
 
-    public function __construct(ServiceContainer $container)
+    private function __construct(ServiceContainer $container)
     {
-        $storage      = new LockedStorage(new PhpFileStorage($container->Config()->path_data(), 'compteur'));
-        $this->table  = new Table($storage, 'ip', 'id');
+        $storage = new LockedStorage(new PhpFileStorage($container->Config()->path_data(), 'compteur'));
+        $this->table = new Table($storage, 'ip', 'id');
         $this->number = $this->comptage();
         $storage->releaseLocks();
     }
 
-    private function comptage()
+    private function comptage(): int
     {
-        $date  = (int)date('Ymd');
-        $ip    = $_SERVER['REMOTE_ADDR'] ?? '';
-        $table = $this->table;
-        if ($ip && !$table->get("IP.$ip.$date")) {
-            $table->upsert(['date' => $date, 'ip' => $ip], "IP.$ip.$date");
-            $this->incremente(self::COUNT);
+        $date = (int) date('Ymd');
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        if ($ip && !$this->table->get("IP.$ip.$date")) {
+            $this->table->upsert(['date' => $date, 'ip' => $ip], "IP.$ip.$date");
+
+            $this->incremente('COUNT');
             $this->incremente('MOIS.' . date('Y-m'));
             $this->incremente('YEAR.' . date('Y'));
-            $table->deleteMultiple(
-                $table->expr()->and(
-                    $table->expr()->lt('date', $date),
-                    $table->expr()->begins('id', 'IP.')
+
+            $this->table->deleteMultiple(
+                $this->table->expr()->and(
+                    $this->table->expr()->lt('date', $date),
+                    $this->table->expr()->begins('id', 'IP.')
                 )
             );
         }
-        return $table->get(self::COUNT)['number'] ?? 1;
+
+        return $this->table->get('COUNT')['number'] ?? 1;
     }
 
-    private function incremente($key)
+    private function incremente(string $key): void
     {
-        $this->table->upsert(['number' => ($this->table->get($key)['number'] ?: 0) + 1], $key);
+        $value = (int) ($this->table->get($key)['number'] ?? 0);
+        $this->table->upsert(['number' => $value + 1], $key);
     }
 
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): self
     {
         return new self($container);
     }

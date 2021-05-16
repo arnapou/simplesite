@@ -11,7 +11,6 @@
 
 namespace Arnapou\SimpleSite\Services;
 
-use Arnapou\SimpleSite\Core\Config;
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
 use Arnapou\SimpleSite\Utils;
@@ -24,30 +23,20 @@ class Logger implements ServiceFactory, LoggerInterface
 {
     use LoggerTrait;
 
-    /**
-     * @var ServiceContainer
-     */
-    private $container;
-    /**
-     * @var Monolog
-     */
-    private $logger;
-
-    public function __construct(ServiceContainer $container, Monolog $logger)
+    private function __construct(private ServiceContainer $container, private Monolog $logger)
     {
-        $this->logger    = $logger;
-        $this->container = $container;
-
         $logger->pushProcessor([$this, 'processor']);
     }
 
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): self
     {
         Utils::mkdir($logdir = $container->Config()->path_logs());
 
-        $level = $container->Config()->log_level() ?: (Utils::in_phar() ? Config::LOG_NOTICE : Config::LOG_DEBUG);
-
-        $handler = new RotatingFileHandler($logdir . '/site.log', $container->Config()->log_max_files(), $level);
+        $handler = new RotatingFileHandler(
+            $logdir . '/site.log',
+            $container->Config()->log_max_files(),
+            $container->Config()->log_level()
+        );
 
         return new self($container, new Monolog('site', [$handler]));
     }
@@ -62,19 +51,20 @@ class Logger implements ServiceFactory, LoggerInterface
         $this->logger->log($level, $message, $context);
     }
 
-    public function processor($data)
+    public function processor(array $data): array
     {
         try {
             $added = [
                 'url' => $this->container->Request()->getPathInfo(),
-                'ip'  => $_SERVER['REMOTE_ADDR'] ?? '?',
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? '?',
             ];
             if ($_SERVER['HTTP_REFERER'] ?? false) {
                 $added['referer'] = $_SERVER['HTTP_REFERER'];
             }
             $data['context'] = array_merge($added, $data['context'] ?? []);
-        } catch (\Throwable $exception) {
+        } catch (\Throwable) {
         }
+
         return $data;
     }
 }

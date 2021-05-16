@@ -17,21 +17,13 @@ use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-function run(array $config)
+Utils::defaultErrorReporting();
+set_error_handler(Utils::defaultErrorHandler());
+set_exception_handler(Utils::defaultExceptionHandler());
+register_shutdown_function(Utils::defaultShutdownHandler());
+
+function run(array $config): void
 {
-    error_reporting(E_ALL & ~E_USER_DEPRECATED);
-
-    set_exception_handler(
-        function (\Throwable $throwable) {
-            header(($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0') . ' 500 Internal Server Error');
-            echo '<h1>500 Internal Server Error</h1>';
-            echo '<pre>';
-            $dump = Utils::dump_throwable($throwable);
-            print_r($dump);
-            echo '</pre>';
-        }
-    );
-
     $kernel = new Kernel(new Config($config));
     $kernel->handle(Request::createFromGlobals())->send();
 }

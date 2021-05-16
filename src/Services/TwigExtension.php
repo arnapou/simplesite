@@ -21,17 +21,11 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface, ServiceFactory
 {
-    /**
-     * @var ServiceContainer
-     */
-    private $container;
-
-    public function __construct(ServiceContainer $container)
+    private function __construct(private ServiceContainer $container)
     {
-        $this->container = $container;
     }
 
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): self
     {
         return new self($container);
     }
@@ -76,58 +70,59 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface, Servi
         ];
     }
 
-
-    public function chunk(array $array, $size)
+    public function chunk(array $array, int $size): array
     {
         return array_chunk($array, $size);
     }
 
-    public function getclass($object)
+    public function getclass(mixed $object): string
     {
-        return \is_object($object) ? \get_class($object) : \gettype($object);
+        return \get_debug_type($object);
     }
 
-    public function repeat($string, $n = 1)
+    public function repeat(string $string, int $n = 1): string
     {
         return str_repeat($string, $n);
     }
 
-    public function thumbnail($path, $size = 200)
+    public function thumbnail(string $path, int $size = 200): string
     {
-        if (\in_array(strtolower(Utils::extension($path) ?? ''), ['jpg', 'png'])) {
-            $path = substr($path, 0, -3) . $size . '.' . substr($path, -3);
+        if (\array_key_exists($ext = strtolower(Utils::extension($path)), Image::MIME_TYPES)) {
+            $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
         }
+
         return $this->asset($path);
     }
 
-    public function asset($path)
+    public function asset(string $path): string
     {
         return $this->container->Request()->getBasePath() . '/' . ltrim($path, '/');
     }
 
-    public function path_dir($path)
+    public function path_dir(string $path): string
     {
         return $this->path('static_dir', ['path' => $path]);
     }
 
-    public function path($name, $parameters = [])
+    public function path(string $name, array $parameters = []): string
     {
         $url = $this->container->UrlGenerator()->generate($name, $parameters);
-        return $url === '//' ? '/' : $url;
+
+        return '//' === $url ? '/' : $url;
     }
 
-    public function path_page($path)
+    public function path_page(string $path): string
     {
         return $this->path('static_page', ['path' => $path]);
     }
 
-    public function emojis(string $text)
+    public function emojis(string $text): string
     {
         return Utils::emojis($text);
     }
 
-    public function minifyHtml($source)
+    public function minifyHtml(string $source): string
     {
-        return Utils::minify_html($source);
+        return Utils::minifyHtml($source);
     }
 }

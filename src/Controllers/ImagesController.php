@@ -12,6 +12,7 @@
 namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\SimpleSite\Core\Controller;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 class ImagesController extends Controller
@@ -24,15 +25,23 @@ class ImagesController extends Controller
             ->setRequirement('ext', '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]');
     }
 
-    public function routeImage(string $path, string $size, string $ext)
+    public function routeImage(string $path, string $size, string $ext): Response
     {
-        $size = (int)$size;
-        if ($size > 16 && $size <= 1500) {
-            if ($response = $this->container()->Image()->thumbnail($path, $ext, $size)) {
-                return $response;
-            }
+        if (!ctype_digit($size)) {
+            throw new ResourceNotFoundException();
         }
-        throw new ResourceNotFoundException();
+
+        $intsize = (int) $size;
+        if ($intsize < 16 || $intsize > 1500) {
+            throw new ResourceNotFoundException();
+        }
+
+        $response = $this->container()->Image()->thumbnail($path, $ext, $intsize);
+        if (null === $response) {
+            throw new ResourceNotFoundException();
+        }
+
+        return $response;
     }
 
     public function routePriority(): int

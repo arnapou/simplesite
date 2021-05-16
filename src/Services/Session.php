@@ -13,16 +13,18 @@ namespace Arnapou\SimpleSite\Services;
 
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Session implements ServiceFactory
 {
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): SessionInterface
     {
         $request = $container->Request();
         if (!$request->hasSession()) {
             $request->setSession(new \Symfony\Component\HttpFoundation\Session\Session());
             $request->getSession()->start();
         }
+
         return $request->getSession();
     }
 

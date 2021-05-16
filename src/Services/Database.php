@@ -19,21 +19,19 @@ use Arnapou\SimpleSite\Utils;
 
 class Database implements ServiceFactory
 {
-    public static function factory(ServiceContainer $container)
+    public static function factory(ServiceContainer $container): \Arnapou\PFDB\Database
     {
-        $pathData  = $container->Config()->path_data();
+        $pathData = $container->Config()->path_data();
         $pathCache = $container->Config()->path_cache() . '/database';
 
         Utils::mkdir($pathCache);
 
-        $database = new \Arnapou\PFDB\Database(
+        return new \Arnapou\PFDB\Database(
             new CachedFileStorage(
                 new YamlFileStorage($pathData),
                 $pathCache
             )
         );
-
-        return $database;
     }
 
     public static function aliases(): array
