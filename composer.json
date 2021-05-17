@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">= 8.0",
-        "arnapou/pfdb": "^3.0",
+        "arnapou/pfdb": "^3.0@dev",
         "monolog/monolog": "^2.0",
         "symfony/cache": "^4.0",
         "symfony/http-foundation": "^4.0",
