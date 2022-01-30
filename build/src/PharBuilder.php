@@ -124,7 +124,7 @@ __HALT_COMPILER(); ?>";
 
     private function mkdir(string $dir): void
     {
-        if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        if (!is_dir($dir) && !mkdir($dir, 0o755, true) && !is_dir($dir)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
     }

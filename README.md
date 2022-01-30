@@ -8,7 +8,8 @@ Arnapou simplesite
 
 ### Changelog versions techniques
 
-| Date       | Branche | Php | 
-|------------|---------|-----|
-| 15/05/2021 | master  | 8.0 |
-| 07/12/2019 | v1.x    | 7.2 |
+| Date       | Tag, Branche | Php | 
+|------------|--------------|-----|
+| 30/01/2022 | 3.x, master  | 8.1 |
+| 15/05/2021 | 2.x          | 8.0 |
+| 07/12/2019 | 1.x          | 7.2 |

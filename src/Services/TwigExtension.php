@@ -42,7 +42,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface, Servi
         ];
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('minifyHtml', [$this, 'minifyHtml'], ['is_safe' => ['html']]),
@@ -55,7 +55,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface, Servi
         ];
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('minifyHtml', [$this, 'minifyHtml'], ['is_safe' => ['html']]),
@@ -77,7 +77,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface, Servi
 
     public function getclass(mixed $object): string
     {
-        return \get_debug_type($object);
+        return get_debug_type($object);
     }
 
     public function repeat(string $string, int $n = 1): string

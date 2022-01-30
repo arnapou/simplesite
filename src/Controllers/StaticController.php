@@ -45,7 +45,7 @@ class StaticController extends Controller
 
     protected function render(string $view, array $context = []): Response
     {
-        if ('.php' === substr($view, -4)) {
+        if (str_ends_with($view, '.php')) {
             throw new ResourceNotFoundException();
         }
 

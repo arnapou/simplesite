@@ -5,9 +5,8 @@ PHAR_FILENAME=site/simplesite.phar
 
 default: composer
 	$(shell echo "<?php require __DIR__.'/../src/main.php';" > site/simplesite.phar)
-	vendor/bin/php-cs-fixer fix
+	vendor/bin/php-cs-fixer fix --using-cache=no
 	vendor/bin/psalm --no-cache
-#	vendor/bin/phpunit
 
 build: default prebuild
 	php -d "phar.readonly=Off" ./build/build.php ${PHAR_FILENAME}

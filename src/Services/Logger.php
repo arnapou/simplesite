@@ -46,7 +46,7 @@ class Logger implements ServiceFactory, LoggerInterface
         return [];
     }
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         $this->logger->log($level, $message, $context);
     }

@@ -9,7 +9,7 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 HEADER;
 
-$finder = PhpCsFixer\Finder::create()
+$finder = (new PhpCsFixer\Finder())
     ->notPath('tmp')
     ->in(
         [
@@ -27,6 +27,7 @@ return (new PhpCsFixer\Config())
             '@Symfony'                            => true,
             '@DoctrineAnnotation'                 => true,
             '@PHP80Migration'                     => true,
+            '@PHP81Migration'                     => true,
             'concat_space'                        => ['spacing' => 'one'],
             'ordered_imports'                     => ['sort_algorithm' => 'alpha'],
             'native_function_invocation'          => ['include' => ['@compiler_optimized']],

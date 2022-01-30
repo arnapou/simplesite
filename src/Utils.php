@@ -274,7 +274,7 @@ class Utils
         $files = [];
         if ($dh = opendir($path)) {
             while ($file = readdir($dh)) {
-                if ('.php' === substr($file, -4)) {
+                if (str_ends_with($file, '.php')) {
                     $files[] = $path . '/' . $file;
                 }
             }
@@ -294,7 +294,7 @@ class Utils
         $path = self::trimRightSlash($path);
 
         if (!is_dir($path)) {
-            if (!mkdir($path, 0777, true) && !is_dir($path)) {
+            if (!mkdir($path, 0o777, true) && !is_dir($path)) {
                 throw new SimplesiteException(sprintf('Directory "%s" was not created', $path));
             }
 
@@ -328,7 +328,7 @@ class Utils
 
     public static function extension(string $filename): string
     {
-        return '.html.twig' === substr($filename, -10)
+        return str_ends_with($filename, '.html.twig')
             ? 'html.twig'
             : pathinfo($filename, PATHINFO_EXTENSION);
     }
