@@ -18,23 +18,23 @@ final class PharBuilder
     public function __construct()
     {
         if ($this->isPharReadonly()) {
-            bye("⛔ You cannot build with phar being readonly.\n\nUsage:\n   php -d \"phar.readonly=Off\" build/build.php\n");
+            self::bye("⛔ You cannot build with phar being readonly.\n\nUsage:\n   php -d \"phar.readonly=Off\" build/build.php\n");
         }
 
         if (!$this->canCompress()) {
-            bye("⛔ You cannot build with phar because the compression option is not supported.\n");
+            self::bye("⛔ You cannot build with phar because the compression option is not supported.\n");
         }
 
         if (!is_file(PROJECT_DIR . '/' . BUILD_BOOTSTRAP_FILE)) {
-            bye('⛔ The File ' . BUILD_BOOTSTRAP_FILE . ' does not exists.');
+            self::bye('⛔ The File ' . BUILD_BOOTSTRAP_FILE . ' does not exists.');
         }
     }
 
     public function build(?string $pharfile): void
     {
         try {
-            if (null == $pharfile || 'phar' !== pathinfo($pharfile, PATHINFO_EXTENSION)) {
-                bye('⛔ You MUST specify the target phar file inside the project.');
+            if (null === $pharfile || 'phar' !== pathinfo($pharfile, PATHINFO_EXTENSION)) {
+                self::bye('⛔ You MUST specify the target phar file inside the project.');
             }
             $pharfile = PROJECT_DIR . '/' . ltrim($pharfile, '/');
 
@@ -52,7 +52,7 @@ final class PharBuilder
 
             $phar->compressFiles(self::COMPRESSION);
         } catch (\Throwable $exception) {
-            bye('⚠️ ' . $exception->getMessage());
+            self::bye('⚠️ ' . $exception->getMessage());
         }
     }
 
@@ -105,7 +105,7 @@ __HALT_COMPILER(); ?>";
     }
 
     /**
-     * @return \Iterator<\SplFileInfo>
+     * @return BuildFilesIterator<\SplFileInfo>
      */
     public function allfiles(): BuildFilesIterator
     {
@@ -127,5 +127,11 @@ __HALT_COMPILER(); ?>";
         if (!is_dir($dir) && !mkdir($dir, 0o755, true) && !is_dir($dir)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
+    }
+
+    public static function bye(string $msg): never
+    {
+        echo "$msg\n";
+        exit(1);
     }
 }

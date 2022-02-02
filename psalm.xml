@@ -9,9 +9,15 @@
     allowStringToStandInForClass="true"
 >
     <projectFiles>
+        <file name="build/build.php" />
+        <file name="build/printfiles.php" />
+        <directory name="build/src" />
         <directory name="src" />
         <ignoreFiles>
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+    <extraFiles>
+        <file name="build/config.php" />
+    </extraFiles>
 </psalm>

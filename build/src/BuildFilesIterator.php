@@ -11,7 +11,11 @@
 
 namespace Arnapou\SimpleSite\Build;
 
-final class BuildFilesIterator extends \IteratorIterator
+/**
+ * @template TValue
+ * @implements \Iterator<TValue>
+ */
+final class BuildFilesIterator extends \IteratorIterator implements \Iterator
 {
     public function __construct()
     {
@@ -20,7 +24,10 @@ final class BuildFilesIterator extends \IteratorIterator
         parent::__construct($this->buildIterator($paths));
     }
 
-    public function buildIterator(array $paths): \Iterator
+    /**
+     * @return \Iterator<\SplFileInfo>
+     */
+    private function buildIterator(array $paths): \Iterator
     {
         $iterator = new \AppendIterator();
 

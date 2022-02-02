@@ -62,24 +62,16 @@ const BUILD_IGNORE_PATHMATCH = [
 const BUILD_TMPDIR = PROJECT_DIR . '/build/tmp';
 
 /**
- * @return no-return
- */
-function bye(string $msg): void
-{
-    echo "$msg\n";
-    exit(1);
-}
-
-/*
  * Include automatically all build/src php files.
  */
 foreach (glob(__DIR__ . '/src/*.php') ?: [] as $srcPhpFile) {
+    /** @psalm-suppress UnresolvableInclude */
     require $srcPhpFile;
 }
 
-/*
+/**
  * Forbid not CLI execution.
  */
 if ('cli' !== PHP_SAPI) {
-    bye('⛔ This script should be run only in CLI');
+    PharBuilder::bye('⛔ This script should be run only in CLI');
 }

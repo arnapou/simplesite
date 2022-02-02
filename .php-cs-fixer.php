@@ -25,6 +25,8 @@ return (new PhpCsFixer\Config())
             '@PSR2'                               => true,
             '@PSR12'                              => true,
             '@Symfony'                            => true,
+            // 👇 override @Symfony - fait péter les phpdoc @psalm
+            'phpdoc_to_comment' => false,
             '@DoctrineAnnotation'                 => true,
             '@PHP80Migration'                     => true,
             '@PHP81Migration'                     => true,
