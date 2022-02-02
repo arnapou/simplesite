@@ -11,52 +11,75 @@
 
 namespace Arnapou\SimpleSite\Services;
 
+use Arnapou\PFDB\Core\TableInterface;
+use Arnapou\PFDB\Database as PFDB;
+use Arnapou\PFDB\Factory\NoPKTableFactory;
 use Arnapou\PFDB\Storage\LockedStorage;
 use Arnapou\PFDB\Storage\PhpFileStorage;
-use Arnapou\PFDB\Table;
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
 
 class Compteur implements ServiceFactory
 {
-    private Table $table;
-    private int   $number;
+    private const COUNT = 'COUNT';
+    private const STATS = 'STATS';
+    public const VALUE = 'value';
+    private readonly PFDB $db;
+    private readonly int $number;
 
-    private function __construct(ServiceContainer $container)
+    private function __construct(private readonly ServiceContainer $container)
     {
-        $storage = new LockedStorage(new PhpFileStorage($container->Config()->path_data(), 'compteur'));
-        $this->table = new Table($storage, 'ip', 'id');
+        $storage = new LockedStorage(
+            new PhpFileStorage($container->Config()->path_data(), 'compteur')
+        );
+        $this->db = new PFDB($storage, new NoPKTableFactory());
         $this->number = $this->comptage();
         $storage->releaseLocks();
     }
 
     private function comptage(): int
     {
-        $date = (int) date('Ymd');
         $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $tableToday = $this->db->getTable(date('Y-m-d'));
+        $tableTotal = $this->db->getTable(self::COUNT);
 
-        if ($ip && !$this->table->get("IP.$ip.$date")) {
-            $this->table->upsert(['date' => $date, 'ip' => $ip], "IP.$ip.$date");
+        if ($ip && !$tableToday->get("IP.$ip")) {
+            $tableToday->upsert([], "IP.$ip");
 
-            $this->incremente('COUNT');
-            $this->incremente('MOIS.' . date('Y-m'));
-            $this->incremente('YEAR.' . date('Y'));
+            $this->incremente($tableTotal, self::COUNT);
 
-            $this->table->deleteMultiple(
-                $this->table->expr()->and(
-                    $this->table->expr()->lt('date', $date),
-                    $this->table->expr()->begins('id', 'IP.')
-                )
-            );
+            $tableStats = $this->db->getTable(self::STATS);
+            $this->incremente($tableStats, 'DAY.' . date('Y-m-d'));
+            $this->incremente($tableStats, 'YEAR.' . date('Y'));
+            $this->incremente($tableStats, 'MONTH.' . date('Y-m'));
+
+            $this->cleanupOldDayTables($tableToday);
         }
 
-        return $this->table->get('COUNT')['number'] ?? 1;
+        return $tableTotal->get(self::COUNT)[self::VALUE] ?? 1;
     }
 
-    private function incremente(string $key): void
+    private function cleanupOldDayTables(TableInterface $tableToday): void
     {
-        $value = (int) ($this->table->get($key)['number'] ?? 0);
-        $this->table->upsert(['number' => $value + 1], $key);
+        try {
+            if ($tableToday->get('CLEANUP_DONE')) {
+                return;
+            }
+            $tableToday->upsert(['time' => time()], 'CLEANUP_DONE');
+
+            $now = time();
+            for ($i = 7; $i < 30; ++$i) {
+                $this->db->getStorage()->delete(date('Y-m-d', $now - $i * 86400));
+            }
+        } catch (\Throwable $e) {
+            $this->container->Logger()->error($e->getMessage());
+        }
+    }
+
+    private function incremente(TableInterface $table, string $key): void
+    {
+        $value = (int) ($table->get($key)[self::VALUE] ?? 0);
+        $table->upsert([self::VALUE => $value + 1], $key);
     }
 
     public static function factory(ServiceContainer $container): self
