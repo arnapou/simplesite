@@ -36,5 +36,8 @@
         "psr-4": {
             "Arnapou\\SimpleSite\\": "src"
         }
+    },
+    "config": {
+        "platform-check": false
     }
 }

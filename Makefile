@@ -9,6 +9,7 @@ PHAR_FILENAME=site/simplesite.phar
 build: all prebuild ## build phar
 	php -d "phar.readonly=Off" ./build/build.php ${PHAR_FILENAME}
 	@ls -lah --color ${PHAR_FILENAME}
+	@head -n1 ${PHAR_FILENAME}
 	@make -s install
 
 build-list: all prebuild ## list phar files

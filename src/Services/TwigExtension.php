@@ -51,28 +51,30 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface,
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('minifyHtml', [$this, 'minifyHtml'], ['is_safe' => ['html']]),
-            new TwigFunction('thumbnail', [$this, 'thumbnail']),
-            new TwigFunction('asset', [$this, 'asset']),
-            new TwigFunction('path', [$this, 'path']),
-            new TwigFunction('path_dir', [$this, 'path_dir']),
-            new TwigFunction('path_page', [$this, 'path_page']),
-            new TwigFunction('emojis', [$this, 'emojis'], ['is_safe' => ['html']]),
+            new TwigFunction('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFunction('thumbnail', $this->thumbnail(...)),
+            new TwigFunction('asset', $this->asset(...)),
+            new TwigFunction('path', $this->path(...)),
+            new TwigFunction('path_dir', $this->path_dir(...)),
+            new TwigFunction('path_page', $this->path_page(...)),
+            new TwigFunction('emojis', Utils::emojis(...), ['is_safe' => ['html']]),
         ];
     }
 
     public function getFilters(): array
     {
         return [
-            new TwigFilter('minifyHtml', [$this, 'minifyHtml'], ['is_safe' => ['html']]),
-            new TwigFilter('thumbnail', [$this, 'thumbnail']),
-            new TwigFilter('chunk', [$this, 'chunk']),
-            new TwigFilter('thumbnail', [$this, 'thumbnail']),
-            new TwigFilter('path_dir', [$this, 'path_dir']),
-            new TwigFilter('path_page', [$this, 'path_page']),
-            new TwigFilter('repeat', [$this, 'repeat'], ['is_safe' => ['html']]),
-            new TwigFilter('getclass', [$this, 'getclass']),
-            new TwigFilter('emojis', [$this, 'emojis'], ['is_safe' => ['html']]),
+            new TwigFilter('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFilter('thumbnail', $this->thumbnail(...)),
+            new TwigFilter('chunk', $this->chunk(...)),
+            new TwigFilter('thumbnail', $this->thumbnail(...)),
+            new TwigFilter('path_dir', $this->path_dir(...)),
+            new TwigFilter('path_page', $this->path_page(...)),
+            new TwigFilter('repeat', $this->repeat(...), ['is_safe' => ['html']]),
+            new TwigFilter('getclass', $this->getclass(...)),
+            new TwigFilter('emojis', Utils::emojis(...), ['is_safe' => ['html']]),
+            new TwigFilter('slugify', Utils::slugify(...)),
+            new TwigFilter('slug', Utils::slugify(...)),
         ];
     }
 
@@ -120,15 +122,5 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface,
     public function path_page(string $path): string
     {
         return $this->path('static_page', ['path' => $path]);
-    }
-
-    public function emojis(string $text): string
-    {
-        return Utils::emojis($text);
-    }
-
-    public function minifyHtml(string $source): string
-    {
-        return Utils::minifyHtml($source);
     }
 }

@@ -18,6 +18,9 @@ use function ini_get;
 
 use LogicException;
 use Phar;
+
+use const PHP_VERSION;
+
 use RuntimeException;
 
 use function strlen;
@@ -64,7 +67,7 @@ final class PharBuilder
 
     private function getStub(string $pharBasename): string
     {
-        return '<?php // Generated ' . date('c') . "
+        return '<?php // Generated ' . date('c') . ' for PHP ' . PHP_VERSION . "
 if (class_exists('Phar')) {
 Phar::mapPhar(" . var_export($pharBasename, true) . ");
 Phar::interceptFileFuncs();

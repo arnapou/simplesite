@@ -271,6 +271,7 @@ final class Utils
         'Ð' => 'dh',
         'Æ' => 'ae',
         'Ĕ' => 'e',
+        'ƥ' => 'p',
     ];
 
     public static function findPhpFiles(string $path): array
@@ -367,8 +368,7 @@ final class Utils
 
     public static function slugify(string $text): string
     {
-        $text = trim($text);
-        $text = strtr($text, self::UTF8_REMOVE_ACCENTS);
+        $text = strtolower(strtr(trim($text), self::UTF8_REMOVE_ACCENTS));
         $text = (string) preg_replace('![^a-z0-9-]!', '-', $text);
         $text = (string) preg_replace('!--+!', '-', $text);
 

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
+use Arnapou\SimpleSite\Exception\ConfigNotDefined;
 use Psr\Log\LogLevel;
 
 final readonly class Config
@@ -54,5 +55,20 @@ final readonly class Config
         $this->log_path = Assert::pathExistsOrCreate(Utils::noSlash($log_path) ?: $path_cache . '/logs');
         $this->log_max_files = $log_max_files < 0 ? 0 : $log_max_files;
         $this->log_level = Assert::validLogLevel($log_level);
+    }
+
+    /**
+     * Deprecated call.
+     * This avoids old version v3.x to break.
+     *
+     * @throws ConfigNotDefined
+     *
+     * @return int|string
+     */
+    public function __call(string $name, array $arguments)
+    {
+        return property_exists($this, $name)
+            ? $this->$name
+            : throw new ConfigNotDefined("Unknown config name '$name'");
     }
 }

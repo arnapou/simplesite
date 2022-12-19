@@ -47,6 +47,7 @@ final class Kernel
             throw new SimplesiteProblem('The kernel cannot be handled more than once.');
         }
 
+        $this->handled = true;
         $this->eventListener->clear();
         $this->container
             ->add('config', $this->config)
