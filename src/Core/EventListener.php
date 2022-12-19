@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,14 +13,14 @@
 
 namespace Arnapou\SimpleSite\Core;
 
-class EventListener
+final class EventListener
 {
+    /** @var array<string, array<callable>> */
     private array $listeners = [];
 
     public function dispatch(string $eventName, ?Event $event = null): void
     {
-        $callables = $this->listeners[$eventName] ?? [];
-        foreach ($callables as $callable) {
+        foreach ($this->listeners[$eventName] ?? [] as $callable) {
             $callable($event);
         }
     }

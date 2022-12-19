@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,9 +13,8 @@
 
 namespace Arnapou\SimpleSite\Build;
 
-require __DIR__ . '/config.php';
-
-$builder = new PharBuilder();
+$config = require __DIR__ . '/config.php';
+$builder = new PharBuilder($config);
 
 foreach ($builder->allfiles() as $file) {
     echo $file->getPathname() . "\n";

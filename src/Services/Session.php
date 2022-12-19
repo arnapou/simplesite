@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -15,11 +17,11 @@ use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-class Session implements ServiceFactory
+final class Session implements ServiceFactory
 {
     public static function factory(ServiceContainer $container): SessionInterface
     {
-        $request = $container->Request();
+        $request = $container->request();
         if (!$request->hasSession()) {
             $request->setSession(new \Symfony\Component\HttpFoundation\Session\Session());
             $request->getSession()->start();

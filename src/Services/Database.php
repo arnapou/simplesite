@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,27 +13,34 @@
 
 namespace Arnapou\SimpleSite\Services;
 
+use Arnapou\PFDB\Exception\DirectoryNotFoundException;
+use Arnapou\PFDB\Exception\InvalidTableNameException;
 use Arnapou\PFDB\Storage\CachedFileStorage;
 use Arnapou\PFDB\Storage\YamlFileStorage;
+use Arnapou\SimpleSite\Core\Assert;
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
-use Arnapou\SimpleSite\Utils;
+use Arnapou\SimpleSite\Core\Utils;
+use Arnapou\SimpleSite\Exception\SimplesiteProblem;
 
-class Database implements ServiceFactory
+final class Database implements ServiceFactory
 {
     public static function factory(ServiceContainer $container): \Arnapou\PFDB\Database
     {
-        $pathData = $container->Config()->path_data();
-        $pathCache = $container->Config()->path_cache() . '/database';
+        $config = $container->config();
 
-        Utils::mkdir($pathCache);
-
-        return new \Arnapou\PFDB\Database(
-            new CachedFileStorage(
-                new YamlFileStorage($pathData),
-                $pathCache
-            )
-        );
+        try {
+            return new \Arnapou\PFDB\Database(
+                new CachedFileStorage(
+                    new YamlFileStorage(
+                        Assert::nonEmptyConfigPath('path_data', $config->path_data)
+                    ),
+                    Utils::mkdir($config->path_cache . '/database')
+                )
+            );
+        } catch (DirectoryNotFoundException|InvalidTableNameException $e) {
+            throw new SimplesiteProblem($e->getMessage(), 0, $e);
+        }
     }
 
     public static function aliases(): array

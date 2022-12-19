@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -9,12 +11,20 @@
  * file that was distributed with this source code.
  */
 
-namespace Arnapou\SimpleSite;
+namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\Exception\SimplesiteException;
+use Arnapou\SimpleSite\Exception\PathNotCreated;
+use Arnapou\SimpleSite\Exception\PathNotWritable;
+
+use function count;
+
+use const PATHINFO_EXTENSION;
+
 use Phar;
 
-class Utils
+use function rtrim;
+
+final class Utils
 {
     private const EMOJIS_PASS1 = [
         '>:)' => '&#x1F620;', // mad
@@ -263,11 +273,6 @@ class Utils
         'Ĕ' => 'e',
     ];
 
-    public static function inPhar(): bool
-    {
-        return class_exists(\Phar::class) && \Phar::running();
-    }
-
     public static function findPhpFiles(string $path): array
     {
         // mandatory to use opendir family functions inside a Phar
@@ -285,45 +290,31 @@ class Utils
         return $files;
     }
 
-    public static function mkdir(string $path): ?string
+    /**
+     * @throws PathNotCreated
+     * @throws PathNotWritable
+     *
+     * @return non-empty-string
+     */
+    public static function mkdir(string $path): string
     {
         if ('' === $path) {
-            return null;
+            throw new PathNotCreated($path);
         }
-
-        $path = self::trimRightSlash($path);
 
         if (!is_dir($path)) {
             if (!mkdir($path, 0o777, true) && !is_dir($path)) {
-                throw new SimplesiteException(sprintf('Directory "%s" was not created', $path));
+                throw new PathNotCreated($path);
             }
 
             return $path;
         }
 
         if (!is_writable($path)) {
-            throw new SimplesiteException("The path '$path' is not writable.");
+            throw new PathNotWritable($path);
         }
 
         return $path;
-    }
-
-    public static function throwableToArray(\Throwable $throwable): array
-    {
-        $array = [];
-        $array['class'] = \get_class($throwable);
-        $array['message'] = $throwable->getMessage();
-        $array['file'] = $throwable->getFile() . '(' . $throwable->getLine() . ')';
-        if ($throwable->getCode()) {
-            $array['code'] = $throwable->getCode();
-        }
-        $array['trace'] = explode("\n", $throwable->getTraceAsString());
-
-        if ($throwable->getPrevious()) {
-            $array['previous'] = self::throwableToArray($throwable->getPrevious());
-        }
-
-        return $array;
     }
 
     public static function extension(string $filename): string
@@ -333,9 +324,9 @@ class Utils
             : pathinfo($filename, PATHINFO_EXTENSION);
     }
 
-    public static function trimRightSlash(string $path): string
+    public static function noSlash(string $path): string
     {
-        return rtrim(rtrim($path, '\\'), '/');
+        return rtrim($path, '/');
     }
 
     public static function minifyHtml(string $source): string
@@ -344,20 +335,20 @@ class Utils
 
         // protection
         $protection = static function (array $matches) use ($blocks): string {
-            $num = \count($blocks);
+            $num = count($blocks);
             $key = "@@PROTECTED:$num:@@";
             $blocks[$key] = $matches[0];
 
             return $key;
         };
 
-        $source = preg_replace_callback('!<script[^>]*?>.*?</script>!si', $protection, $source);
-        $source = preg_replace_callback('!<pre[^>]*?>.*?</pre>!is', $protection, $source);
-        $source = preg_replace_callback('!<textarea[^>]*?>.*?</textarea>!is', $protection, $source);
+        $source = (string) preg_replace_callback('!<script[^>]*?>.*?</script>!si', $protection, $source);
+        $source = (string) preg_replace_callback('!<pre[^>]*?>.*?</pre>!is', $protection, $source);
+        $source = (string) preg_replace_callback('!<textarea[^>]*?>.*?</textarea>!is', $protection, $source);
 
         // minify
-        $source = trim(preg_replace('/((?<!\?>)\n)[\s]+/m', '\1', $source));
-        $source = preg_replace('#<!---.*?--->#si', '', $source);
+        $source = trim((string) preg_replace('/((?<!\?>)\n)[\s]+/m', '\1', $source));
+        $source = (string) preg_replace('#<!---.*?--->#si', '', $source);
         $source = str_replace(["\t", "\n", "\r"], '', $source);
 
         // restoration before return
@@ -378,103 +369,9 @@ class Utils
     {
         $text = trim($text);
         $text = strtr($text, self::UTF8_REMOVE_ACCENTS);
-        $text = preg_replace('![^a-z0-9-]!', '-', $text);
-        $text = preg_replace('!--+!', '-', $text);
+        $text = (string) preg_replace('![^a-z0-9-]!', '-', $text);
+        $text = (string) preg_replace('!--+!', '-', $text);
 
         return trim($text, '-');
-    }
-
-    public static function defaultErrorReporting(): void
-    {
-        error_reporting(E_ALL & ~E_USER_DEPRECATED);
-    }
-
-    public static function defaultShutdownHandler(): callable
-    {
-        return static function (): void {
-            $error = error_get_last();
-            if (!empty($error['message'])) {
-                throw new \ErrorException($error['message'], 0, $error['type'] ?? 0, $error['file'] ?? '', $error['line'] ?? 0);
-            }
-        };
-    }
-
-    public static function defaultExceptionHandler(): callable
-    {
-        return static function (\Throwable $exception): void {
-            if ($exception instanceof \Exception || $exception instanceof \Error) {
-                if (PHP_SAPI === 'cli') {
-                    self::throwableToText($exception);
-                } else {
-                    self::throwableToHtml($exception);
-                }
-            }
-        };
-    }
-
-    public static function defaultErrorHandler(): callable
-    {
-        return static function (int $errno, string $errstr, string $errfile, int $errline): void {
-            switch ($errno) {
-                case E_ERROR:
-                case E_PARSE:
-                case E_CORE_ERROR:
-                case E_CORE_WARNING:
-                case E_COMPILE_ERROR:
-                case E_COMPILE_WARNING:
-                case E_USER_ERROR:
-                    error_clear_last();
-                    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
-                case E_WARNING:
-                case E_NOTICE:
-                case E_USER_WARNING:
-                case E_USER_NOTICE:
-                case E_STRICT:
-                case E_RECOVERABLE_ERROR:
-                case E_DEPRECATED:
-                case E_USER_DEPRECATED:
-                default:
-                    // we ignore it
-            }
-        };
-    }
-
-    private static function throwableToHtml(\Throwable $exception): void
-    {
-        echo '<pre style="color: red">';
-        echo '<div class="alert alert-danger" role="alert">';
-        self::throwableToText($exception);
-        echo '</div>';
-        echo '</pre>';
-    }
-
-    public static function throwableToText(\Throwable $exception): void
-    {
-        while ($exception) {
-            echo '  class: ' . \get_class($exception) . "\n";
-            echo 'message: ' . $exception->getMessage() . "\n";
-            echo '   file: ' . $exception->getFile() . "\n";
-            echo '   line: ' . $exception->getLine() . "\n";
-            if ($exception->getCode()) {
-                echo '   code: ' . $exception->getCode() . "\n";
-            }
-            echo '  trace: ' . ltrim(self::traceAsStringWithMarginLeft($exception, '         ')) . "\n";
-            if ($exception = $exception->getPrevious()) {
-                echo "\n";
-            }
-        }
-    }
-
-    private static function traceAsStringWithMarginLeft(\Throwable $exception, string $margin): string
-    {
-        return implode(
-            "\n",
-            array_map(
-                static function (string $line) use ($margin): string {
-                    return $margin . trim($line);
-                },
-                explode("\n", trim($exception->getTraceAsString()))
-            )
-        );
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -14,16 +16,18 @@ namespace Arnapou\SimpleSite\Services;
 use Arnapou\SimpleSite\Core\Controller;
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
+
+use function array_key_exists;
+
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
-class RouteCollections implements ServiceFactory
+final class RouteCollections implements ServiceFactory
 {
-    /**
-     * @var RouteCollection[]
-     */
-    private array           $collections = [];
-    private array           $names = [];
+    /** @var RouteCollection[] */
+    private array $collections = [];
+    /** @var array<string, string> */
+    private array $names = [];
     private RouteCollection $main;
 
     private function __construct()
@@ -58,7 +62,7 @@ class RouteCollections implements ServiceFactory
 
     public function add(string $name, Route $route, int $priority): Route
     {
-        if (!\array_key_exists($priority, $this->collections)) {
+        if (!array_key_exists($priority, $this->collections)) {
             $this->collections[$priority] = new RouteCollection();
         }
         $this->collections[$priority]->add($this->ensureUniqueName($name), $route);
@@ -71,7 +75,7 @@ class RouteCollections implements ServiceFactory
         $unique = $name;
         $index = 1;
         while (isset($this->names[$unique])) {
-            $unique = "${name}_${index}";
+            $unique = "{$name}_{$index}";
             ++$index;
         }
         $this->names[$unique] = $unique;

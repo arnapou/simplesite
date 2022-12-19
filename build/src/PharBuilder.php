@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,48 +13,52 @@
 
 namespace Arnapou\SimpleSite\Build;
 
+use function dirname;
+use function ini_get;
+
+use LogicException;
+use Phar;
+use RuntimeException;
+
+use function strlen;
+
+use Throwable;
+
 final class PharBuilder
 {
-    private const COMPRESSION = \Phar::GZ;
+    private const COMPRESSION = Phar::GZ;
 
-    public function __construct()
+    public function __construct(private readonly BuildConfig $config)
     {
         if ($this->isPharReadonly()) {
-            self::bye("⛔ You cannot build with phar being readonly.\n\nUsage:\n   php -d \"phar.readonly=Off\" build/build.php\n");
+            bye("⛔ You cannot build with phar being readonly.\n\nUsage:\n   php -d \"phar.readonly=Off\" build/build.php\n");
         }
 
         if (!$this->canCompress()) {
-            self::bye("⛔ You cannot build with phar because the compression option is not supported.\n");
-        }
-
-        if (!is_file(PROJECT_DIR . '/' . BUILD_BOOTSTRAP_FILE)) {
-            self::bye('⛔ The File ' . BUILD_BOOTSTRAP_FILE . ' does not exists.');
+            bye("⛔ You cannot build with phar because the compression option is not supported.\n");
         }
     }
 
-    public function build(?string $pharfile): void
+    public function build(): void
     {
         try {
-            if (null === $pharfile || 'phar' !== pathinfo($pharfile, PATHINFO_EXTENSION)) {
-                self::bye('⛔ You MUST specify the target phar file inside the project.');
-            }
-            $pharfile = PROJECT_DIR . '/' . ltrim($pharfile, '/');
+            $pharfile = $this->config->pharPath();
 
             $this->copyAllFilesToTmp();
             $this->unlinkPreviousBuilds($pharfile);
 
-            $phar = new \Phar($pharfile);
+            $phar = new Phar($pharfile);
 
             // Phars created from iterator (unlike from directory) does not have full-fledged directory structure.
             // For example, functions like opendir() will fail, although fopen() does not.
             // -> That's why we copy files + buildFromDirectory
-            $phar->buildFromDirectory(BUILD_TMPDIR);
+            $phar->buildFromDirectory($this->config->tempDir);
 
             $phar->setStub($this->getStub(basename($pharfile)));
 
             $phar->compressFiles(self::COMPRESSION);
-        } catch (\Throwable $exception) {
-            self::bye('⚠️ ' . $exception->getMessage());
+        } catch (Throwable $exception) {
+            bye('⚠️ ' . $exception->getMessage());
         }
     }
 
@@ -62,7 +68,7 @@ final class PharBuilder
 if (class_exists('Phar')) {
 Phar::mapPhar(" . var_export($pharBasename, true) . ");
 Phar::interceptFileFuncs();
-require 'phar://' . __FILE__ . '/" . BUILD_BOOTSTRAP_FILE . "';
+require 'phar://' . __FILE__ . '/" . $this->config->bootstrapFile . "';
 }
 __HALT_COMPILER(); ?>";
     }
@@ -74,28 +80,20 @@ __HALT_COMPILER(); ?>";
         }
     }
 
-    private function cleanupTmp(): void
-    {
-        if (is_dir(BUILD_TMPDIR)) {
-            exec('rm -Rf ' . escapeshellarg(BUILD_TMPDIR), $output, $code);
-            if (0 !== $code) {
-                throw new \LogicException('I was not able to cleanup the temporary folder ' . BUILD_TMPDIR);
-            }
-        }
-        $this->mkdir(BUILD_TMPDIR);
-    }
-
     private function copyAllFilesToTmp(): void
     {
+        $rootDir = $this->config->projectRootDir;
+        $rootDirLength = strlen($rootDir);
+
         $this->cleanupTmp();
         foreach ($this->allfiles() as $file) {
-            if (!str_starts_with($file->getPathname(), PROJECT_DIR . '/')) {
+            if (!str_starts_with($file->getPathname(), $rootDir . '/')) {
                 continue;
             }
 
-            $destPathname = BUILD_TMPDIR . substr($file->getPathname(), \strlen(PROJECT_DIR));
+            $destPathname = $this->config->tempDir . substr($file->getPathname(), $rootDirLength);
 
-            $this->mkdir(\dirname($destPathname));
+            $this->mkdir(dirname($destPathname));
             if ('php' === strtolower($file->getExtension())) {
                 file_put_contents($destPathname, php_strip_whitespace($file->getPathname()));
             } else {
@@ -104,17 +102,25 @@ __HALT_COMPILER(); ?>";
         }
     }
 
-    /**
-     * @return BuildFilesIterator<\SplFileInfo>
-     */
+    private function cleanupTmp(): void
+    {
+        if (is_dir($tempDir = $this->config->tempDir)) {
+            exec('rm -Rf ' . escapeshellarg($tempDir), $output, $code);
+            if (0 !== $code) {
+                throw new LogicException("I was not able to cleanup the temporary folder $tempDir");
+            }
+        }
+        $this->mkdir($tempDir);
+    }
+
     public function allfiles(): BuildFilesIterator
     {
-        return new BuildFilesIterator();
+        return new BuildFilesIterator($this->config);
     }
 
     private function canCompress(): bool
     {
-        return \Phar::canCompress(self::COMPRESSION);
+        return Phar::canCompress(self::COMPRESSION);
     }
 
     private function isPharReadonly(): bool
@@ -125,13 +131,7 @@ __HALT_COMPILER(); ?>";
     private function mkdir(string $dir): void
     {
         if (!is_dir($dir) && !mkdir($dir, 0o755, true) && !is_dir($dir)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
-    }
-
-    public static function bye(string $msg): never
-    {
-        echo "$msg\n";
-        exit(1);
     }
 }

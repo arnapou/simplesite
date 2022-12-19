@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -12,6 +14,10 @@
 namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\SimpleSite\Core\Controller;
+use DateTime;
+
+use function strlen;
+
 use Symfony\Component\HttpFoundation\Response;
 
 class FallbackController extends Controller
@@ -35,7 +41,7 @@ class FallbackController extends Controller
             200,
             [
                 'Content-Type' => 'image/vnd.microsoft.icon',
-                'Content-Length' => \strlen($binary),
+                'Content-Length' => strlen($binary),
             ]
         );
 
@@ -44,7 +50,7 @@ class FallbackController extends Controller
         $response->setCache(
             [
                 'etag' => base64_encode(hash('sha256', $binary, true)),
-                'last_modified' => \DateTime::createFromFormat('U', (string) $startDayTimestamp),
+                'last_modified' => DateTime::createFromFormat('U', (string) $startDayTimestamp),
                 'max_age' => 86400,
                 's_maxage' => 86400,
                 'public' => true,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -12,15 +14,17 @@
 namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\SimpleSite\Core\Controller;
-use Arnapou\SimpleSite\Utils;
+use Arnapou\SimpleSite\Core\Utils;
+
+use function in_array;
+use function strlen;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 class StaticController extends Controller
 {
-    /**
-     * @var string[]
-     */
+    /** @var list<string> */
     protected array $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php'];
 
     public function configure(): void
@@ -31,7 +35,8 @@ class StaticController extends Controller
 
     public function routeStaticDir(string $path = ''): Response
     {
-        $pathPublic = $this->container()->Config()->path_public();
+        $config = $this->container()->config();
+        $pathPublic = $config->path_public;
 
         if (is_dir($realpath = "$pathPublic/$path")) {
             foreach ($this->extensions as $extension) {
@@ -54,12 +59,13 @@ class StaticController extends Controller
 
     public function routeStaticPage(string $path = ''): Response
     {
-        $pathPublic = $this->container()->Config()->path_public();
-        $basePath = $this->container()->Request()->getBasePath() . '/';
+        $config = $this->container()->config();
+        $pathPublic = $config->path_public;
+        $basePath = $this->container()->request()->getBasePath() . '/';
 
         $extension = Utils::extension($path);
-        if (\in_array($extension, $this->extensions, true)) {
-            return $this->redirect($basePath . substr($path, 0, -\strlen($extension) - 1));
+        if (in_array($extension, $this->extensions, true)) {
+            return $this->redirect($basePath . substr($path, 0, -strlen($extension) - 1));
         }
 
         $realpath = "$pathPublic/$path";

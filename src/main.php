@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,19 +13,37 @@
 
 namespace Arnapou\SimpleSite;
 
-use Arnapou\SimpleSite\Core\Config;
-use Arnapou\SimpleSite\Core\Kernel;
-use Symfony\Component\HttpFoundation\Request;
-
 require __DIR__ . '/../vendor/autoload.php';
 
-Utils::defaultErrorReporting();
-set_error_handler(Utils::defaultErrorHandler());
-set_exception_handler(Utils::defaultExceptionHandler());
-register_shutdown_function(Utils::defaultShutdownHandler());
+Core\Php::setErrorReporting();
+set_error_handler(Core\Php::getErrorHandler());
+set_exception_handler(Core\Php::getExceptionHandler());
+register_shutdown_function(Core\Php::getShutdownHandler());
 
-function run(array $config): void
-{
-    $kernel = new Kernel(new Config($config));
-    $kernel->handle(Request::createFromGlobals())->send();
+function run(
+    string $name,
+    string $path_public,
+    string $path_cache,
+    string $path_data = '',
+    string $path_templates = '',
+    string $path_php = '',
+    string $log_path = '',
+    int $log_max_files = 7,
+    string $log_level = 'notice'
+): void {
+    (new Core\Kernel(
+        new Core\Config(
+            $name,
+            $path_public,
+            $path_cache,
+            $path_data,
+            $path_templates,
+            $path_php,
+            $log_path,
+            $log_max_files,
+            $log_level
+        )
+    ))
+        ->handle(\Symfony\Component\HttpFoundation\Request::createFromGlobals())
+        ->send();
 }

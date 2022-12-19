@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,13 +13,22 @@
 
 namespace Arnapou\SimpleSite\Services;
 
+use Arnapou\SimpleSite\Core\Psr\FilesystemCache;
+use Arnapou\SimpleSite\Core\Psr\Probability;
 use Arnapou\SimpleSite\Core\ServiceContainer;
-use Arnapou\SimpleSite\Exception\SimplesiteException;
-use Arnapou\SimpleSite\Utils;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Arnapou\SimpleSite\Core\ServiceFactory;
+use Arnapou\SimpleSite\Exception\ImageError;
+use Arnapou\SimpleSite\Exception\SimplesiteProblem;
+use DateTime;
+
+use function extension_loaded;
+
+use GdImage;
+use Imagick;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class Image
+final class Image implements ServiceFactory
 {
     public const MIME_TYPES = [
         'jpg' => 'image/jpeg',
@@ -25,103 +36,88 @@ class Image
         'gif' => 'image/gif',
     ];
 
-    private ServiceContainer  $container;
-    private int               $tnExpire;
-    private FilesystemAdapter $cache;
-    private string            $pathPublic;
-
-    private function __construct(ServiceContainer $container)
-    {
-        $this->container = $container;
-        $this->tnExpire = 86400 * 30;
-        $this->pathPublic = $container->Config()->path_public();
-
-        Utils::mkdir($directory = $container->Config()->path_cache() . '/images');
-        $this->cache = new FilesystemAdapter('', $this->tnExpire, $directory);
+    private function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly FilesystemCache $cache,
+        private readonly string $pathPublic,
+    ) {
     }
 
     public static function factory(ServiceContainer $container): self
     {
-        return new self($container);
+        $config = $container->config();
+
+        return new self(
+            $container->logger(),
+            new FilesystemCache(
+                $config->path_cache . '/images',
+                86400 * 30,
+                new Probability(1, 1000)
+            ),
+            $config->path_public
+        );
     }
 
     public static function aliases(): array
     {
-        return [];
-    }
-
-    public function __destruct()
-    {
-        try {
-            // 1 chance sur 1000 pour declencher le prune automatiquement
-            if (0 === random_int(0, 1000)) {
-                $this->cache->prune();
-            }
-        } catch (\Throwable) {
-        }
+        return ['img'];
     }
 
     public function thumbnail(string $path, string $ext, int $size): ?Response
     {
-        $filename = $this->pathPublic . "/$path.$ext";
-        if (is_file($filename)) {
-            $filemtime = filemtime($filename);
-            $filesize = filesize($filename);
-            $key = md5($path) . ".$size.$ext.$filemtime.$filesize";
-            $item = $this->cache->getItem($key);
-            if (!$item->isHit()) {
-                $this->container->Logger()->notice('Image resize', ['size' => $size]);
-                $item->set($this->imgResize($filename, strtolower($ext), $size));
-                $item->expiresAfter($this->tnExpire);
-                $this->cache->save($item);
-            }
-
-            return $this->fileResponse($item->get(), strtolower($ext), $filemtime);
+        if (!is_file($filename = $this->pathPublic . "/$path.$ext")) {
+            return null;
         }
 
-        return null;
+        $filemtime = (int) filemtime($filename);
+        $filesize = filesize($filename);
+        $key = md5($path) . ".$size.$ext.$filemtime.$filesize";
+
+        $content = $this->cache->get($key);
+        if (null === $content || !$this->cache->has($key)) {
+            $content = $this->imgResize($filename, strtolower($ext), $size);
+            $this->logger->notice('Image resize', ['size' => $size]);
+            $this->cache->set($key, $content);
+        }
+
+        return $this->fileResponse($content, strtolower($ext), $filemtime);
     }
 
     private function imgResize(string $filename, string $ext, int $size): string
     {
-        if (class_exists('Imagick')) {
-            return $this->imgResizeImagick($filename, $ext, $size);
-        }
-
-        if (\function_exists('imagecreatefromjpeg')) {
-            return $this->imgResizeGD($filename, $ext, $size);
-        }
-
-        throw new SimplesiteException();
+        return $this->tryResizeImagick($filename, $ext, $size)
+            ?? $this->tryResizeGD($filename, $ext, $size)
+            ?? throw new SimplesiteProblem();
     }
 
-    private function imgResizeImagick(string $filename, string $ext, int $size): string
+    private function tryResizeImagick(string $filename, string $ext, int $size): ?string
     {
-        $img = new \Imagick($filename);
-        $w1 = $img->getImageWidth();
-        $h1 = $img->getImageHeight();
+        if (!extension_loaded('imagick')) {
+            return null;
+        }
+
+        $img = new Imagick($filename);
+        [$w1, $h1] = [$img->getImageWidth(), $img->getImageHeight()];
         [$w2, $h2] = $this->newSize($w1, $h1, $size);
-        $img->resizeImage($w2, $h2, \Imagick::FILTER_LANCZOS, 1);
+        $img->resizeImage($w2, $h2, Imagick::FILTER_LANCZOS, 1);
 
         return $img->getImageBlob();
     }
 
-    private function newSize(int $width, int $height, int $size): array
+    private function tryResizeGD(string $filename, string $ext, int $size): ?string
     {
-        return $width > $height
-            ? [$size, (int) floor($size * $height / $width)]
-            : [(int) floor($size * $width / $height), $size];
-    }
+        if (!extension_loaded('gd')) {
+            return null;
+        }
 
-    private function imgResizeGD(string $filename, string $ext, int $size): string
-    {
-        $resize = function (mixed $img) use ($size): mixed {
-            $w1 = imagesx($img);
-            $h1 = imagesy($img);
+        $resize = function (false|GdImage $img) use ($size): GdImage {
+            if (false === $img) {
+                throw new ImageError();
+            }
+
+            [$w1, $h1] = [imagesx($img), imagesy($img)];
             [$w2, $h2] = $this->newSize($w1, $h1, $size);
-            $w2 = (int) $w2;
-            $h2 = (int) $h2;
-            $dst = imagecreate($w2, $h2);
+            $dst = imagecreate($w2, $h2) ?: throw new ImageError();
             imagecopyresampled($dst, $img, 0, 0, 0, 0, $w2, $h2, $w1, $h1);
 
             return $dst;
@@ -131,18 +127,28 @@ class Image
             ob_start();
             $ok = $process();
             if (!$ok) {
-                throw new SimplesiteException();
+                throw new SimplesiteProblem();
             }
 
-            return ob_get_clean();
+            return (string) ob_get_clean();
         };
 
         return match ($ext) {
             'jpg' => $binary(fn () => imagejpeg($resize(imagecreatefromjpeg($filename)), null, 95)),
             'png' => $binary(fn () => imagepng($resize(imagecreatefrompng($filename)), null, 9)),
             'gif' => $binary(fn () => imagegif($resize(imagecreatefromgif($filename)), null)),
-            default => throw new SimplesiteException()
+            default => throw new SimplesiteProblem()
         };
+    }
+
+    /**
+     * @return array{int, int}
+     */
+    private function newSize(int $width, int $height, int $size): array
+    {
+        return $width > $height
+            ? [$size, (int) floor($size * $height / $width)]
+            : [(int) floor($size * $width / $height), $size];
     }
 
     private function fileResponse(string $content, string $ext, int $filemtime): Response
@@ -152,7 +158,7 @@ class Image
         $response->setCache(
             [
                 'etag' => base64_encode(hash('sha256', $content, true)),
-                'last_modified' => \DateTime::createFromFormat('U', (string) $filemtime),
+                'last_modified' => DateTime::createFromFormat('U', (string) $filemtime),
                 'max_age' => 864000,
                 's_maxage' => 864000,
                 'public' => true,

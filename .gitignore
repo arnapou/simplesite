@@ -1,10 +1,10 @@
 .idea
-vendor
-cache
-build/tmp
-demo/cache
-composer.lock
 .php_cs.cache
 .php-cs-fixer.cache
-githubhook.log
+.phpunit.result.cache
+composer.lock
+vendor
+
+build/tmp
+site/cache
 site/data/compteur.*.php

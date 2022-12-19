@@ -11,41 +11,43 @@
 
 
 
-    <h3>L'objet retourné implémente l'interface <code><span class="text-info">Arnapou\SimpleSite\Core\</span>PhpCode</code></h3>
+    <h3>L'objet retourné implémente l'interface <code>Arnapou\SimpleSite\Core\<mark>PhpCode</mark></code></h3>
 
-    <pre class="border p-2">
+    <pre>
 interface Arnapou\SimpleSite\Core\PhpCode
 {
     public function init(\Arnapou\SimpleSite\Core\ServiceContainer $container);
 }</pre>
     <p>Comme dans l'exemple <code>php/twig_globals.php</code> qui injecte en variable global twig des données d'une table yaml :</p>
-    <pre class="border p-2">{{ source('@php/twig_globals.php') | escape }}</pre>
+    <pre>{{ source('@php/twig_globals.php') | escape }}</pre>
 
 
 
-    <h3 class="mt-5">L'objet retourné étend la classe <code><span class="text-info">Arnapou\SimpleSite\Core\</span>Controller</code></h3>
+    <h3>L'objet retourné étend la classe <code>Arnapou\SimpleSite\Core\<mark>Controller</mark></code></h3>
 
     <p>Obligation d'implémenter la méthode abstraite configure (pour les routes) :</p>
-    <pre class="border p-2">
+    <pre>
 abstract class Arnapou\SimpleSite\Core\Controller
 {
     abstract public function configure(): void;
 }</pre>
     <p>Comme dans l'exemple <code>php/controller.php</code> qui déclare une route <code>hello</code> pour afficher une page bidon :</p>
-    <pre class="border p-2">{{ source('@php/controller.php') | escape }}</pre>
+    <pre>{{ source('@php/controller.php') | escape }}</pre>
 
     <p>
         Exemple de page :
-        <a href="{{ path('hello', { name: 'world'}) }}" target="_blank">{{ path('hello', { name: 'world'}) }}</a>
+        <a href="{{ path('hello', { name: 'world'}) }}" target="_blank"><button>
+            {{ path('hello', { name: 'world'}) }}
+        </button></a>
         lien produit avec <code>{% verbatim %}{{ path('hello', { name: 'world'}) }}{% endverbatim %}</code>
     </p>
 
 
-    <h3 class="mt-5">Evènements de kernel</h3>
+    <h3>Evènements de kernel</h3>
 
     <p>On peut intercepter des évènements de kernel pour changer le comportement du site : changer la réponse par exemple et/ou court-circuiter le routing.</p>
 
-    <p>Evènements de la classe <code><span class="text-info">Arnapou\SimpleSite\Core\</span>Kernel</code> :</p>
+    <p>Evènements de la classe <code>Arnapou\SimpleSite\Core\<mark>Kernel</mark></code> :</p>
     <ul>
         <li><code>Kernel::onRun</code></li>
         <li><code>Kernel::onRequest</code></li>
@@ -54,9 +56,11 @@ abstract class Arnapou\SimpleSite\Core\Controller
         <li><code>Kernel::onError500</code></li>
     </ul>
     <p>Exemple <code>php/event_hook.php</code> qui court-circuite le routing pour envoyer une autre page :
-    <pre class="border p-2">{{ source('@php/event_hook.php') | escape }}</pre>
+    <pre>{{ source('@php/event_hook.php') | escape }}</pre>
     <p>Tester la page :
-        <a href="{{ path('hello', { name: 'world'}) }}?killme=1" target="_blank">{{ path('hello', { name: 'world'}) }}?killme=1</a>
+        <a href="{{ path('hello', { name: 'world'}) }}?killme=1" target="_blank"><button>
+            {{ path('hello', { name: 'world'}) }}?killme=1
+        </button></a>
     </p>
 
 

@@ -1,0 +1,20 @@
+parameters:
+	level: 9
+	paths:
+		- build
+		- site/php
+		- site/public/index.php
+		- src
+	excludePaths:
+		- build/tmp
+	bootstrapFiles:
+		- vendor/autoload.php
+	ignoreErrors:
+		- path: src
+		  messages:
+		      - '#Method .* return type has no value type specified in iterable type array.#'
+		      - '#Method .* has parameter .* with no value type specified in iterable type array.#'
+		      - '#Method .* has parameter .* with no value type specified in iterable type iterable.#'
+		- path: build
+		  messages:
+		      - '#Method .* has parameter .* with no value type specified in iterable type array.#'

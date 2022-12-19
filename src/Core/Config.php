@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,103 +13,46 @@
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\Exception\ConfigException;
-use Arnapou\SimpleSite\Utils;
-use Monolog\Logger;
+use Psr\Log\LogLevel;
 
-class Config
+final readonly class Config
 {
-    public const LOG_DEBUG = Logger::DEBUG;
-    public const LOG_INFO = Logger::INFO;
-    public const LOG_NOTICE = Logger::NOTICE;
-    public const LOG_WARNING = Logger::WARNING;
-    public const LOG_ERROR = Logger::ERROR;
-    public const LOG_CRITICAL = Logger::CRITICAL;
-    public const LOG_ALERT = Logger::ALERT;
-    public const LOG_EMERGENCY = Logger::EMERGENCY;
+    public string $name;
+    public string $path_public;
+    public string $path_cache;
+    public string $path_data;
+    public string $path_templates;
+    public string $path_php;
+    public string $log_path;
+    public int $log_max_files;
+    /** @var LogLevel::* */
+    public string $log_level;
 
-    private const DEFAULT_LOG_MAX_FILES = 7;
-    private const DEFAULT_LOG_LEVEL_DEV = self::LOG_INFO;
-    private const DEFAULT_LOG_LEVEL_PROD = self::LOG_NOTICE;
+    public function __construct(
+        string $name,
+        string $path_public,
+        string $path_cache,
+        string $path_data = '',
+        string $path_templates = '',
+        string $path_php = '',
+        string $log_path = '',
+        int $log_max_files = 7,
+        string $log_level = 'notice',
+    ) {
+        $this->name = $name;
 
-    /**
-     * @var array<string, int|string>
-     */
-    private array $config;
+        $path_public = Assert::nonEmptyConfigPath('path_public', Utils::noSlash($path_public));
+        $this->path_public = Assert::pathExists($path_public);
 
-    public function __construct(array $config)
-    {
-        $this->config = array_merge(
-            [
-                'name' => '',
-                'path_cache' => '',
-                'path_logs' => '',
-                'path_data' => '',
-                'path_public' => '',
-                'path_templates' => '',
-                'path_php' => '',
-                'log_max_files' => 14,
-                'log_level' => 0,
-            ],
-            $config
-        );
+        $path_cache = Assert::nonEmptyConfigPath('path_cache', Utils::noSlash($path_cache));
+        $this->path_cache = Assert::pathExistsOrCreate($path_cache);
 
-        if (!$this->config['path_logs']) {
-            $this->config['path_logs'] = $this->config['path_cache'] ? $this->config['path_cache'] . '/logs' : '';
-        }
-    }
+        $this->path_data = Assert::pathExistsIfNotEmpty(Utils::noSlash($path_data));
+        $this->path_templates = Assert::pathExistsIfNotEmpty(Utils::noSlash($path_templates));
+        $this->path_php = Assert::pathExistsIfNotEmpty(Utils::noSlash($path_php));
 
-    public function name(): string
-    {
-        return (string) $this->config['name']
-            ?: throw new ConfigException('Config "name" is not defined');
-    }
-
-    public function path_cache(): string
-    {
-        return Utils::mkdir((string) $this->config['path_cache'])
-            ?: throw new ConfigException('Config "path_cache" is not defined');
-    }
-
-    public function path_logs(): string
-    {
-        return Utils::mkdir((string) $this->config['path_logs'])
-            ?: throw new ConfigException('Config "path_logs" is not defined');
-    }
-
-    public function path_data(): string
-    {
-        return Utils::trimRightSlash((string) $this->config['path_data'])
-            ?: throw new ConfigException('Config "path_data" is not defined');
-    }
-
-    public function path_public(): string
-    {
-        return Utils::trimRightSlash((string) $this->config['path_public'])
-            ?: throw new ConfigException('Config "path_public" is not defined');
-    }
-
-    public function path_templates(): string
-    {
-        return Utils::trimRightSlash((string) $this->config['path_templates']);
-    }
-
-    public function path_php(): string
-    {
-        return Utils::trimRightSlash((string) $this->config['path_php']);
-    }
-
-    public function log_max_files(): int
-    {
-        return (int) $this->config['log_max_files'] ?: self::DEFAULT_LOG_MAX_FILES;
-    }
-
-    public function log_level(): int
-    {
-        if (Utils::inPhar()) {
-            return (int) $this->config['log_level'] ?: self::DEFAULT_LOG_LEVEL_PROD;
-        }
-
-        return (int) $this->config['log_level'] ?: self::DEFAULT_LOG_LEVEL_DEV;
+        $this->log_path = Assert::pathExistsOrCreate(Utils::noSlash($log_path) ?: $path_cache . '/logs');
+        $this->log_max_files = $log_max_files < 0 ? 0 : $log_max_files;
+        $this->log_level = Assert::validLogLevel($log_level);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,14 +13,17 @@
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\Exception\SimplesiteException;
-use Arnapou\SimpleSite\Utils;
+use Arnapou\SimpleSite\Exception\SimplesiteProblem;
+
+use function is_object;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Throwable;
 
-class Kernel
+final class Kernel
 {
     public const onRun = 'onRun';
     public const onRequest = 'onRequest';
@@ -26,98 +31,132 @@ class Kernel
     public const onError404 = 'onError404';
     public const onError500 = 'onError500';
 
-    private Config        $config;
-    private EventListener $eventListener;
+    private readonly ServiceContainer $container;
+    private bool $handled = false;
 
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-        $this->eventListener = new EventListener();
+    public function __construct(
+        private readonly Config $config,
+        private readonly EventListener $eventListener = new EventListener()
+    ) {
+        $this->container = new ServiceContainer();
     }
 
     public function handle(Request $request): Response
     {
+        if ($this->handled) {
+            throw new SimplesiteProblem('The kernel cannot be handled more than once.');
+        }
+
         $this->eventListener->clear();
-        $container = new ServiceContainer(__DIR__ . '/../Services', 'Arnapou\\SimpleSite\\Services');
+        $this->container
+            ->add('config', $this->config)
+            ->add('kernel', $this)
+            ->add('request', $request)
+            ->loadPsr4(
+                'Arnapou\\SimpleSite\\Services',
+                __DIR__ . '/../Services'
+            );
+
+        $logger = $this->container->logger();
 
         try {
-            $container->add('Config', $this->config);
-            $container->add('Kernel', $this);
-            $container->add('Request', $request);
-            $this->loadPhpFiles($container);
+            $this->loadPhpFiles();
 
-            $this->eventListener->dispatch(self::onRun, $event = new Event($container, null));
+            $this->eventListener->dispatch(self::onRun, $this->createEvent(null));
 
-            $urlMatcher = new UrlMatcher($container->RouteCollections()->merge(), $container->RequestContext());
-            $pathInfo = $container->Request()->getPathInfo();
+            $urlMatcher = new UrlMatcher(
+                $this->container->routeCollections()->merge(),
+                $this->container->requestContext()
+            );
+            $pathInfo = $this->container->request()->getPathInfo();
             $parameters = $urlMatcher->match($pathInfo);
             $routeName = $parameters['_route'];
             $controller = $parameters['_controller'];
             unset($parameters['_controller'], $parameters['_route']);
-            $container->Logger()->debug("Route $routeName", ['params' => $parameters]);
+            $logger->debug("Route $routeName", ['params' => $parameters]);
 
-            $this->eventListener->dispatch(self::onRequest, $event = new Event($container, null));
-            $response = $event->getResponse() ?: \call_user_func_array($controller, $parameters);
+            $this->eventListener->dispatch(self::onRequest, $event = $this->createEvent(null));
+            $response = $event->getResponse() ?? $controller(...$parameters);
 
-            $this->eventListener->dispatch(self::onResponse, $event = new Event($container, $response));
-        } catch (ResourceNotFoundException $exception) {
-            $container->Logger()->warning('404 Not Found');
-            $response = $this->error($container, 404, $exception);
-            $this->eventListener->dispatch(self::onError404, $event = new Event($container, $response));
-        } catch (\Throwable $exception) {
-            $container->Logger()->error('500 Internal Error', ['exception' => Utils::throwableToArray($exception)]);
-            $response = $this->error($container, 500, $exception);
-            $this->eventListener->dispatch(self::onError500, $event = new Event($container, $response));
+            $this->eventListener->dispatch(self::onResponse, $event = $this->createEvent($response));
+        } catch (ResourceNotFoundException $e) {
+            $logger->warning('404 Not Found');
+            $response = $this->error(404, $e);
+            $this->eventListener->dispatch(self::onError404, $event = $this->createEvent($response));
+        } catch (Throwable $e) {
+            $logger->error('500 Internal Error', ['exception' => Php::throwableToArray($e)]);
+            $response = $this->error(500, $e);
+            $this->eventListener->dispatch(self::onError500, $event = $this->createEvent($response));
         }
 
         return $event->getResponse()
-            ?? $this->error($container, 500, new SimplesiteException('A theoretical impossible bug was thrown.'));
+            ?? $this->error(500, new SimplesiteProblem('A theoretical impossible bug was thrown.'));
     }
 
-    private function loadPhpFiles(ServiceContainer $container): void
+    private function loadPhpFiles(): void
     {
-        if ($pathPhp = $this->config->path_php()) {
-            if (!is_dir($pathPhp)) {
-                throw new SimplesiteException("path $pathPhp not found");
-            }
+        if ($pathPhp = $this->config->path_php) {
             foreach (Utils::findPhpFiles($pathPhp) as $file) {
-                $this->loadPhpFile($container, $file);
+                $this->loadPhpFile($file);
             }
         }
+
         foreach (Utils::findPhpFiles(__DIR__ . '/../Controllers') as $file) {
-            $this->loadPhpFile($container, $file, 'Arnapou\\SimpleSite\\Controllers');
+            $this->loadPhpFile2($file, 'Arnapou\\SimpleSite\\Controllers');
         }
     }
 
-    private function loadPhpFile(ServiceContainer $container, string $phpfile, string $namespace = ''): void
+    private function loadPhpFile(string $phpfile): void
     {
         /** @psalm-suppress UnresolvableInclude */
         $obj = include_once $phpfile;
 
-        if (!\is_object($obj) && $namespace) {
+        if ($obj instanceof PhpCode) {
+            $obj->init($this->container);
+        }
+    }
+
+    private function loadPhpFile2(string $phpfile, string $namespace = ''): void
+    {
+        /** @psalm-suppress UnresolvableInclude */
+        $obj = include_once $phpfile;
+
+        if (!is_object($obj) && $namespace) {
             $class = "$namespace\\" . basename($phpfile, '.php');
             $obj = new $class();
         }
 
         if ($obj instanceof PhpCode) {
-            $obj->init($container);
+            $obj->init($this->container);
         }
     }
 
-    private function error(ServiceContainer $container, int $code, \Throwable $exception): Response
+    private function error(int $code, Throwable $exception): Response
     {
         $context = [
             'exception' => $exception,
             'code' => $code,
         ];
 
+        if (
+            $exception instanceof SimplesiteProblem ||
+            $exception instanceof \Twig\Error\LoaderError
+        ) {
+            $context['content'] = $exception->getMessage();
+        }
+
         try {
-            $html = $container->TwigEnvironment()->render("@templates/error.$code.twig", $context);
+            $html = $this->container->twigEnvironment()->render("@templates/error.$code.twig", $context);
         } catch (\Throwable) {
-            $html = $container->TwigEnvironment()->render("@internal/error.$code.twig", $context);
+            $html = $this->container->twigEnvironment()->render("@internal/error.$code.twig", $context);
         }
 
         return new Response($html, $code);
+    }
+
+    public function createEvent(?Response $response): Event
+    {
+        return new Event($this->container, $response);
     }
 
     public function eventListener(): EventListener

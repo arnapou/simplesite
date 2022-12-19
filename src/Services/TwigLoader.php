@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -13,31 +15,31 @@ namespace Arnapou\SimpleSite\Services;
 
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
-use Arnapou\SimpleSite\Exception\ConfigException;
 use Twig\Loader\FilesystemLoader;
 
-class TwigLoader implements ServiceFactory
+final class TwigLoader implements ServiceFactory
 {
     public static function factory(ServiceContainer $container): FilesystemLoader
     {
         $loader = new FilesystemLoader();
-        $loader->addPath($container->Config()->path_public());
-        $loader->addPath(__DIR__ . '/../Views', 'internal');
+        $config = $container->config();
 
-        $registerNamespace = static function (string $namespace, string $configName) use ($container, $loader): void {
-            try {
-                if ($path = $container->Config()->$configName()) {
-                    $loader->addPath($path, $namespace);
-                }
-            } catch (ConfigException) {
+        /** @var array<string, string> $namespaces */
+        $namespaces = [
+            $loader::MAIN_NAMESPACE => $config->path_public,
+            'internal' => __DIR__ . '/../Views',
+            'templates' => $config->path_templates,
+            'data' => $config->path_data,
+            'php' => $config->path_php,
+            'public' => $config->path_public,
+            'logs' => $config->log_path,
+        ];
+
+        foreach ($namespaces as $namespace => $path) {
+            if ('' !== $path) {
+                $loader->addPath($path, $namespace);
             }
-        };
-
-        $registerNamespace('templates', 'path_templates');
-        $registerNamespace('data', 'path_data');
-        $registerNamespace('logs', 'path_logs');
-        $registerNamespace('php', 'path_php');
-        $registerNamespace('public', 'path_public');
+        }
 
         return $loader;
     }

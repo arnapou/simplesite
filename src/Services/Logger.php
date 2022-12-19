@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,60 +13,64 @@
 
 namespace Arnapou\SimpleSite\Services;
 
+use Arnapou\SimpleSite\Core\Psr\RotatingLogger;
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
-use Arnapou\SimpleSite\Utils;
-use Monolog\Handler\RotatingFileHandler;
-use Monolog\Logger as Monolog;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
+use Stringable;
 
-class Logger implements ServiceFactory, LoggerInterface
+final class Logger implements ServiceFactory, LoggerInterface
 {
     use LoggerTrait;
 
-    private function __construct(private ServiceContainer $container, private Monolog $logger)
-    {
-        $logger->pushProcessor([$this, 'processor']);
+    private function __construct(
+        private readonly ServiceContainer $container,
+        private readonly RotatingLogger $logger
+    ) {
     }
 
     public static function factory(ServiceContainer $container): self
     {
-        Utils::mkdir($logdir = $container->Config()->path_logs());
+        $config = $container->config();
 
-        $handler = new RotatingFileHandler(
-            $logdir . '/site.log',
-            $container->Config()->log_max_files(),
-            $container->Config()->log_level()
+        return new self(
+            $container,
+            new RotatingLogger(
+                $config->log_path,
+                'site',
+                $config->log_max_files,
+                $config->log_level,
+            )
         );
-
-        return new self($container, new Monolog('site', [$handler]));
     }
 
     public static function aliases(): array
     {
-        return [];
+        return ['log'];
     }
 
-    public function log($level, $message, array $context = []): void
+    public function log($level, Stringable|string $message, array $context = []): void
     {
-        $this->logger->log($level, $message, $context);
+        $this->logger->log(
+            $level,
+            $message,
+            $this->commonContext($context)
+        );
     }
 
-    public function processor(array $data): array
+    private function commonContext(array $context): array
     {
         try {
-            $added = [
-                'url' => $this->container->Request()->getPathInfo(),
-                'ip' => $_SERVER['REMOTE_ADDR'] ?? '?',
-            ];
-            if ($_SERVER['HTTP_REFERER'] ?? false) {
-                $added['referer'] = $_SERVER['HTTP_REFERER'];
+            $context['url'] = $this->container->request()->getPathInfo();
+            $context['ip'] = $_SERVER['REMOTE_ADDR'] ?? '?';
+
+            if (isset($_SERVER['HTTP_REFERER'])) {
+                $context['referer'] = $_SERVER['HTTP_REFERER'];
             }
-            $data['context'] = array_merge($added, $data['context'] ?? []);
         } catch (\Throwable) {
         }
 
-        return $data;
+        return $context;
     }
 }

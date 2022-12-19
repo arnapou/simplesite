@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -36,7 +38,7 @@ class ImagesController extends Controller
             throw new ResourceNotFoundException();
         }
 
-        $response = $this->container()->Image()->thumbnail($path, $ext, $intsize);
+        $response = $this->container()->image()->thumbnail($path, $ext, $intsize);
         if (null === $response) {
             throw new ResourceNotFoundException();
         }

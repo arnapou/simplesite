@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -14,17 +16,15 @@ namespace Arnapou\SimpleSite\Core;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class Event
+final class Event
 {
-    private Request          $request;
-    private ?Response        $response = null;
-    private ServiceContainer $container;
+    private readonly Request $request;
 
-    public function __construct(ServiceContainer $container, ?Response $response)
-    {
-        $this->request = $container->Request();
-        $this->response = $response;
-        $this->container = $container;
+    public function __construct(
+        private readonly ServiceContainer $container,
+        private ?Response $response
+    ) {
+        $this->request = $container->request();
     }
 
     public function getRequest(): Request

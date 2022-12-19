@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,6 +13,10 @@
 
 namespace Arnapou\SimpleSite\Exception;
 
-class UnkownServiceException extends \Exception
+class ServiceCouldNotBeLoaded extends SimplesiteProblem
 {
+    public function __construct(string $name = '')
+    {
+        parent::__construct("The service '$name' could not be loaded.");
+    }
 }

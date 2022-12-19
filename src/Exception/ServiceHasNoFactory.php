@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,6 +13,10 @@
 
 namespace Arnapou\SimpleSite\Exception;
 
-class ConfigException extends \Exception
+class ServiceHasNoFactory extends SimplesiteProblem
 {
+    public function __construct(string $name = '')
+    {
+        parent::__construct("The service '$name' does not implements ServiceFactory.");
+    }
 }

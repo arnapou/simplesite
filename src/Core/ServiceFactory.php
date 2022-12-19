@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -16,7 +18,7 @@ interface ServiceFactory
     public static function factory(ServiceContainer $container): object;
 
     /**
-     * @return string[]
+     * @return list<string>
      */
     public static function aliases(): array;
 }

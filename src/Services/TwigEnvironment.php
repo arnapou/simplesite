@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -13,30 +15,28 @@ namespace Arnapou\SimpleSite\Services;
 
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
-use Arnapou\SimpleSite\Utils;
+use Arnapou\SimpleSite\Core\Utils;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
 
-class TwigEnvironment implements ServiceFactory
+final class TwigEnvironment implements ServiceFactory
 {
     public static function factory(ServiceContainer $container): Environment
     {
-        Utils::mkdir($cache = $container->Config()->path_cache() . '/twig');
-
         $environment = new Environment(
-            $container->TwigLoader(),
+            $container->twigLoader(),
             [
                 'debug' => true,
                 'charset' => 'UTF-8',
                 'strict_variables' => false,
                 'autoescape' => 'html',
-                'cache' => $cache,
+                'cache' => Utils::mkdir($container->config()->path_cache . '/twig'),
                 'auto_reload' => true,
                 'optimizations' => -1,
             ]
         );
         $environment->addExtension(new DebugExtension());
-        $environment->addExtension($container->TwigExtension());
+        $environment->addExtension($container->twigExtension());
 
         return $environment;
     }

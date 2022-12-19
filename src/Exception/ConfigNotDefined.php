@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,6 +13,10 @@
 
 namespace Arnapou\SimpleSite\Exception;
 
-class SimplesiteException extends \Exception
+class ConfigNotDefined extends SimplesiteProblem
 {
+    public function __construct(string $variable)
+    {
+        parent::__construct("Config variable '" . $variable . "' is not defined");
+    }
 }

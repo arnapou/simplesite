@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -16,21 +18,27 @@ use Arnapou\PFDB\Database as PFDB;
 use Arnapou\PFDB\Factory\NoPKTableFactory;
 use Arnapou\PFDB\Storage\LockedStorage;
 use Arnapou\PFDB\Storage\PhpFileStorage;
+use Arnapou\SimpleSite\Core\Assert;
 use Arnapou\SimpleSite\Core\ServiceContainer;
 use Arnapou\SimpleSite\Core\ServiceFactory;
+use Throwable;
 
-class Compteur implements ServiceFactory
+final class Counter implements ServiceFactory
 {
     private const COUNT = 'COUNT';
     private const STATS = 'STATS';
-    public const VALUE = 'value';
+    private const VALUE = 'value';
     private readonly PFDB $db;
     private readonly int $number;
 
     private function __construct(private readonly ServiceContainer $container)
     {
+        $config = $container->config();
         $storage = new LockedStorage(
-            new PhpFileStorage($container->Config()->path_data(), 'compteur')
+            new PhpFileStorage(
+                Assert::nonEmptyConfigPath('path_data', $config->path_data),
+                'compteur'
+            )
         );
         $this->db = new PFDB($storage, new NoPKTableFactory());
         $this->number = $this->comptage();
@@ -71,8 +79,8 @@ class Compteur implements ServiceFactory
             for ($i = 7; $i < 30; ++$i) {
                 $this->db->getStorage()->delete(date('Y-m-d', $now - $i * 86400));
             }
-        } catch (\Throwable $e) {
-            $this->container->Logger()->error($e->getMessage());
+        } catch (Throwable $e) {
+            $this->container->logger()->error($e->getMessage());
         }
     }
 
@@ -89,7 +97,7 @@ class Compteur implements ServiceFactory
 
     public static function aliases(): array
     {
-        return [];
+        return ['Compteur'];
     }
 
     public function __toString(): string

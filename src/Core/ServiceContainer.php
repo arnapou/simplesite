@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -12,12 +14,13 @@
 namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\PFDB\Database;
-use Arnapou\SimpleSite\Exception\UnkownServiceException;
-use Arnapou\SimpleSite\Services\Compteur;
+use Arnapou\SimpleSite\Exception\ServiceCouldNotBeLoaded;
+use Arnapou\SimpleSite\Exception\ServiceHasNoFactory;
+use Arnapou\SimpleSite\Exception\ServiceUnknown;
+use Arnapou\SimpleSite\Services\Counter;
 use Arnapou\SimpleSite\Services\Image;
 use Arnapou\SimpleSite\Services\RouteCollections;
 use Arnapou\SimpleSite\Services\TwigExtension;
-use Arnapou\SimpleSite\Utils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -27,62 +30,94 @@ use Twig\Environment;
 use Twig\Loader\LoaderInterface;
 
 /**
- * @method Compteur         Compteur()
- * @method Database         Database()
- * @method Image            Image()
- * @method LoggerInterface  Logger()
- * @method Request          Request()
- * @method RequestContext   RequestContext()
- * @method RouteCollections RouteCollections()
- * @method SessionInterface Session()
- * @method Environment      TwigEnvironment()
- * @method TwigExtension    TwigExtension()
- * @method LoaderInterface  TwigLoader()
- * @method UrlGenerator     UrlGenerator()
- * @method Kernel           Kernel()
- * @method Config           Config()
+ * @method Counter          counter()
+ * @method Database         database()
+ * @method Image            image()
+ * @method LoggerInterface  logger()
+ * @method Request          request()
+ * @method RequestContext   requestContext()
+ * @method RouteCollections routeCollections()
+ * @method SessionInterface session()
+ * @method Environment      twigEnvironment()
+ * @method TwigExtension    twigExtension()
+ * @method LoaderInterface  twigLoader()
+ * @method UrlGenerator     urlGenerator()
+ * @method Kernel           kernel()
+ * @method Config           config()
  */
-class ServiceContainer
+final class ServiceContainer
 {
-    private array $services = [];
+    /** @var array<string, object> */
+    private array $instances = [];
+    /** @var array<string, array{class-string<ServiceFactory>, array<string>}> */
     private array $classes = [];
 
-    public function __construct(string $path, string $namespace)
-    {
-        foreach (Utils::findPhpFiles($path) as $file) {
-            $baseclass = basename($file, '.php');
-            $classname = "$namespace\\$baseclass";
-            $aliases = array_map('strtolower', \call_user_func([$classname, 'aliases']));
-            $aliases[] = strtolower($baseclass);
-            foreach ($aliases as $alias) {
-                $this->classes[$alias] = [$classname, $aliases];
-            }
-        }
-    }
-
-    public function add(string $name, object $instance): void
-    {
-        $this->services[strtolower($name)] = $instance;
-    }
-
+    /**
+     * This Magic method can retrieve a service by its name or alias.
+     *
+     * @throws ServiceUnknown
+     */
     public function __call(string $name, array $arguments = []): object
     {
         return $this->get($name);
     }
 
-    public function get(string $id): object
+    /**
+     * Like a PSR-4 loading mapping : namespace => path.
+     *
+     * @throws ServiceHasNoFactory
+     * @throws ServiceCouldNotBeLoaded
+     *
+     * @return $this
+     */
+    public function loadPsr4(string $namespace, string $path): self
     {
-        $id = strtolower($id);
-        if (!isset($this->services[$id])) {
-            if (!isset($this->classes[$id])) {
-                throw new UnkownServiceException($id);
+        foreach (Utils::findPhpFiles($path) as $file) {
+            $baseClass = basename($file, '.php');
+
+            if (!class_exists($fqcnClass = "$namespace\\$baseClass")) {
+                throw new ServiceCouldNotBeLoaded($baseClass);
             }
-            $this->services[$id] = \call_user_func([$this->classes[$id][0], 'factory'], $this);
-            foreach ($this->classes[$id][1] as $alias) {
-                $this->services[strtolower($alias)] = $this->services[$id];
+
+            if (!is_subclass_of($fqcnClass, ServiceFactory::class)) {
+                throw new ServiceHasNoFactory($baseClass);
+            }
+
+            $aliases = [
+                strtolower($baseClass),
+                ...array_map('strtolower', ([$fqcnClass, 'aliases'])()),
+            ];
+            foreach ($aliases as $alias) {
+                $this->classes[$alias] = [$fqcnClass, $aliases];
             }
         }
 
-        return $this->services[$id];
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function add(string $name, object $instance): self
+    {
+        $this->instances[strtolower($name)] = $instance;
+
+        return $this;
+    }
+
+    public function get(string $id): object
+    {
+        if (isset($this->instances[$id = strtolower($id)])) {
+            return $this->instances[$id];
+        }
+
+        [$class, $aliases] = $this->classes[$id] ?? throw new ServiceUnknown($id);
+
+        $object = ([$class, 'factory'])($this);
+        foreach ($aliases as $alias) {
+            $this->instances[$alias] = $object;
+        }
+
+        return $object;
     }
 }

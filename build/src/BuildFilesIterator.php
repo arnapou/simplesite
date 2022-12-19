@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Arnapou Simple Site package.
  *
@@ -11,59 +13,72 @@
 
 namespace Arnapou\SimpleSite\Build;
 
-/**
- * @template TValue
- * @implements \Iterator<TValue>
- */
-final class BuildFilesIterator extends \IteratorIterator implements \Iterator
-{
-    public function __construct()
-    {
-        $paths = array_map(static fn ($dir) => PROJECT_DIR . "/$dir", BUILD_INCLUDED_DIRS);
+use AppendIterator;
+use CallbackFilterIterator;
+use FilesystemIterator;
 
-        parent::__construct($this->buildIterator($paths));
+use function in_array;
+
+use IteratorIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+use Traversable;
+
+/**
+ * @extends \IteratorIterator<int, SplFileInfo, \Traversable<int, SplFileInfo>>
+ */
+final class BuildFilesIterator extends IteratorIterator
+{
+    public function __construct(private readonly BuildConfig $config)
+    {
+        parent::__construct($this->buildIterator());
     }
 
     /**
-     * @return \Iterator<\SplFileInfo>
+     * @return Traversable<int, SplFileInfo>
      */
-    private function buildIterator(array $paths): \Iterator
+    private function buildIterator(): Traversable
     {
-        $iterator = new \AppendIterator();
+        $paths = array_map(
+            fn ($dir) => $this->config->projectRootDir . "/$dir",
+            $this->config->includedDirectories
+        );
 
+        $iterator = new AppendIterator();
         foreach ($paths as $path) {
             $iterator->append(
-                new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator(
+                new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator(
                         $path,
-                        \FilesystemIterator::KEY_AS_PATHNAME
-                        | \FilesystemIterator::SKIP_DOTS
-                        | \FilesystemIterator::CURRENT_AS_FILEINFO
+                        FilesystemIterator::KEY_AS_PATHNAME
+                        | FilesystemIterator::SKIP_DOTS
+                        | FilesystemIterator::CURRENT_AS_FILEINFO
                     ),
-                    \RecursiveIteratorIterator::LEAVES_ONLY
+                    RecursiveIteratorIterator::LEAVES_ONLY
                 )
             );
         }
 
-        return new \CallbackFilterIterator(
-            $iterator,
-            static function (\SplFileInfo $file) {
-                if ($file->isDir()) {
-                    return false;
-                }
+        return new CallbackFilterIterator($iterator, $this->filter(...));
+    }
 
-                if (\in_array($file->getBasename(), BUILD_IGNORE_FILENAMES, true)) {
-                    return false;
-                }
+    private function filter(SplFileInfo $file): bool
+    {
+        if ($file->isDir()) {
+            return false;
+        }
 
-                foreach (BUILD_IGNORE_PATHMATCH as $pattern) {
-                    if (fnmatch($pattern, $file->getPathname())) {
-                        return false;
-                    }
-                }
+        if (in_array($file->getBasename(), $this->config->ignoredFilenames, true)) {
+            return false;
+        }
 
-                return true;
+        foreach ($this->config->ignoredPathMatch as $pattern) {
+            if (fnmatch($pattern, $file->getPathname())) {
+                return false;
             }
-        );
+        }
+
+        return true;
     }
 }
