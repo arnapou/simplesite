@@ -19,7 +19,7 @@ return new class() extends Controller {
         $this->addRoute(
             'je_plante',
             function () {
-                throw new \RuntimeException('Plantage volontaire');
+                throw new \RuntimeException('Plantage volontaire', 0, new \Exception('previous'));
             },
             'je_plante'
         );

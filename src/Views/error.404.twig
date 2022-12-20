@@ -36,42 +36,14 @@
     </style>
 </head>
 <body>
-<div id="background"></div>
-<div class="top">
+<header>
     <h1>{{ code }}</h1>
     <h2>{{ block('title') }}</h2>
-</div>
-<div>
-    {% block svg %}
-    <svg width="200" height="200" version="1.1" viewBox="0 0 52.917 52.917" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#"
-         xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <metadata>
-            <rdf:RDF>
-                <cc:Work rdf:about="">
-                    <dc:format>image/svg+xml</dc:format>
-                    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-                    <dc:title/>
-                </cc:Work>
-            </rdf:RDF>
-        </metadata>
-        <g transform="translate(0 -244.08)">
-            <path transform="matrix(.26458 0 0 .26458 0 244.08)"
-                  d="m100 5c-52.526 0-95 42.474-95 95v87.93l20-20 25 25 25-25 25 25 25-25 25 25 25-25 20 20v-87.93c0-52.526-42.474-95-95-95z"
-                  fill="#fff" fill-opacity=".8"/>
-            <path transform="matrix(.26458 0 0 .26458 0 244.08)"
-                  d="m100 0a100 100 0 0 0-100 100v100l25-25 25 25 25-25 25 25 25-25 25 25 25-25 25 25v-100a100 100 0 0 0-100-100zm0 10c49.824 0 90 40.176 90 90v75.857l-15-15-25 25.002-25-25.002-25 25.002-25-25.002-25 25.002-25-25.002-15 15v-75.857c-4e-7 -49.824 40.176-90 90-90z"
-                  fill="{{ block('color_border') }}"/>
-            <circle cx="14.386" cy="264.54" r="2.4568" fill="{{ block('color_border') }}" stroke="{{ block('color_border') }}" stroke-width="2.6458"/>
-            <circle cx="38.531" cy="264.54" r="2.4568" fill="{{ block('color_border') }}" stroke="{{ block('color_border') }}" stroke-width="2.6458"/>
-        </g>
-    </svg>
-    {% endblock %}
-</div>
-<div class="bottom">
-    {% block body %}
-        <p>Boo, looks like a ghost stole this page!</p>
-    {% endblock %}
-</div>
+</header>
+<main>
+    {% block svg %}{{ macro.svg(block('color_border'), '#fff', 0.8) }}{% endblock %}
+    {% block body %}<p>Boo, looks like a ghost stole this page!</p>{% endblock %}
+</main>
 
 <!--
 {{ macro.error(exception) -}}
@@ -87,6 +59,31 @@
         --
         {{ macro.error(exception.previous, n+1) -}}
     {%- endif -%}
+{%- endmacro %}
+
+{% macro svg(border, background, opacity) -%}
+<svg width="200" height="200" version="1.1" viewBox="0 0 52.917 52.917" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#"
+     xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <metadata>
+        <rdf:RDF>
+            <cc:Work rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <dc:title/>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <g transform="translate(0 -244.08)">
+        <path transform="matrix(.26458 0 0 .26458 0 244.08)"
+              d="m100 5c-52.526 0-95 42.474-95 95v87.93l20-20 25 25 25-25 25 25 25-25 25 25 25-25 20 20v-87.93c0-52.526-42.474-95-95-95z"
+              fill="{{ background }}" fill-opacity="{{ opacity }}"/>
+        <path transform="matrix(.26458 0 0 .26458 0 244.08)"
+              d="m100 0a100 100 0 0 0-100 100v100l25-25 25 25 25-25 25 25 25-25 25 25 25-25 25 25v-100a100 100 0 0 0-100-100zm0 10c49.824 0 90 40.176 90 90v75.857l-15-15-25 25.002-25-25.002-25 25.002-25-25.002-25 25.002-25-25.002-15 15v-75.857c-4e-7 -49.824 40.176-90 90-90z"
+              fill="{{ border }}"/>
+        <circle cx="14.386" cy="264.54" r="2.4568" fill="{{ border }}" stroke="{{ border }}" stroke-width="2.6458"/>
+        <circle cx="38.531" cy="264.54" r="2.4568" fill="{{ border }}" stroke="{{ border }}" stroke-width="2.6458"/>
+    </g>
+</svg>
 {%- endmacro %}
 </body>
 </html>
