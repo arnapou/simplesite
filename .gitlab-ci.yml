@@ -59,10 +59,8 @@ release:
     name: '$CI_COMMIT_TAG'
     tag_name: '$CI_COMMIT_TAG'
     description: |
-      Build of `simplesite.phar` : 
-      
-      - 🏷️ Tag version $CI_COMMIT_TAG
-      - 🐘 PHP version $PHP_VERSION
+      - 🏷️ Tag $CI_COMMIT_TAG
+      - 🐘 PHP v$PHP_VERSION
     assets:
       links:
         - name: 'simplesite.phar'
