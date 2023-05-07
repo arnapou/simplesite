@@ -1,6 +1,8 @@
 {
     "name": "arnapou/simplesite",
-    "description": "Arnapou Simple Site",
+    "description": "Project - Simple site system delivered as a standalone phar file.",
+    "license": "MIT",
+    "type": "project",
     "authors": [
         {
             "name": "Arnaud Buathier",
@@ -14,7 +16,7 @@
         }
     },
     "require": {
-        "php": ">= 8.2",
+        "php": "~8.2.0",
         "arnapou/pfdb": "^5.0",
         "psr/simple-cache": "^3.0",
         "psr/log": "^3.0",
@@ -23,10 +25,11 @@
         "twig/twig": "^3.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": ">=3.13",
-        "phpstan/phpstan": ">=1.9",
-        "phpunit/phpunit": ">=9.5",
-        "vimeo/psalm": ">=5.1"
+        "friendsofphp/php-cs-fixer": "^3.14",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^10.0",
+        "phpunit/php-code-coverage": "^10.0",
+        "vimeo/psalm": "^5.7"
     },
     "suggest": {
         "ext-gd": "*",
@@ -35,6 +38,11 @@
     "autoload": {
         "psr-4": {
             "Arnapou\\SimpleSite\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Arnapou\\SimpleSite\\Tests\\": "tests/"
         }
     },
     "config": {

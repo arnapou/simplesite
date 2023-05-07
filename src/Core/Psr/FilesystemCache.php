@@ -174,7 +174,7 @@ final class FilesystemCache implements CacheInterface, IteratorAggregate
     private function ttlToExpireAt(null|int|DateInterval $ttl): int
     {
         return match (true) {
-            $ttl instanceof DateInterval => time() + $ttl->days * 86400 + $ttl->h * 3600 + $ttl->i * 60 + $ttl->s,
+            $ttl instanceof DateInterval => time() + (int) $ttl->days * 86400 + $ttl->h * 3600 + $ttl->i * 60 + $ttl->s,
             is_int($ttl) => $ttl > 1_000_000 ? $ttl : $ttl + time(),
             default => time() + $this->defaultTtl,
         };

@@ -2,14 +2,32 @@
 stages:
   - quality
 
-quality:php:
-  image: 'registry.gitlab.com/arnapou/docker/php:8.2-cron'
+code-style: &quality
+  image: 'registry.gitlab.com/arnapou/docker/php:8.2-dev'
   stage: quality
   only:
-    - master
+    - main
+  before_script:
+    - make install
   script:
-    - make all
+    - make cs
   cache:
     key: "$CI_COMMIT_REF_SLUG:$CI_JOB_NAME"
     paths:
       - vendor
+
+static-analysis:
+  <<: *quality
+  script:
+    - make sa
+
+test:
+  <<: *quality
+  script:
+    - sudo -Eu www-data make test
+
+coverage:
+  <<: *quality
+  script:
+    - sudo -Eu www-data make coverage
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
