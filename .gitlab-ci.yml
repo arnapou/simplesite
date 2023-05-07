@@ -36,9 +36,9 @@ simplesite.phar:
   image: *php-image
   only: [ tags ]
   stage: artifact
-  before_script:
+  script:
     - echo ARTIFACT_JOB_ID=$CI_JOB_ID >> dotenv.env
-  script: [ make build ]
+    - make build
   artifacts:
     expire_in: never
     name: "simplesite-$CI_COMMIT_TAG"
@@ -49,9 +49,11 @@ release:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   stage: release
   only: [ tags ]
-#  needs:
-#    - job: simplesite.phar
-#      artifacts: true
+  script:
+    - echo "Building release $CI_COMMIT_TAG"
+  needs:
+    - job: simplesite.phar
+      artifacts: true
   release:
     name: '$CI_COMMIT_TAG'
     tag_name: '$CI_COMMIT_TAG'
