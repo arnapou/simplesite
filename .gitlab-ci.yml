@@ -48,9 +48,10 @@ simplesite.phar:
 release:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   stage: release
-  needs:
-    - job: simplesite.phar
-      artifacts: true
+  only: [ tags ]
+#  needs:
+#    - job: simplesite.phar
+#      artifacts: true
   release:
     name: '$CI_COMMIT_TAG'
     tag_name: '$CI_COMMIT_TAG'
