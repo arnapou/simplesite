@@ -115,7 +115,7 @@ final class RotatingLogger implements LoggerInterface
         $output = [];
         foreach ($context as $key => $value) {
             $output[$key] = match ($type = gettype($value)) {
-                'boolean', 'integer', 'double', 'float', 'string', 'NULL' => $value,
+                'boolean', 'integer', 'double', 'string', 'NULL' => $value,
                 'array' => $this->sanitizeContext($value),
                 'object' => match (true) {
                     $value instanceof JsonSerializable => $value,

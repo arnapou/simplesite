@@ -16,7 +16,7 @@ namespace Arnapou\SimpleSite\Build;
 require __DIR__ . '/src/common.php';
 
 return new BuildConfig(
-    'site/simplesite.phar',
+    'bin/simplesite.phar',
     'src/main.php',
     dirname(__DIR__),
     __DIR__ . '/tmp',
