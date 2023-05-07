@@ -8,8 +8,8 @@ Arnapou simplesite
 Links
 --------------------
 
-> Demo 👉️ http://simplesite.arnapou.net \
-> Article 👉️ http://arnapou.net/php/site_phar/ \
+> Demo 👉️ http://simplesite.arnapou.net <br>
+> Article 👉️ http://arnapou.net/php/site_phar/ <br>
 > Phar file 👉️ [bin/simplesite.phar](bin/simplesite.phar)
 
 
