@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-include __DIR__ . '/../simplesite.phar';
+include __DIR__ . '/../../bin/simplesite.phar';
 
 \Arnapou\SimpleSite\run(
     // mandatory

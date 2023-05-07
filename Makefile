@@ -3,7 +3,7 @@
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-PHAR_FILENAME=site/simplesite.phar
+PHAR_FILENAME=bin/simplesite.phar
 
 all: install cs sa test coverage ## code style + analysis + test
 
@@ -24,20 +24,21 @@ endif
 cs: ## code style
 	PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --using-cache=no
 
+install-no-dev: ## composer install (--no-dev)
+	composer install --no-interaction --no-progress --optimize-autoloader --quiet --no-dev
+
 install: ## composer install
 	composer install --no-interaction --no-progress --optimize-autoloader --quiet
 
 update: ## composer update
 	composer update --no-interaction --no-progress --optimize-autoloader
 
-build: ## build phar
-	composer install --no-interaction --no-progress --optimize-autoloader --quiet --no-dev
+build: install-no-dev ## build phar
 	php -d "phar.readonly=Off" ./build/build.php ${PHAR_FILENAME}
 	@ls -lah --color ${PHAR_FILENAME}
 	@head -n1 ${PHAR_FILENAME}
 	@make -s install
 
-build-list: ## list phar files
-	composer install --no-interaction --no-progress --optimize-autoloader --quiet --no-dev
+build-list: install-no-dev ## list phar files
 	php -d "phar.readonly=Off" ./build/printfiles.php
 	@make -s install

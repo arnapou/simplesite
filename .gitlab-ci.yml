@@ -1,33 +1,50 @@
-
 stages:
   - quality
+  - release
 
-code-style: &quality
+.common-job: &common-job
   image: 'registry.gitlab.com/arnapou/docker/php:8.2-dev'
-  stage: quality
-  only:
-    - main
-  before_script:
-    - make install
-  script:
-    - make cs
+  only: [ main ]
+  before_script: [ make install ]
   cache:
     key: "$CI_COMMIT_REF_SLUG:$CI_JOB_NAME"
-    paths:
-      - vendor
+    paths: [ vendor ]
+
+code-style:
+  <<: *common-job
+  stage: quality
+  script: [ make cs ]
 
 static-analysis:
-  <<: *quality
-  script:
-    - make sa
+  <<: *common-job
+  stage: quality
+  script: [ make sa ]
 
 test:
-  <<: *quality
-  script:
-    - sudo -Eu www-data make test
+  <<: *common-job
+  stage: quality
+  script: [ sudo -Eu www-data make test ]
 
 coverage:
-  <<: *quality
-  script:
-    - sudo -Eu www-data make coverage
+  <<: *common-job
+  stage: quality
+  script: [ sudo -Eu www-data make coverage ]
   coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+
+release:
+  <<: *common-job
+  stage: release
+  only: [ tags ]
+  script: [ make build ]
+  artifacts:
+    expire_in: never
+    expose_as: '$CI_COMMIT_TAG simplesite.phar'
+    paths: [ bin/simplesite.phar ]
+  release:
+    name: '$CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG phar file'
+    assets:
+      links:
+        - name: '$CI_COMMIT_TAG simplesite.phar'
+          url: 'https://gitlab.com/arnapou/simplesite/cw/-/jobs/${CI_JOB_ID}/artifacts/file/bin/simplesite.phar'

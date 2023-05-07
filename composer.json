@@ -35,6 +35,9 @@
         "ext-gd": "*",
         "ext-imagick": "*"
     },
+    "bin": [
+        "bin/simplesite.phar"
+    ],
     "autoload": {
         "psr-4": {
             "Arnapou\\SimpleSite\\": "src"
