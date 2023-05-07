@@ -47,7 +47,6 @@ simplesite.phar:
 
 release:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  only: [ tags ]
   stage: release
   needs:
     - job: simplesite.phar
