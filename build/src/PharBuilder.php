@@ -13,18 +13,8 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
-use function dirname;
-use function ini_get;
-
 use LogicException;
 use Phar;
-
-use const PHP_VERSION;
-
-use RuntimeException;
-
-use function strlen;
-
 use Throwable;
 
 final class PharBuilder
@@ -33,19 +23,27 @@ final class PharBuilder
 
     public function __construct(private readonly BuildConfig $config)
     {
+        if ('cli' !== \PHP_SAPI) {
+            $this->bye('⛔ This script should be run only in CLI');
+        }
+
         if ($this->isPharReadonly()) {
-            bye("⛔ You cannot build with phar being readonly.\n\nUsage:\n   php -d \"phar.readonly=Off\" build/build.php\n");
+            $this->bye("⛔ You cannot build with phar being readonly.\n\nUsage:\n   php -d \"phar.readonly=Off\" build/build.php\n");
         }
 
         if (!$this->canCompress()) {
-            bye("⛔ You cannot build with phar because the compression option is not supported.\n");
+            $this->bye("⛔ You cannot build with phar because the compression option is not supported.\n");
+        }
+
+        if ('' === $this->config->pharOutputFile || 'phar' !== pathinfo($this->config->pharOutputFile, \PATHINFO_EXTENSION)) {
+            $this->bye('⛔ You MUST specify the target phar file inside the project.');
         }
     }
 
     public function build(): void
     {
         try {
-            $pharfile = $this->config->pharPath();
+            $pharfile = $this->config->projectRootDir . '/' . ltrim($this->config->pharOutputFile, '/');
 
             $this->copyAllFilesToTmp();
             $this->unlinkPreviousBuilds($pharfile);
@@ -55,23 +53,23 @@ final class PharBuilder
             // Phars created from iterator (unlike from directory) does not have full-fledged directory structure.
             // For example, functions like opendir() will fail, although fopen() does not.
             // -> That's why we copy files + buildFromDirectory
-            $phar->buildFromDirectory($this->config->tempDir);
+            $phar->buildFromDirectory($this->config->buildTempDir);
 
             $phar->setStub($this->getStub(basename($pharfile)));
 
             $phar->compressFiles(self::COMPRESSION);
         } catch (Throwable $exception) {
-            bye('⚠️ ' . $exception->getMessage());
+            $this->bye('⚠️ ' . $exception->getMessage());
         }
     }
 
     private function getStub(string $pharBasename): string
     {
-        return '<?php // Generated ' . date('c') . ' for PHP ' . PHP_VERSION . "
+        return '<?php // Generated ' . date('c') . ' for PHP ' . \PHP_VERSION . "
 if (class_exists('Phar')) {
 Phar::mapPhar(" . var_export($pharBasename, true) . ");
 Phar::interceptFileFuncs();
-require 'phar://' . __FILE__ . '/" . $this->config->bootstrapFile . "';
+require 'phar://' . __FILE__ . '/" . $this->config->pharBootstrap . "';
 }
 __HALT_COMPILER(); ?>";
     }
@@ -86,7 +84,6 @@ __HALT_COMPILER(); ?>";
     private function copyAllFilesToTmp(): void
     {
         $rootDir = $this->config->projectRootDir;
-        $rootDirLength = strlen($rootDir);
 
         $this->cleanupTmp();
         foreach ($this->allfiles() as $file) {
@@ -94,9 +91,9 @@ __HALT_COMPILER(); ?>";
                 continue;
             }
 
-            $destPathname = $this->config->tempDir . substr($file->getPathname(), $rootDirLength);
+            $destPathname = $this->config->buildTempDir . substr($file->getPathname(), \strlen($rootDir));
 
-            $this->mkdir(dirname($destPathname));
+            $this->mkdir(\dirname($destPathname));
             if ('php' === strtolower($file->getExtension())) {
                 file_put_contents($destPathname, php_strip_whitespace($file->getPathname()));
             } else {
@@ -107,7 +104,7 @@ __HALT_COMPILER(); ?>";
 
     private function cleanupTmp(): void
     {
-        if (is_dir($tempDir = $this->config->tempDir)) {
+        if (is_dir($tempDir = $this->config->buildTempDir)) {
             exec('rm -Rf ' . escapeshellarg($tempDir), $output, $code);
             if (0 !== $code) {
                 throw new LogicException("I was not able to cleanup the temporary folder $tempDir");
@@ -128,13 +125,19 @@ __HALT_COMPILER(); ?>";
 
     private function isPharReadonly(): bool
     {
-        return (bool) ini_get('phar.readonly');
+        return (bool) \ini_get('phar.readonly');
     }
 
     private function mkdir(string $dir): void
     {
         if (!is_dir($dir) && !mkdir($dir, 0o755, true) && !is_dir($dir)) {
-            throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
+            $this->bye("❌ Directory '$dir' could not be created");
         }
+    }
+
+    private function bye(string $msg): never
+    {
+        echo "$msg\n";
+        exit(1);
     }
 }

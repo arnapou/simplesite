@@ -11,12 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Arnapou\SimpleSite\Exception;
+namespace Arnapou\SimpleSite;
 
-class ConfigNotDefined extends SimplesiteProblem
+interface PhpCode
 {
-    public function __construct(string $variable)
-    {
-        parent::__construct("Config variable '" . $variable . "' is not defined");
-    }
+    public function init(): void;
 }

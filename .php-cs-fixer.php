@@ -43,14 +43,15 @@ return (new PhpCsFixer\Config())
             '@PHP82Migration' => true,
             'declare_strict_types' => true,
             'concat_space' => ['spacing' => 'one'],
-            'ordered_imports' => ['sort_algorithm' => 'alpha'],
+            'ordered_imports' => ['sort_algorithm' => 'alpha', 'imports_order' => ['const', 'class', 'function']],
             'native_function_invocation' => ['include' => ['@compiler_optimized']],
             'combine_consecutive_issets' => true,
             'combine_consecutive_unsets' => true,
             'phpdoc_order' => true,
             'phpdoc_var_annotation_correct_order' => true,
-            'global_namespace_import' => ['import_classes' => true, 'import_functions' => true, 'import_constants' => true],
+            'global_namespace_import' => ['import_classes' => true, 'import_functions' => false, 'import_constants' => false],
             'header_comment' => ['location' => 'after_declare_strict', 'header' => $header],
+            'phpdoc_line_span' => ['const' => 'single', 'method' => 'multi', 'property' => 'single'],
             // 👇 override @Symfony - fait péter les phpdoc @psalm
             'phpdoc_to_comment' => false,
         ]

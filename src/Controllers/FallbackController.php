@@ -13,12 +13,10 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Controllers;
 
-use Arnapou\SimpleSite\Core\Controller;
-use DateTime;
-
-use function strlen;
-
-use Symfony\Component\HttpFoundation\Response;
+use Arnapou\Psr\Psr7HttpMessage\Response;
+use Arnapou\SimpleSite\Controller;
+use Arnapou\SimpleSite\Core\Utils;
+use Nyholm\Psr7\Stream;
 
 class FallbackController extends Controller
 {
@@ -36,43 +34,25 @@ class FallbackController extends Controller
             . 'AD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA'
         );
 
-        $response = new Response(
-            $binary,
-            200,
-            [
-                'Content-Type' => 'image/vnd.microsoft.icon',
-                'Content-Length' => strlen($binary),
-            ]
-        );
-
         $startDayTimestamp = (int) (floor(time() / 86400) * 86400);
+        $etag = base64_encode(hash('sha256', $binary, true));
 
-        $response->setCache(
-            [
-                'etag' => base64_encode(hash('sha256', $binary, true)),
-                'last_modified' => DateTime::createFromFormat('U', (string) $startDayTimestamp),
-                'max_age' => 86400,
-                's_maxage' => 86400,
-                'public' => true,
-            ]
-        );
-
-        return $response;
+        return Utils::cachedResponse($etag, 86400, $startDayTimestamp)
+            ->withHeader('Content-Type', 'image/vnd.microsoft.icon')
+            ->withHeader('Content-Length', (string) \strlen($binary))
+            ->withBody(Stream::create($binary));
     }
 
     public function routeRobotsTxt(): Response
     {
-        return new Response(
-            "User-agent: *\nDisallow:\n",
-            200,
-            [
-                'content-type' => 'text/plain',
-            ]
-        );
+        return (new Response())
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'text/plain')
+            ->withBody(Stream::create("User-agent: *\nDisallow:\n"));
     }
 
     public function routePriority(): int
     {
-        return 0;
+        return 100;
     }
 }

@@ -16,9 +16,6 @@ namespace Arnapou\SimpleSite\Build;
 use AppendIterator;
 use CallbackFilterIterator;
 use FilesystemIterator;
-
-use function in_array;
-
 use IteratorIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -69,7 +66,7 @@ final class BuildFilesIterator extends IteratorIterator
             return false;
         }
 
-        if (in_array($file->getBasename(), $this->config->ignoredFilenames, true)) {
+        if (\in_array($file->getBasename(), $this->config->ignoredFilenames, true)) {
             return false;
         }
 

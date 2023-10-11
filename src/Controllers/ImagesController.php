@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Controllers;
 
-use Arnapou\SimpleSite\Core\Controller;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
+use Arnapou\Psr\Psr7HttpMessage\Response;
+use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\Controller;
 
 class ImagesController extends Controller
 {
@@ -30,17 +31,17 @@ class ImagesController extends Controller
     public function routeImage(string $path, string $size, string $ext): Response
     {
         if (!ctype_digit($size)) {
-            throw new ResourceNotFoundException();
+            throw new NoResponseFound();
         }
 
         $intsize = (int) $size;
         if ($intsize < 16 || $intsize > 1500) {
-            throw new ResourceNotFoundException();
+            throw new NoResponseFound();
         }
 
-        $response = $this->container()->image()->thumbnail($path, $ext, $intsize);
+        $response = SimpleSite::image()->thumbnail($path, $ext, $intsize);
         if (null === $response) {
-            throw new ResourceNotFoundException();
+            throw new NoResponseFound();
         }
 
         return $response;
@@ -48,6 +49,6 @@ class ImagesController extends Controller
 
     public function routePriority(): int
     {
-        return 0;
+        return 100;
     }
 }

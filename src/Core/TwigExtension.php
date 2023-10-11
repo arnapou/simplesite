@@ -11,34 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Arnapou\SimpleSite\Services;
+namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\Core\ServiceContainer;
-use Arnapou\SimpleSite\Core\ServiceFactory;
-use Arnapou\SimpleSite\Core\Utils;
-
-use function array_key_exists;
-use function strlen;
-
+use Arnapou\SimpleSite;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-final class TwigExtension extends AbstractExtension implements GlobalsInterface, ServiceFactory
+final class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    private function __construct(private ServiceContainer $container)
+    public function __construct(private readonly LazyGetterContainer $container)
     {
-    }
-
-    public static function factory(ServiceContainer $container): self
-    {
-        return new self($container);
-    }
-
-    public static function aliases(): array
-    {
-        return [];
     }
 
     public function getGlobals(): array
@@ -95,8 +79,8 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface,
 
     public function thumbnail(string $path, int $size = 200): string
     {
-        if (array_key_exists($ext = strtolower(Utils::extension($path)), Image::MIME_TYPES)) {
-            $path = substr($path, 0, -strlen($ext)) . $size . '.' . substr($path, -strlen($ext));
+        if (\array_key_exists($ext = strtolower(Utils::extension($path)), Image::MIME_TYPES)) {
+            $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
         }
 
         return $this->asset($path);
@@ -104,7 +88,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface,
 
     public function asset(string $path): string
     {
-        return $this->container->request()->getBasePath() . '/' . ltrim($path, '/');
+        return SimpleSite::config()->base_path_url . ltrim($path, '/');
     }
 
     public function path_dir(string $path): string
@@ -114,7 +98,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface,
 
     public function path(string $name, array $parameters = []): string
     {
-        $url = $this->container->urlGenerator()->generate($name, $parameters);
+        $url = SimpleSite::config()->base_path_url . ltrim(SimpleSite::router()->generateUrl($name, $parameters), '/');
 
         return '//' === $url ? '/' : $url;
     }

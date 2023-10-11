@@ -8,7 +8,6 @@ PHAR_FILENAME=bin/simplesite.phar
 all: install cs sa test coverage build ## code style + analysis + test
 
 sa: ## static analysis
-	vendor/bin/psalm --no-cache
 	vendor/bin/phpstan
 
 test: ## phpunit

@@ -9,12 +9,9 @@ parameters:
 		- build/tmp
 	bootstrapFiles:
 		- vendor/autoload.php
+		- src/main.php
 	ignoreErrors:
 		- path: src
 		  messages:
 		      - '#Method .* return type has no value type specified in iterable type array.#'
-		      - '#Method .* has parameter .* with no value type specified in iterable type array.#'
-		      - '#Method .* has parameter .* with no value type specified in iterable type iterable.#'
-		- path: build
-		  messages:
 		      - '#Method .* has parameter .* with no value type specified in iterable type array.#'

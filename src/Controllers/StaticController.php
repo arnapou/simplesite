@@ -13,14 +13,11 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Controllers;
 
-use Arnapou\SimpleSite\Core\Controller;
+use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
+use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\Controller;
 use Arnapou\SimpleSite\Core\Utils;
-
-use function in_array;
-use function strlen;
-
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Psr\Http\Message\ResponseInterface;
 
 class StaticController extends Controller
 {
@@ -29,14 +26,14 @@ class StaticController extends Controller
 
     public function configure(): void
     {
-        $this->addRoute('{path}/', [$this, 'routeStaticDir'], 'static_dir')->setRequirement('path', '.*');
-        $this->addRoute('{path}', [$this, 'routeStaticPage'], 'static_page')->setRequirement('path', '.+');
+        $this->addRoute('/', $this->routeStaticDir(...), 'static_home');
+        $this->addRoute('{path}/', $this->routeStaticDir(...), 'static_dir')->setRequirement('path', '.+');
+        $this->addRoute('{path}', $this->routeStaticPage(...), 'static_page')->setRequirement('path', '.+');
     }
 
-    public function routeStaticDir(string $path = ''): Response
+    public function routeStaticDir(string $path = ''): ResponseInterface
     {
-        $config = $this->container()->config();
-        $pathPublic = $config->path_public;
+        $pathPublic = SimpleSite::config()->path_public;
 
         if (is_dir($realpath = "$pathPublic/$path")) {
             foreach ($this->extensions as $extension) {
@@ -45,27 +42,17 @@ class StaticController extends Controller
                 }
             }
         }
-        throw new ResourceNotFoundException();
+        throw new NoResponseFound();
     }
 
-    protected function render(string $view, array $context = []): Response
+    public function routeStaticPage(string $path = ''): ResponseInterface
     {
-        if (str_ends_with($view, '.php')) {
-            throw new ResourceNotFoundException();
-        }
-
-        return parent::render($view, $context);
-    }
-
-    public function routeStaticPage(string $path = ''): Response
-    {
-        $config = $this->container()->config();
-        $pathPublic = $config->path_public;
-        $basePath = $this->container()->request()->getBasePath() . '/';
+        $pathPublic = SimpleSite::config()->path_public;
+        $basePath = SimpleSite::config()->base_path_url;
 
         $extension = Utils::extension($path);
-        if (in_array($extension, $this->extensions, true)) {
-            return $this->redirect($basePath . substr($path, 0, -strlen($extension) - 1));
+        if (\in_array($extension, $this->extensions, true)) {
+            return $this->redirect($basePath . substr($path, 0, -\strlen($extension) - 1));
         }
 
         $realpath = "$pathPublic/$path";
@@ -79,11 +66,20 @@ class StaticController extends Controller
             return $this->redirect($basePath . "$path/", 301);
         }
 
-        throw new ResourceNotFoundException();
+        throw new NoResponseFound();
+    }
+
+    protected function render(string $view, array $context = []): ResponseInterface
+    {
+        if (str_ends_with($view, '.php')) {
+            throw new NoResponseFound();
+        }
+
+        return parent::render($view, $context);
     }
 
     public function routePriority(): int
     {
-        return 100;
+        return 0;
     }
 }

@@ -13,16 +13,9 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\Exception\PathNotCreated;
-use Arnapou\SimpleSite\Exception\PathNotWritable;
-
-use function count;
-
-use const PATHINFO_EXTENSION;
-
-use Phar;
-
-use function rtrim;
+use Arnapou\Psr\Psr7HttpMessage\Header\CacheControl;
+use Arnapou\Psr\Psr7HttpMessage\Header\Date;
+use Arnapou\Psr\Psr7HttpMessage\Response;
 
 final class Utils
 {
@@ -292,27 +285,26 @@ final class Utils
     }
 
     /**
-     * @throws PathNotCreated
-     * @throws PathNotWritable
+     * @throws Problem
      *
      * @return non-empty-string
      */
     public static function mkdir(string $path): string
     {
         if ('' === $path) {
-            throw new PathNotCreated($path);
+            throw Problem::pathNotCreated($path);
         }
 
         if (!is_dir($path)) {
             if (!mkdir($path, 0o777, true) && !is_dir($path)) {
-                throw new PathNotCreated($path);
+                throw Problem::pathNotCreated($path);
             }
 
             return $path;
         }
 
         if (!is_writable($path)) {
-            throw new PathNotWritable($path);
+            throw Problem::pathNotWritable($path);
         }
 
         return $path;
@@ -322,12 +314,7 @@ final class Utils
     {
         return str_ends_with($filename, '.html.twig')
             ? 'html.twig'
-            : pathinfo($filename, PATHINFO_EXTENSION);
-    }
-
-    public static function noSlash(string $path): string
-    {
-        return rtrim($path, '/');
+            : pathinfo($filename, \PATHINFO_EXTENSION);
     }
 
     public static function minifyHtml(string $source): string
@@ -336,7 +323,7 @@ final class Utils
 
         // protection
         $protection = static function (array $matches) use ($blocks): string {
-            $num = count($blocks);
+            $num = \count($blocks);
             $key = "@@PROTECTED:$num:@@";
             $blocks[$key] = $matches[0];
 
@@ -348,8 +335,8 @@ final class Utils
         $source = (string) preg_replace_callback('!<textarea[^>]*?>.*?</textarea>!is', $protection, $source);
 
         // minify
-        $source = trim((string) preg_replace('/((?<!\?>)\n)[\s]+/m', '\1', $source));
-        $source = (string) preg_replace('#<!---.*?--->#si', '', $source);
+        $source = trim((string) preg_replace('/((?<!\?>)\n)\s+/m', '\1', $source));
+        $source = (string) preg_replace('#<!---.*?--->#s', '', $source);
         $source = str_replace(["\t", "\n", "\r"], '', $source);
 
         // restoration before return
@@ -361,9 +348,8 @@ final class Utils
         $text = str_replace(['http://', 'https://'], ['http$$//', 'https$$//'], $text);
         $text = strtr($text, self::EMOJIS_PASS1);
         $text = strtr($text, self::EMOJIS_PASS2);
-        $text = str_replace(['http$$//', 'https$$//'], ['http://', 'https://'], $text);
 
-        return $text;
+        return str_replace(['http$$//', 'https$$//'], ['http://', 'https://'], $text);
     }
 
     public static function slugify(string $text): string
@@ -373,5 +359,14 @@ final class Utils
         $text = (string) preg_replace('!--+!', '-', $text);
 
         return trim($text, '-');
+    }
+
+    public static function cachedResponse(string $etag, int $maxAge, int $lastModified): Response
+    {
+        return (new Response())
+            ->withStatus(200)
+            ->withHeader('ETag', $etag)
+            ->withHeader(CacheControl::sharedMaxAge($maxAge))
+            ->withHeader(Date::lastModified($lastModified));
     }
 }

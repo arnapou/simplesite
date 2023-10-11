@@ -68,38 +68,24 @@
             <td>{{ app.logger.info('Hello World !') }}</td>
         </tr>
         <tr>
-            <td rowspan="3"><code>app.request</code></td>
-            <td rowspan="3">objet <code>Request</code> de symfony <a href="{{ url_http_foundation }}">HttpFoundation</a></td>
-            <td>{% verbatim %}<code>{{ app.request.pathinfo }}</code>{% endverbatim %}</td>
-            <td>{{ app.request.pathinfo }}</td>
-        </tr>
-        <tr>
-            <td>{% verbatim %}<code>{{ app.request.basepath }}</code>{% endverbatim %}</td>
-            <td>{{ app.request.basepath }}</td>
+            <td rowspan="2"><code>app.request</code></td>
+            <td rowspan="2">objet <code>ServerRequestInterface</code> de la <a href="{{ url_psr_7 }}">PSR-7 HTTP message interfaces</a></td>
+            <td>{% verbatim %}<code>{{ app.request.uri.path }}</code>{% endverbatim %}</td>
+            <td>{{ app.request.uri.path }}</td>
         </tr>
         <tr>
             <td>{% verbatim %}<code>{{ app.request.uri }}</code>{% endverbatim %}</td>
             <td>{{ app.request.uri }}</td>
         </tr>
         <tr>
-            <td rowspan="2"><code>app.session</code></td>
-            <td rowspan="2">objet <code>Session</code> de symfony <a href="{{ url_http_foundation }}">HttpFoundation</a></td>
-            <td>{% verbatim %}<code>{{ app.session.set('test', 42) }}</code>{% endverbatim %}</td>
-            <td>{{ app.session.set('test', 42) }}</td>
+            <td rowspan="2"><code>app.router</code></td>
+            <td rowspan="2">objet <code>HttpRouteHandler</code> de <a href="{{ url_routing }}">arnapou/psr</a></td>
+            <td>{% verbatim %}<code>{{ app.router.generateUrl('static_page', { path: 'pages/templating' }) }}</code>{% endverbatim %}</td>
+            <td>{{ app.router.generateUrl('static_page', { path: 'pages/templating' }) }}</td>
         </tr>
         <tr>
-            <td>{% verbatim %}<code>{{ app.session.get('test') }}</code>{% endverbatim %}</td>
-            <td>{{ app.session.get('test') }}</td>
-        </tr>
-        <tr>
-            <td rowspan="2"><code>app.urlgenerator</code></td>
-            <td rowspan="2">objet <code>UrlGenerator</code> de symfony <a href="{{ url_routing }}">Routing</a></td>
-            <td>{% verbatim %}<code>{{ app.urlgenerator.generate('static_page', { path: 'pages/templating' }) }}</code>{% endverbatim %}</td>
-            <td>{{ app.urlgenerator.generate('static_page', { path: 'pages/templating' }) }}</td>
-        </tr>
-        <tr>
-            <td>{% verbatim %}<code>{{ app.urlgenerator.generate('static_dir', { path: 'pages' }) }}</code>{% endverbatim %}</td>
-            <td>{{ app.urlgenerator.generate('static_dir', { path: 'pages' }) }}</td>
+            <td>{% verbatim %}<code>{{ app.router.generateUrl('static_dir', { path: 'pages' }) }}</code>{% endverbatim %}</td>
+            <td>{{ app.router.generateUrl('static_dir', { path: 'pages' }) }}</td>
         </tr>
         <tr>
             <td rowspan="2"><code>app.config</code></td>

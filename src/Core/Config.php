@@ -13,22 +13,29 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\Exception\ConfigNotDefined;
-use Psr\Log\LogLevel;
+use Arnapou\Psr\Psr3Logger\Utils\Psr3Level;
 
 final readonly class Config
 {
     public string $name;
+
+    /** @var non-empty-string */
     public string $path_public;
+
+    /** @var non-empty-string */
+    public string $log_path;
+    public int $log_max_files;
+    public Psr3Level $log_level;
+
     public string $path_cache;
     public string $path_data;
     public string $path_templates;
     public string $path_php;
-    public string $log_path;
-    public int $log_max_files;
-    /** @var LogLevel::* */
-    public string $log_level;
+    public string $base_path_url;
 
+    /**
+     * @throws Problem
+     */
     public function __construct(
         string $name,
         string $path_public,
@@ -39,36 +46,82 @@ final readonly class Config
         string $log_path = '',
         int $log_max_files = 7,
         string $log_level = 'notice',
+        string $base_path_url = '/'
     ) {
         $this->name = $name;
 
-        $path_public = Assert::nonEmptyConfigPath('path_public', Utils::noSlash($path_public));
-        $this->path_public = Assert::pathExists($path_public);
+        $this->path_public = $this->mustExist($path_public ?: throw Problem::emptyVariable('path_public'))
+            ?: throw Problem::emptyVariable('path_public');
+        $this->path_cache = $this->createIfNotExist($path_cache ?: throw Problem::emptyVariable('path_cache'));
 
-        $path_cache = Assert::nonEmptyConfigPath('path_cache', Utils::noSlash($path_cache));
-        $this->path_cache = Assert::pathExistsOrCreate($path_cache);
+        $this->path_data = $this->mustExistIfNotEmpty($path_data);
+        $this->path_templates = $this->mustExistIfNotEmpty($path_templates);
+        $this->path_php = $this->mustExistIfNotEmpty($path_php);
 
-        $this->path_data = Assert::pathExistsIfNotEmpty(Utils::noSlash($path_data));
-        $this->path_templates = Assert::pathExistsIfNotEmpty(Utils::noSlash($path_templates));
-        $this->path_php = Assert::pathExistsIfNotEmpty(Utils::noSlash($path_php));
+        $this->base_path_url = '/' . ltrim($base_path_url, '/');
 
-        $this->log_path = Assert::pathExistsOrCreate(Utils::noSlash($log_path) ?: $path_cache . '/logs');
-        $this->log_max_files = $log_max_files < 0 ? 0 : $log_max_files;
-        $this->log_level = Assert::validLogLevel($log_level);
+        $this->log_path = $this->createIfNotExist($this->noSlash($log_path) ?: "$this->path_cache/logs")
+            ?: throw Problem::emptyVariable('log_path');
+        $this->log_max_files = max($log_max_files, 0);
+        $this->log_level = Psr3Level::tryFrom($log_level) ?? Psr3Level::Notice;
     }
 
     /**
-     * Deprecated call.
-     * This avoids old version v3.x to break.
+     * @throws Problem
      *
-     * @throws ConfigNotDefined
-     *
-     * @return int|string
+     * @return non-empty-string
      */
-    public function __call(string $name, array $arguments)
+    public function pathData(): string
     {
-        return property_exists($this, $name)
-            ? $this->$name
-            : throw new ConfigNotDefined("Unknown config name '$name'");
+        return $this->path_data ?: throw Problem::emptyVariable('path_data');
+    }
+
+    /**
+     * @throws Problem
+     *
+     * @return non-empty-string
+     */
+    public function pathCache(string $folder): string
+    {
+        return Utils::mkdir("$this->path_cache/$folder");
+    }
+
+    /**
+     * @param non-empty-string $path
+     *
+     * @throws Problem
+     */
+    private function createIfNotExist(string $path): string
+    {
+        $path = $this->noSlash($path);
+
+        return is_dir($path) ? $path : Utils::mkdir($path);
+    }
+
+    /**
+     * @param non-empty-string $path
+     *
+     * @throws Problem
+     */
+    public function mustExist(string $path): string
+    {
+        $path = $this->noSlash($path);
+
+        return is_dir($path) ? $path : throw Problem::pathNotExists($path);
+    }
+
+    /**
+     * @throws Problem
+     */
+    public function mustExistIfNotEmpty(string $path): string
+    {
+        $path = $this->noSlash($path);
+
+        return '' === $path ? '' : $this->noSlash($this->mustExist($path));
+    }
+
+    public function noSlash(string $path): string
+    {
+        return trim(rtrim(trim($path), '/\\'));
     }
 }

@@ -11,16 +11,14 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Arnapou\SimpleSite\Core\Controller;
+use Arnapou\SimpleSite\Controller;
 
 return new class() extends Controller {
     public function configure(): void
     {
         $this->addRoute(
             'je_plante',
-            function () {
-                throw new \RuntimeException('Plantage volontaire', 0, new \Exception('previous'));
-            },
+            static fn () => throw new \RuntimeException('Plantage volontaire', 0, new \Exception('previous')),
             'je_plante'
         );
     }

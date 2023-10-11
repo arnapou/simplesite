@@ -13,20 +13,16 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
-require __DIR__ . '/src/common.php';
-
 return new BuildConfig(
-    'bin/simplesite.phar',
-    'src/main.php',
-    dirname(__DIR__),
-    __DIR__ . '/tmp',
-    // included directories
-    [
+    pharOutputFile: 'bin/simplesite.phar',
+    pharBootstrap: 'src/main.php',
+    buildTempDir: __DIR__ . '/tmp',
+    projectRootDir: \dirname(__DIR__),
+    includedDirectories: [
         'src',
         'vendor',
     ],
-    // ignored filenames
-    [
+    ignoredFilenames: [
         '.editorconfig',
         '.gitattributes',
         '.gitignore',
@@ -42,23 +38,28 @@ return new BuildConfig(
         'LICENCE',
         'LICENSE',
         'LICENSE.md',
+        'LICENSE.txt',
         'Makefile',
         'phpstan.neon',
         'phpunit.xml',
+        'psalm.baseline.xml',
         'psalm.xml',
         'README.md',
         'README.rst',
         'UPGRADE.md',
     ],
-    // ignored pathmatch
-    [
+    ignoredPathMatch: [
+        '*/vendor/arnapou/*/icon.png',
+        '*/vendor/arnapou/*/icon.svg',
+        '*/vendor/arnapou/*/demo/*',
+        '*/vendor/arnapou/*/example/*',
+        '*/vendor/arnapou/*/tests/*',
         '*/vendor/composer/InstalledVersions.php',
         '*/vendor/composer/installed.php',
         '*/vendor/composer/installed.json',
+        '*/vendor/psr/*/docs/*.md',
         '*/vendor/Expectation.php',
         '*/bin/yaml-lint',
-        '*/pfdb/demo/*',
-        '*/pfdb/tests/*',
         '*/.git/*',
         '*/.github/*',
     ]

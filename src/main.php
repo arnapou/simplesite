@@ -13,37 +13,14 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite;
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-Core\Php::setErrorReporting();
-set_error_handler(Core\Php::getErrorHandler());
-set_exception_handler(Core\Php::getExceptionHandler());
-register_shutdown_function(Core\Php::getShutdownHandler());
+error_reporting(\E_ALL & ~\E_USER_DEPRECATED);
 
-function run(
-    string $name,
-    string $path_public,
-    string $path_cache,
-    string $path_data = '',
-    string $path_templates = '',
-    string $path_php = '',
-    string $log_path = '',
-    int $log_max_files = 7,
-    string $log_level = 'notice'
-): void {
-    (new Core\Kernel(
-        new Core\Config(
-            $name,
-            $path_public,
-            $path_cache,
-            $path_data,
-            $path_templates,
-            $path_php,
-            $log_path,
-            $log_max_files,
-            $log_level
-        )
-    ))
-        ->handle(\Symfony\Component\HttpFoundation\Request::createFromGlobals())
-        ->send();
-}
+class_alias(SimpleSite::class, \SimpleSite::class);
+class_alias(SimpleSite::class, \Arnapou\SimpleSite::class);
+
+// Fake core scope.
+class_alias(SimpleSite::class, Core\SimpleSite::class);
+class_alias(Controller::class, Core\Controller::class);
+class_alias(PhpCode::class, Core\PhpCode::class);

@@ -11,22 +11,27 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Arnapou\SimpleSite\Core\Event;
-use Arnapou\SimpleSite\Core\Kernel;
-use Arnapou\SimpleSite\Core\PhpCode;
-use Arnapou\SimpleSite\Core\ServiceContainer;
-use Symfony\Component\HttpFoundation\Response;
+use Arnapou\Psr\Psr14EventDispatcher\Event\ServerRequestEvent;
+use Arnapou\Psr\Psr14EventDispatcher\Listener\ServerRequestListenerInterface;
+use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
+use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\PhpCode;
 
 return new class() implements PhpCode {
-    public function init(ServiceContainer $container): void
+    public function init(): void
     {
-        $container->kernel()->eventListener()->addListener(Kernel::onRequest, [$this, 'onRequest']);
+        SimpleSite::router()->addListener($this->getHackListener());
     }
 
-    public function onRequest(Event $event): void
+    private function getHackListener(): ServerRequestListenerInterface
     {
-        if ($event->getRequest()->get('killme')) {
-            $event->setResponse(new Response('<h1>Arrrgghh .... I am killed ...</h1>', 500));
-        }
+        return new class() implements ServerRequestListenerInterface {
+            public function __invoke(ServerRequestEvent $event): void
+            {
+                if ($event->request->getQueryParams()['killme'] ?? false) {
+                    $event->response = new HtmlResponse('<h1>Arrrgghh .... I am killed ...</h1>', 500);
+                }
+            }
+        };
     }
 };

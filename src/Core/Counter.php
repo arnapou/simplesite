@@ -11,41 +11,33 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Arnapou\SimpleSite\Services;
+namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\PFDB\Core\TableInterface;
-use Arnapou\PFDB\Database as PFDB;
+use Arnapou\PFDB\Database;
 use Arnapou\PFDB\Factory\NoPKTableFactory;
 use Arnapou\PFDB\Storage\LockedStorage;
 use Arnapou\PFDB\Storage\PhpFileStorage;
-use Arnapou\SimpleSite\Core\Assert;
-use Arnapou\SimpleSite\Core\ServiceContainer;
-use Arnapou\SimpleSite\Core\ServiceFactory;
+use Arnapou\SimpleSite;
 use Throwable;
 
-final class Counter implements ServiceFactory
+final class Counter
 {
     private const COUNT = 'COUNT';
     private const STATS = 'STATS';
     private const VALUE = 'value';
-    private readonly PFDB $db;
+    private readonly Database $db;
     private readonly int $number;
 
-    private function __construct(private readonly ServiceContainer $container)
+    public function __construct(PhpFileStorage $phpFileStorage)
     {
-        $config = $container->config();
-        $storage = new LockedStorage(
-            new PhpFileStorage(
-                Assert::nonEmptyConfigPath('path_data', $config->path_data),
-                'compteur'
-            )
-        );
-        $this->db = new PFDB($storage, new NoPKTableFactory());
-        $this->number = $this->comptage();
+        $storage = new LockedStorage($phpFileStorage);
+        $this->db = new Database($storage, new NoPKTableFactory());
+        $this->number = $this->process();
         $storage->releaseLocks();
     }
 
-    private function comptage(): int
+    private function process(): int
     {
         $ip = $_SERVER['REMOTE_ADDR'] ?? '';
         $tableToday = $this->db->getTable(date('Y-m-d'));
@@ -54,12 +46,12 @@ final class Counter implements ServiceFactory
         if ($ip && !$tableToday->get("IP.$ip")) {
             $tableToday->upsert([], "IP.$ip");
 
-            $this->incremente($tableTotal, self::COUNT);
+            $this->increment($tableTotal, self::COUNT);
 
             $tableStats = $this->db->getTable(self::STATS);
-            $this->incremente($tableStats, 'DAY.' . date('Y-m-d'));
-            $this->incremente($tableStats, 'YEAR.' . date('Y'));
-            $this->incremente($tableStats, 'MONTH.' . date('Y-m'));
+            $this->increment($tableStats, 'DAY.' . date('Y-m-d'));
+            $this->increment($tableStats, 'YEAR.' . date('Y'));
+            $this->increment($tableStats, 'MONTH.' . date('Y-m'));
 
             $this->cleanupOldDayTables($tableToday);
         }
@@ -80,24 +72,14 @@ final class Counter implements ServiceFactory
                 $this->db->getStorage()->delete(date('Y-m-d', $now - $i * 86400));
             }
         } catch (Throwable $e) {
-            $this->container->logger()->error($e->getMessage());
+            SimpleSite::logger()->error($e->getMessage());
         }
     }
 
-    private function incremente(TableInterface $table, string $key): void
+    private function increment(TableInterface $table, string $key): void
     {
         $value = (int) ($table->get($key)[self::VALUE] ?? 0);
         $table->upsert([self::VALUE => $value + 1], $key);
-    }
-
-    public static function factory(ServiceContainer $container): self
-    {
-        return new self($container);
-    }
-
-    public static function aliases(): array
-    {
-        return ['Compteur'];
     }
 
     public function __toString(): string

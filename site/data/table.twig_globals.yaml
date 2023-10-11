@@ -18,8 +18,8 @@
   id: url_php
   value: 'https://www.php.net/'
 -
-  id: url_http_foundation
-  value: 'https://symfony.com/doc/current/components/http_foundation.html'
+  id: url_psr_7
+  value: 'https://www.php-fig.org/psr/psr-7/'
 -
   id: url_routing
-  value: 'https://symfony.com/doc/current/components/routing.html'
+  value: 'https://packagist.org/packages/arnapou/psr'

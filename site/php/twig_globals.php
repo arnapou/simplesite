@@ -11,17 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Arnapou\SimpleSite\Core\PhpCode;
-use Arnapou\SimpleSite\Core\ServiceContainer;
+use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\PhpCode;
 
 return new class() implements PhpCode {
-    public function init(ServiceContainer $container): void
+    public function init(): void
     {
-        $twig = $container->twigEnvironment();
+        $twigEnvironment = SimpleSite::twigEnvironment();
+        $database = SimpleSite::database();
 
-        $parameters = $container->database()->getTable('twig_globals');
+        $parameters = $database->getTable('twig_globals');
         foreach ($parameters as $key => $data) {
-            $twig->addGlobal($key, $data['value'] ?? '');
+            $twigEnvironment->addGlobal($key, $data['value'] ?? '');
         }
     }
 };

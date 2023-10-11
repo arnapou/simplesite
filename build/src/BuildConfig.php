@@ -13,38 +13,21 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
-use const PATHINFO_EXTENSION;
-
 final readonly class BuildConfig
 {
+    /**
+     * @param array<string> $includedDirectories
+     * @param array<string> $ignoredFilenames
+     * @param array<string> $ignoredPathMatch
+     */
     public function __construct(
-        public string $pharFile,
-        public string $bootstrapFile,
+        public string $pharOutputFile,
+        public string $pharBootstrap,
+        public string $buildTempDir,
         public string $projectRootDir,
-        public string $tempDir,
-        public readonly array $includedDirectories,
-        public readonly array $ignoredFilenames,
-        public readonly array $ignoredPathMatch,
+        public array $includedDirectories,
+        public array $ignoredFilenames,
+        public array $ignoredPathMatch,
     ) {
-    }
-
-    public function bootstrapPath(): string
-    {
-        $filepath = $this->projectRootDir . '/' . ltrim($this->bootstrapFile, '/');
-
-        if (!is_file($filepath)) {
-            bye("⛔ The File $this->bootstrapFile does not exists.");
-        }
-
-        return $filepath;
-    }
-
-    public function pharPath(): string
-    {
-        if ('' === $this->pharFile || 'phar' !== pathinfo($this->pharFile, PATHINFO_EXTENSION)) {
-            bye('⛔ You MUST specify the target phar file inside the project.');
-        }
-
-        return $this->projectRootDir . '/' . ltrim($this->pharFile, '/');
     }
 }

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 include __DIR__ . '/../../bin/simplesite.phar';
 
-\Arnapou\SimpleSite\run(
+SimpleSite::run(
     // mandatory
     name: 'Arnapou simple site',
     path_public: __DIR__,
