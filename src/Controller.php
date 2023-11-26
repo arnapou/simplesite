@@ -17,14 +17,17 @@ use Arnapou\Psr\Psr15HttpHandlers\Routing\Route;
 use Arnapou\Psr\Psr3Logger\Decorator\ContextLogger;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\Psr\Psr7HttpMessage\RedirectResponse;
+use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite;
-use Arnapou\SimpleSite\Core\Utils;
-use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Yaml\Yaml;
-use Throwable;
 
 abstract class Controller implements PhpCode
 {
+    final protected const int PRIORITY_LOWEST = -10;
+    final protected const int PRIORITY_LOW = 0;
+    final protected const int PRIORITY_DEFAULT = 10;
+    final protected const int PRIORITY_HIGH = 20;
+    final protected const int PRIORITY_HIGHEST = 30;
+
     public function init(): void
     {
         $this->configure();
@@ -34,7 +37,7 @@ abstract class Controller implements PhpCode
 
     public function routePriority(): int
     {
-        return 10;
+        return self::PRIORITY_DEFAULT;
     }
 
     protected function addRoute(string $path, callable $controller, string $name = null): Route
@@ -42,29 +45,11 @@ abstract class Controller implements PhpCode
         return SimpleSite::router()->addRoute($path, $controller, $name, $this->routePriority());
     }
 
-    protected function render(string $view, array $context = []): ResponseInterface
+    protected function render(string $view, array $context = []): Response
     {
-        $context = array_merge($context, $this->yamlContext($view));
+        $context = SimpleSite::yamlContext()->getContext($view, $context);
 
         return new HtmlResponse(SimpleSite::twigEnvironment()->render($view, $context));
-    }
-
-    protected function yamlContext(string $view): array
-    {
-        $yamlFile = substr($view, 0, -\strlen(Utils::extension($view))) . 'yaml';
-        try {
-            if (SimpleSite::twigLoader()->exists($yamlFile)) {
-                $yaml = SimpleSite::twigLoader()->getSourceContext($yamlFile)->getCode();
-                $parsed = Yaml::parse($yaml);
-
-                return \is_array($parsed) ? $parsed : [];
-            }
-        } catch (Throwable $exception) {
-            $context = ['yaml' => $yamlFile, 'throwable' => $exception];
-            SimpleSite::logger()->error('Yaml parsing failed', $context);
-        }
-
-        return [];
     }
 
     protected function redirect(string $url, int $status = 302): RedirectResponse

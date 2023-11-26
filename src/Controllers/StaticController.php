@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
+use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite;
 use Arnapou\SimpleSite\Controller;
 use Arnapou\SimpleSite\Core\Utils;
-use Psr\Http\Message\ResponseInterface;
 
-class StaticController extends Controller
+final class StaticController extends Controller
 {
     /** @var list<string> */
     protected array $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php'];
@@ -31,7 +31,7 @@ class StaticController extends Controller
         $this->addRoute('{path}', $this->routeStaticPage(...), 'static_page')->setRequirement('path', '.+');
     }
 
-    public function routeStaticDir(string $path = ''): ResponseInterface
+    public function routeStaticDir(string $path = ''): Response
     {
         $pathPublic = SimpleSite::config()->path_public;
 
@@ -45,7 +45,7 @@ class StaticController extends Controller
         throw new NoResponseFound();
     }
 
-    public function routeStaticPage(string $path = ''): ResponseInterface
+    public function routeStaticPage(string $path = ''): Response
     {
         $pathPublic = SimpleSite::config()->path_public;
         $basePath = SimpleSite::config()->base_path_url;
@@ -69,7 +69,7 @@ class StaticController extends Controller
         throw new NoResponseFound();
     }
 
-    protected function render(string $view, array $context = []): ResponseInterface
+    protected function render(string $view, array $context = []): Response
     {
         if (str_ends_with($view, '.php')) {
             throw new NoResponseFound();
@@ -80,6 +80,6 @@ class StaticController extends Controller
 
     public function routePriority(): int
     {
-        return 0;
+        return self::PRIORITY_LOWEST;
     }
 }

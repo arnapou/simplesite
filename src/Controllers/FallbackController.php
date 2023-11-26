@@ -16,14 +16,13 @@ namespace Arnapou\SimpleSite\Controllers;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Controller;
 use Arnapou\SimpleSite\Core\Utils;
-use Nyholm\Psr7\Stream;
 
-class FallbackController extends Controller
+final class FallbackController extends Controller
 {
     public function configure(): void
     {
-        $this->addRoute('favicon.ico', [$this, 'routeFavicon'], 'favicon');
-        $this->addRoute('robots.txt', [$this, 'routeRobotsTxt'], 'robots_txt');
+        $this->addRoute('favicon.ico', $this->routeFavicon(...), 'favicon');
+        $this->addRoute('robots.txt', $this->routeRobotsTxt(...), 'robots_txt');
     }
 
     public function routeFavicon(): Response
@@ -40,7 +39,7 @@ class FallbackController extends Controller
         return Utils::cachedResponse($etag, 86400, $startDayTimestamp)
             ->withHeader('Content-Type', 'image/vnd.microsoft.icon')
             ->withHeader('Content-Length', (string) \strlen($binary))
-            ->withBody(Stream::create($binary));
+            ->withBody($binary);
     }
 
     public function routeRobotsTxt(): Response
@@ -48,11 +47,11 @@ class FallbackController extends Controller
         return (new Response())
             ->withStatus(200)
             ->withHeader('Content-Type', 'text/plain')
-            ->withBody(Stream::create("User-agent: *\nDisallow:\n"));
+            ->withBody("User-agent: *\nDisallow:\n");
     }
 
     public function routePriority(): int
     {
-        return 100;
+        return self::PRIORITY_HIGH;
     }
 }

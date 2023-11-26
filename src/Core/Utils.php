@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\Psr\Psr7HttpMessage\Header\CacheControl;
-use Arnapou\Psr\Psr7HttpMessage\Header\Date;
+use Arnapou\Psr\Psr7HttpMessage\Header\LastModified;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 
 final class Utils
@@ -366,7 +366,7 @@ final class Utils
         return (new Response())
             ->withStatus(200)
             ->withHeader('ETag', $etag)
-            ->withHeader(CacheControl::sharedMaxAge($maxAge))
-            ->withHeader(Date::lastModified($lastModified));
+            ->withHeader((new CacheControl())->setSharedMaxAge($maxAge))
+            ->withHeader(new LastModified($lastModified));
     }
 }

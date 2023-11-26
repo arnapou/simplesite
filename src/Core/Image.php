@@ -17,7 +17,6 @@ use Arnapou\Psr\Psr7HttpMessage\Response;
 use GdImage;
 use Imagick;
 use ImagickException;
-use Nyholm\Psr7\Stream;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -146,6 +145,6 @@ final class Image
 
         return Utils::cachedResponse($etag, 864000, $filemtime)
             ->withHeader('Content-Type', self::MIME_TYPES[$ext])
-            ->withBody(Stream::create($content));
+            ->withBody($content);
     }
 }

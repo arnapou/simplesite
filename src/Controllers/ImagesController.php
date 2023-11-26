@@ -18,11 +18,11 @@ use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite;
 use Arnapou\SimpleSite\Controller;
 
-class ImagesController extends Controller
+final class ImagesController extends Controller
 {
     public function configure(): void
     {
-        $this->addRoute('{path}.{size}.{ext}', [$this, 'routeImage'], 'images')
+        $this->addRoute('{path}.{size}.{ext}', $this->routeImage(...), 'images')
             ->setRequirement('path', '.*')
             ->setRequirement('size', '[0-9]{1,4}')
             ->setRequirement('ext', '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]');
@@ -49,6 +49,6 @@ class ImagesController extends Controller
 
     public function routePriority(): int
     {
-        return 100;
+        return self::PRIORITY_HIGH;
     }
 }

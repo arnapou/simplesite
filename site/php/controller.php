@@ -11,8 +11,8 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Controller;
-use Psr\Http\Message\ResponseInterface;
 
 return new class() extends Controller {
     public function configure(): void
@@ -21,7 +21,7 @@ return new class() extends Controller {
             ->setRequirement('name', '[a-zA-Z]+');
     }
 
-    public function hello(string $name): ResponseInterface
+    public function hello(string $name): Response
     {
         $this->logger()->debug("Hello $name");
         $this->logger()->info("Hello $name");

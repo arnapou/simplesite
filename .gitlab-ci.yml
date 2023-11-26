@@ -4,7 +4,7 @@ stages:
   - release
 
 .common-job: &common-job
-  image: &php-image 'registry.gitlab.com/arnapou/docker/php:8.2-dev'
+  image: &php-image 'registry.gitlab.com/arnapou/docker/php:8.3-dev'
   only: [ main, tags ]
   before_script: [ make install ]
   cache:

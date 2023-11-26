@@ -43,6 +43,7 @@ use Arnapou\SimpleSite\Core\LogContextFormatter;
 use Arnapou\SimpleSite\Core\Problem;
 use Arnapou\SimpleSite\Core\TwigExtension;
 use Arnapou\SimpleSite\Core\Utils;
+use Arnapou\SimpleSite\Core\YamlContext;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Twig\Environment;
@@ -64,6 +65,7 @@ require __DIR__ . '/../vendor/autoload.php';
  * @method static Environment            twigEnvironment()
  * @method static TwigExtension          twigExtension()
  * @method static LoaderInterface        twigLoader()
+ * @method static YamlContext            yamlContext()
  */
 final class SimpleSite extends StaticServices
 {
@@ -124,6 +126,7 @@ final class SimpleSite extends StaticServices
     public function getFactories(): iterable
     {
         yield 'phpHandlers' => static fn () => new PhpHandlers(self::logger());
+        yield 'yamlContext' => static fn () => new YamlContext();
 
         yield 'request' => static fn () => (new HttpFactory())->createServerRequestFromGlobals();
         yield 'router' => static fn () => new HttpRouteHandler(new ClassEventDispatcher(logger: self::logger()));

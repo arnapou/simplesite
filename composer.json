@@ -12,18 +12,18 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "5.x-dev"
+            "dev-main": "6.x-dev"
         }
     },
     "require": {
-        "php": "~8.2.0",
-        "arnapou/pfdb": "^5.2",
-        "arnapou/psr": "^1.3",
+        "php": "~8.3.0",
+        "arnapou/pfdb": "^6.0",
+        "arnapou/psr": "^2.0",
         "symfony/yaml": "^5.4",
         "twig/twig": "^3.7"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.30",
+        "friendsofphp/php-cs-fixer": "^3.40",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.4",
         "phpunit/php-code-coverage": "^10.1",
