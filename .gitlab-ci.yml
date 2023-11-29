@@ -2,6 +2,7 @@ stages:
   - quality
   - artifact
   - release
+  - build
 
 .common-job: &common-job
   image: &php-image 'registry.gitlab.com/arnapou/docker/php:8.3-dev'
@@ -65,3 +66,17 @@ release:
       links:
         - name: 'simplesite.phar'
           url: 'https://gitlab.com/arnapou/simplesite/-/jobs/${ARTIFACT_JOB_ID}/artifacts/file/bin/simplesite.phar'
+
+build:
+  image: docker:24
+  stage: build
+  only:
+    - main
+  services:
+    - docker:24-dind
+  variables:
+    IMAGE_TAG: latest
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG .
+    - docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG

@@ -1,0 +1,17 @@
+.dockerignore
+.git
+.gitignore
+.gitlab-ci.yml
+.idea
+.php-cs-fixer.*
+.php_cs.cache
+.phpunit*.cache
+compose.override.*yaml
+compose.yaml
+doc
+Dockerfile
+Makefile
+phpstan.neon
+phpunit.xml
+tests
+files

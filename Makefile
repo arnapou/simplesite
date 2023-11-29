@@ -32,7 +32,10 @@ install: ## composer install
 update: ## composer update
 	composer update --no-interaction --no-progress --optimize-autoloader
 
-build: install-no-dev ## build phar
+build-docker: ## build docker image
+	docker build -t registry.gitlab.com/arnapou/simplesite:latest .
+
+build-phar: install-no-dev ## build phar
 	php -d "phar.readonly=Off" ./build/build.php ${PHAR_FILENAME}
 	@ls -lah --color ${PHAR_FILENAME}
 	@head -n1 ${PHAR_FILENAME}

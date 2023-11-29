@@ -4,6 +4,7 @@
 .phpunit*.cache
 tests/coverage
 vendor
+compose.override.yaml
 
 build/tmp
 site/cache
