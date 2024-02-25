@@ -11,16 +11,17 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Arnapou\Psr\Psr14EventDispatcher\Event\ServerRequestEvent;
-use Arnapou\Psr\Psr14EventDispatcher\Listener\ServerRequestListenerInterface;
+use Arnapou\Psr\Psr15HttpHandlers\Routing\Event\ServerRequestEvent;
+use Arnapou\Psr\Psr15HttpHandlers\Routing\Listener\ServerRequestListenerInterface;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\SimpleSite;
 use Arnapou\SimpleSite\PhpCode;
+use Arnapou\SimpleSite\Controller;
 
 return new class() implements PhpCode {
     public function init(): void
     {
-        SimpleSite::router()->addListener($this->getHackListener());
+        SimpleSite::router()->addListener($this->getHackListener(), Controller::PRIORITY_HIGHEST);
     }
 
     private function getHackListener(): ServerRequestListenerInterface
@@ -30,6 +31,7 @@ return new class() implements PhpCode {
             {
                 if ($event->request->getQueryParams()['killme'] ?? false) {
                     $event->response = new HtmlResponse('<h1>Arrrgghh .... I am killed ...</h1>', 500);
+                    $event->stoppedPropagation = true;
                 }
             }
         };

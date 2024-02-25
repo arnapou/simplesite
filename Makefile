@@ -27,10 +27,10 @@ install-no-dev: ## composer install (--no-dev)
 	composer install --no-interaction --no-progress --optimize-autoloader --quiet --no-dev
 
 install: ## composer install
-	composer install --no-interaction --no-progress --optimize-autoloader --quiet
+	composer install --no-interaction --no-progress --optimize-autoloader --prefer-dist --quiet
 
 update: ## composer update
-	composer update --no-interaction --no-progress --optimize-autoloader
+	composer update --no-interaction --no-progress --optimize-autoloader --prefer-dist
 
 build-docker: ## build docker image
 	docker build -t registry.gitlab.com/arnapou/simplesite:latest .

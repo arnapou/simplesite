@@ -22,11 +22,11 @@ use Arnapou\SimpleSite;
 
 abstract class Controller implements PhpCode
 {
-    final protected const int PRIORITY_LOWEST = -10;
-    final protected const int PRIORITY_LOW = 0;
-    final protected const int PRIORITY_DEFAULT = 10;
-    final protected const int PRIORITY_HIGH = 20;
-    final protected const int PRIORITY_HIGHEST = 30;
+    final public const int PRIORITY_LOWEST = -10;
+    final public const int PRIORITY_LOW = 0;
+    final public const int PRIORITY_DEFAULT = 10;
+    final public const int PRIORITY_HIGH = 20;
+    final public const int PRIORITY_HIGHEST = 30;
 
     public function init(): void
     {
@@ -40,7 +40,7 @@ abstract class Controller implements PhpCode
         return self::PRIORITY_DEFAULT;
     }
 
-    protected function addRoute(string $path, callable $controller, string $name = null): Route
+    protected function addRoute(string $path, callable $controller, ?string $name = null): Route
     {
         return SimpleSite::router()->addRoute($path, $controller, $name, $this->routePriority());
     }
