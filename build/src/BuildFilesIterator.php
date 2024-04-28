@@ -39,7 +39,7 @@ final class BuildFilesIterator extends IteratorIterator
     {
         $paths = array_map(
             fn ($dir) => $this->config->projectRootDir . "/$dir",
-            $this->config->includedDirectories
+            $this->config->includedDirectories,
         );
 
         $iterator = new AppendIterator();
@@ -50,10 +50,10 @@ final class BuildFilesIterator extends IteratorIterator
                         $path,
                         FilesystemIterator::KEY_AS_PATHNAME
                         | FilesystemIterator::SKIP_DOTS
-                        | FilesystemIterator::CURRENT_AS_FILEINFO
+                        | FilesystemIterator::CURRENT_AS_FILEINFO,
                     ),
-                    RecursiveIteratorIterator::LEAVES_ONLY
-                )
+                    RecursiveIteratorIterator::LEAVES_ONLY,
+                ),
             );
         }
 

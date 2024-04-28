@@ -15,5 +15,10 @@ namespace Arnapou\SimpleSite\Core;
 
 interface YamlContextLoader
 {
+    /**
+     * @param array<mixed> $context
+     *
+     * @return array<mixed>
+     */
     public function __invoke(string $view, array $context): array;
 }

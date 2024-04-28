@@ -13,19 +13,20 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
+use Arnapou\Ensure\Enforce;
 use Arnapou\PFDB\Core\TableInterface;
 use Arnapou\PFDB\Database;
 use Arnapou\PFDB\Factory\NoPKTableFactory;
 use Arnapou\PFDB\Storage\LockedStorage;
 use Arnapou\PFDB\Storage\PhpFileStorage;
-use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\SimpleSite;
 use Throwable;
 
 final class Counter
 {
-    private const COUNT = 'COUNT';
-    private const STATS = 'STATS';
-    private const VALUE = 'value';
+    private const string COUNT = 'COUNT';
+    private const string STATS = 'STATS';
+    private const string VALUE = 'value';
     private readonly Database $db;
     private readonly int $number;
 
@@ -39,11 +40,11 @@ final class Counter
 
     private function process(): int
     {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $ip = Enforce::string($_SERVER['REMOTE_ADDR'] ?? '');
         $tableToday = $this->db->getTable(date('Y-m-d'));
         $tableTotal = $this->db->getTable(self::COUNT);
 
-        if ($ip && !$tableToday->get("IP.$ip")) {
+        if ('' !== $ip && [] === (array) $tableToday->get("IP.$ip")) {
             $tableToday->upsert([], "IP.$ip");
 
             $this->increment($tableTotal, self::COUNT);
@@ -56,13 +57,13 @@ final class Counter
             $this->cleanupOldDayTables($tableToday);
         }
 
-        return $tableTotal->get(self::COUNT)[self::VALUE] ?? 1;
+        return Enforce::int($tableTotal->get(self::COUNT)[self::VALUE] ?? 1);
     }
 
     private function cleanupOldDayTables(TableInterface $tableToday): void
     {
         try {
-            if ($tableToday->get('CLEANUP_DONE')) {
+            if ([] !== (array) $tableToday->get('CLEANUP_DONE')) {
                 return;
             }
             $tableToday->upsert(['time' => time()], 'CLEANUP_DONE');
@@ -78,7 +79,7 @@ final class Counter
 
     private function increment(TableInterface $table, string $key): void
     {
-        $value = (int) ($table->get($key)[self::VALUE] ?? 0);
+        $value = Enforce::int($table->get($key)[self::VALUE] ?? 0);
         $table->upsert([self::VALUE => $value + 1], $key);
     }
 

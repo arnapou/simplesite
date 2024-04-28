@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
+use Arnapou\Ensure\Ensure;
+use Arnapou\Ensure\Expected;
 use Arnapou\Psr\Psr3Logger\Utils\Psr3Level;
 
 final readonly class Config
@@ -46,24 +48,32 @@ final readonly class Config
         string $log_path = '',
         int $log_max_files = 7,
         string $log_level = 'notice',
-        string $base_path_url = '/'
+        string $base_path_url = '/',
     ) {
         $this->name = $name;
+        try {
+            $this->path_public = Ensure::nonEmptyString(
+                $this->mustExist(Ensure::nonEmptyString($path_public, 'path_public')),
+                'path_public',
+            );
+            $this->path_cache = $this->createIfNotExist(Ensure::nonEmptyString($path_cache, 'path_cache'));
 
-        $this->path_public = $this->mustExist($path_public ?: throw Problem::emptyVariable('path_public'))
-            ?: throw Problem::emptyVariable('path_public');
-        $this->path_cache = $this->createIfNotExist($path_cache ?: throw Problem::emptyVariable('path_cache'));
+            $this->path_data = $this->mustExistIfNotEmpty($path_data);
+            $this->path_templates = $this->mustExistIfNotEmpty($path_templates);
+            $this->path_php = $this->mustExistIfNotEmpty($path_php);
 
-        $this->path_data = $this->mustExistIfNotEmpty($path_data);
-        $this->path_templates = $this->mustExistIfNotEmpty($path_templates);
-        $this->path_php = $this->mustExistIfNotEmpty($path_php);
+            $this->base_path_url = '/' . ltrim($base_path_url, '/');
 
-        $this->base_path_url = '/' . ltrim($base_path_url, '/');
-
-        $this->log_path = $this->createIfNotExist($this->noSlash($log_path) ?: "$this->path_cache/logs")
-            ?: throw Problem::emptyVariable('log_path');
-        $this->log_max_files = max($log_max_files, 0);
-        $this->log_level = Psr3Level::tryFrom($log_level) ?? Psr3Level::Notice;
+            $log_path = $this->noSlash($log_path);
+            $this->log_path = Ensure::nonEmptyString(
+                $this->createIfNotExist('' !== $log_path ? $log_path : "$this->path_cache/logs"),
+                'log_path',
+            );
+            $this->log_max_files = max($log_max_files, 0);
+            $this->log_level = Psr3Level::tryFrom($log_level) ?? Psr3Level::Notice;
+        } catch (Expected $exception) {
+            throw Problem::emptyVariable($exception->getPropertyName());
+        }
     }
 
     /**
@@ -73,7 +83,11 @@ final readonly class Config
      */
     public function pathData(): string
     {
-        return $this->path_data ?: throw Problem::emptyVariable('path_data');
+        if ('' === $this->path_data) {
+            throw Problem::emptyVariable('path_data');
+        }
+
+        return $this->path_data;
     }
 
     /**
@@ -103,7 +117,7 @@ final readonly class Config
      *
      * @throws Problem
      */
-    public function mustExist(string $path): string
+    private function mustExist(string $path): string
     {
         $path = $this->noSlash($path);
 
@@ -113,14 +127,14 @@ final readonly class Config
     /**
      * @throws Problem
      */
-    public function mustExistIfNotEmpty(string $path): string
+    private function mustExistIfNotEmpty(string $path): string
     {
         $path = $this->noSlash($path);
 
         return '' === $path ? '' : $this->noSlash($this->mustExist($path));
     }
 
-    public function noSlash(string $path): string
+    private function noSlash(string $path): string
     {
         return trim(rtrim(trim($path), '/\\'));
     }

@@ -14,7 +14,7 @@ declare(strict_types=1);
 use Arnapou\Psr\Psr15HttpHandlers\Routing\Event\ServerRequestEvent;
 use Arnapou\Psr\Psr15HttpHandlers\Routing\Listener\ServerRequestListenerInterface;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
-use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\SimpleSite;
 use Arnapou\SimpleSite\PhpCode;
 use Arnapou\SimpleSite\Controller;
 

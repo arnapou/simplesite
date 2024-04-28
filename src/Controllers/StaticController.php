@@ -15,9 +15,9 @@ namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr7HttpMessage\Response;
-use Arnapou\SimpleSite;
 use Arnapou\SimpleSite\Controller;
 use Arnapou\SimpleSite\Core\Utils;
+use Arnapou\SimpleSite\SimpleSite;
 
 final class StaticController extends Controller
 {
@@ -50,9 +50,9 @@ final class StaticController extends Controller
         $pathPublic = SimpleSite::config()->path_public;
         $basePath = SimpleSite::config()->base_path_url;
 
-        $extension = Utils::extension($path);
-        if (\in_array($extension, $this->extensions, true)) {
-            return $this->redirect($basePath . substr($path, 0, -\strlen($extension) - 1));
+        $pathExtension = Utils::extension($path);
+        if (\in_array($pathExtension, $this->extensions, true)) {
+            return $this->redirect($basePath . substr($path, 0, -\strlen($pathExtension) - 1));
         }
 
         $realpath = "$pathPublic/$path";

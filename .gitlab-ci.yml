@@ -4,34 +4,37 @@ stages:
   - release
   - build
 
-.common-job: &common-job
+code-style: &quality
   image: &php-image 'registry.gitlab.com/arnapou/docker/php:8.3-dev'
-  only: [ main, tags ]
-  before_script: [ make install ]
+  stage: quality
+  only:
+    - main
+  before_script:
+    - make install
+  script:
+    - make cs
   cache:
     key: "$CI_COMMIT_REF_SLUG:$CI_JOB_NAME"
-    paths: [ vendor ]
-
-code-style:
-  <<: *common-job
-  stage: quality
-  script: [ make cs ]
+    paths:
+      - vendor
 
 static-analysis:
-  <<: *common-job
-  stage: quality
-  script: [ make sa ]
+  <<: *quality
+  script:
+    - make sa
 
-#test:
-#  <<: *common-job
-#  stage: quality
-#  script: [ sudo -Eu www-data make test ]
-#
-#coverage:
-#  <<: *common-job
-#  stage: quality
-#  script: [ sudo -Eu www-data make coverage ]
-#  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+test:
+  <<: *quality
+  script:
+    - sudo -Eu www-data make test
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+  artifacts:
+    when: always
+    reports:
+      junit: phpunit-report.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: phpunit-coverage.xml
 
 simplesite.phar:
   image: *php-image

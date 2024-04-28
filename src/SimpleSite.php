@@ -86,19 +86,27 @@ final class SimpleSite extends StaticServices
     ): void {
         $config = new Config($name, $path_public, $path_cache, $path_data, $path_templates, $path_php, $log_path, $log_max_files, $log_level, $base_path_url);
 
+        self::handle($config)->send();
+    }
+
+    public static function handle(Config $config, ?ServerRequestInterface $request = null): Response
+    {
         self::container()->registerInstance('config', $config);
         self::phpHandlers()->registerAll();
         self::phpHandlers()->eventDispatcher->listen(self::throwableHandler(...));
 
         try {
             self::loadPhpFiles();
-            (new Response(self::router()->handle(self::request())))->send();
+
+            return new Response(self::router()->handle($request ?? self::request()));
         } catch (NoResponseFound $e) {
             self::logger()->warning('404 Not Found');
-            self::error(404, $e)->send();
+
+            return self::error(404, $e);
         } catch (Throwable $e) {
             self::logger()->error('500 Internal Error', ['exception' => $e]);
-            self::error(500, $e)->send();
+
+            return self::error(500, $e);
         }
     }
 
@@ -112,7 +120,7 @@ final class SimpleSite extends StaticServices
             }
         };
 
-        if ($pathPhp = self::config()->path_php) {
+        if ('' !== ($pathPhp = self::config()->path_php)) {
             foreach (Utils::findPhpFiles($pathPhp) as $file) {
                 $loadPhpFile($file);
             }
@@ -133,8 +141,8 @@ final class SimpleSite extends StaticServices
         yield 'counter' => static fn () => new Counter(
             new PhpFileStorage(
                 self::config()->pathData(),
-                'compteur'
-            )
+                'compteur',
+            ),
         );
 
         yield 'img' => static fn () => self::image();
@@ -146,9 +154,9 @@ final class SimpleSite extends StaticServices
                     86400 * 30,
                 ),
                 1,
-                1000
+                1000,
             ),
-            self::config()->path_public
+            self::config()->path_public,
         );
 
         yield 'db' => static fn () => self::database();
@@ -157,8 +165,8 @@ final class SimpleSite extends StaticServices
                 return new Database(
                     new CachedFileStorage(
                         new YamlFileStorage(self::config()->pathData()),
-                        self::config()->pathCache('database')
-                    )
+                        self::config()->pathCache('database'),
+                    ),
                 );
             } catch (DirectoryNotFoundException|InvalidTableNameException $e) {
                 throw new Problem($e->getMessage(), 0, $e);
@@ -173,8 +181,8 @@ final class SimpleSite extends StaticServices
                     Rotation::EveryDay,
                     self::config()->log_max_files,
                     0o777,
-                    logFormatter: new DefaultLogFormatter('Y-m-d H:i:s', new LogContextFormatter())
-                )
+                    logFormatter: new DefaultLogFormatter('Y-m-d H:i:s', new LogContextFormatter()),
+                ),
             );
             try {
                 $context->addContext(['url' => (string) self::request()->getUri()]);
@@ -201,7 +209,7 @@ final class SimpleSite extends StaticServices
                     'cache' => self::config()->pathCache('twig'),
                     'auto_reload' => true,
                     'optimizations' => -1,
-                ]
+                ],
             );
             $environment->addExtension(new DebugExtension());
             $environment->addExtension(self::twigExtension());
@@ -226,7 +234,7 @@ final class SimpleSite extends StaticServices
             ];
 
             foreach ($namespaces as $namespace => $path) {
-                if ($path) {
+                if ('' !== $path) {
                     $loader->addPath($path, $namespace);
                 }
             }
@@ -243,7 +251,7 @@ final class SimpleSite extends StaticServices
             $text .= 'message: ' . $throwable->getMessage() . "\n";
             $text .= '   file: ' . $throwable->getFile() . "\n";
             $text .= '   line: ' . $throwable->getLine() . "\n";
-            if ($throwable->getCode()) {
+            if (0 !== $throwable->getCode()) {
                 $text .= '   code: ' . $throwable->getCode() . "\n";
             }
             $text .= '  trace: ' . ltrim(
@@ -251,11 +259,11 @@ final class SimpleSite extends StaticServices
                     "\n",
                     array_map(
                         static fn (string $line): string => '         ' . trim($line),
-                        explode("\n", trim($throwable->getTraceAsString()))
-                    )
-                )
+                        explode("\n", trim($throwable->getTraceAsString())),
+                    ),
+                ),
             ) . "\n";
-            if ($throwable = $throwable->getPrevious()) {
+            if (null !== ($throwable = $throwable->getPrevious())) {
                 $text .= "\n";
             }
         }

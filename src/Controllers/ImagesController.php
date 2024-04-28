@@ -15,8 +15,8 @@ namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr7HttpMessage\Response;
-use Arnapou\SimpleSite;
 use Arnapou\SimpleSite\Controller;
+use Arnapou\SimpleSite\SimpleSite;
 
 final class ImagesController extends Controller
 {

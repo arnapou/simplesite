@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(\E_ALL & ~\E_USER_DEPRECATED);
@@ -24,3 +25,4 @@ class_alias(SimpleSite::class, \Arnapou\SimpleSite::class);
 class_alias(SimpleSite::class, Core\SimpleSite::class);
 class_alias(Controller::class, Core\Controller::class);
 class_alias(PhpCode::class, Core\PhpCode::class);
+// @codeCoverageIgnoreEnd

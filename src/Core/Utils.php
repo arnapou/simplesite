@@ -19,11 +19,11 @@ use Arnapou\Psr\Psr7HttpMessage\Response;
 
 final class Utils
 {
-    private const EMOJIS_PASS1 = [
+    private const array EMOJIS_PASS1 = [
         '>:)' => '&#x1F620;', // mad
         '<:|' => '&#x1F633;', // flushed
     ];
-    private const EMOJIS_PASS2 = [
+    private const array EMOJIS_PASS2 = [
         ':D' => '&#x1F604;', // 😄 biggrin
         ':d' => '&#x1F604;', // 😄 biggrin
         ':)' => '&#x1F60A;', // 😊 smile
@@ -57,7 +57,7 @@ final class Utils
         '^)' => '&#x1F608;', // 😈 twisted
         ':fear:' => '&#x1F631;', // 😱 fear
     ];
-    private const UTF8_REMOVE_ACCENTS = [
+    private const array UTF8_REMOVE_ACCENTS = [
         'à' => 'a',
         'ô' => 'o',
         'ď' => 'd',
@@ -267,12 +267,15 @@ final class Utils
         'ƥ' => 'p',
     ];
 
+    /**
+     * @return array<string>
+     */
     public static function findPhpFiles(string $path): array
     {
         // mandatory to use opendir family functions inside a Phar
         $files = [];
-        if ($dh = opendir($path)) {
-            while ($file = readdir($dh)) {
+        if (\is_resource($dh = opendir($path))) {
+            while ('' !== ($file = (string) readdir($dh))) {
                 if (str_ends_with($file, '.php')) {
                     $files[] = $path . '/' . $file;
                 }

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\SimpleSite;
 use Arnapou\SimpleSite\PhpCode;
 
 return new class() implements PhpCode {

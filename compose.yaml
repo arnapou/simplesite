@@ -1,9 +1,6 @@
-version: "3"
-
 services:
 
   app:
-    container_name: simplesite
     image: registry.gitlab.com/arnapou/simplesite:latest
     ports:
       - '8080:80'

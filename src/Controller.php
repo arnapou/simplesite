@@ -18,7 +18,6 @@ use Arnapou\Psr\Psr3Logger\Decorator\ContextLogger;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\Psr\Psr7HttpMessage\RedirectResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
-use Arnapou\SimpleSite;
 
 abstract class Controller implements PhpCode
 {
@@ -45,6 +44,9 @@ abstract class Controller implements PhpCode
         return SimpleSite::router()->addRoute($path, $controller, $name, $this->routePriority());
     }
 
+    /**
+     * @param array<mixed> $context
+     */
     protected function render(string $view, array $context = []): Response
     {
         $context = SimpleSite::yamlContext()->getContext($view, $context);
@@ -59,6 +61,9 @@ abstract class Controller implements PhpCode
         return new RedirectResponse($url, $status);
     }
 
+    /**
+     * @param array<string, string|int|float> $parameters
+     */
     protected function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
         return new RedirectResponse(SimpleSite::router()->generateUrl($route, $parameters), $status);

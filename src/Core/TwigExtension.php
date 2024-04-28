@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\SimpleSite;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
@@ -62,6 +62,11 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
         ];
     }
 
+    /**
+     * @param array<mixed> $array
+     *
+     * @return array<mixed>
+     */
     public function chunk(array $array, int $size): array
     {
         return array_chunk($array, max($size, 1));
@@ -96,6 +101,9 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $this->path('static_dir', ['path' => $path]);
     }
 
+    /**
+     * @param array<string,string|int|float> $parameters
+     */
     public function path(string $name, array $parameters = []): string
     {
         $url = SimpleSite::config()->base_path_url . ltrim(SimpleSite::router()->generateUrl($name, $parameters), '/');

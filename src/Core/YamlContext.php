@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite;
+use Arnapou\SimpleSite\SimpleSite;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
 
@@ -29,6 +29,11 @@ final class YamlContext
         return $this;
     }
 
+    /**
+     * @param array<mixed> $context
+     *
+     * @return array<mixed>
+     */
     public function getContext(string $view, array $context): array
     {
         $context = array_merge($context, $this->default($view));
@@ -40,6 +45,9 @@ final class YamlContext
         return $context;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function default(string $view): array
     {
         $yamlFile = substr($view, 0, -\strlen(Utils::extension($view))) . 'yaml';

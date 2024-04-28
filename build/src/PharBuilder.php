@@ -19,7 +19,7 @@ use Throwable;
 
 final class PharBuilder
 {
-    private const COMPRESSION = Phar::GZ;
+    private const int COMPRESSION = Phar::GZ;
 
     public function __construct(private readonly BuildConfig $config)
     {
@@ -76,8 +76,11 @@ __HALT_COMPILER(); ?>";
 
     private function unlinkPreviousBuilds(string $pharfile): void
     {
-        foreach (glob("$pharfile*") ?: [] as $filename) {
-            @unlink($filename);
+        $files = glob("$pharfile*");
+        if (\is_array($files)) {
+            foreach ($files as $filename) {
+                @unlink($filename);
+            }
         }
     }
 

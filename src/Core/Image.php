@@ -23,7 +23,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 final class Image
 {
-    public const MIME_TYPES = [
+    public const array MIME_TYPES = [
         'jpg' => 'image/jpeg',
         'png' => 'image/png',
         'gif' => 'image/gif',
@@ -105,7 +105,10 @@ final class Image
 
             [$w1, $h1] = [imagesx($img), imagesy($img)];
             [$w2, $h2] = $this->newSize($w1, $h1, $size);
-            $dst = imagecreate($w2, $h2) ?: throw Problem::imageError();
+            $dst = imagecreate($w2, $h2);
+            if (false === $dst) {
+                throw Problem::imageError();
+            }
             imagecopyresampled($dst, $img, 0, 0, 0, 0, $w2, $h2, $w1, $h1);
 
             return $dst;
