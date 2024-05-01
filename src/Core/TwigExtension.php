@@ -21,7 +21,7 @@ use Twig\TwigFunction;
 
 final class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private readonly LazyGetterContainer $container)
+    public function __construct(private readonly ContainerWithMagicGetters $container)
     {
     }
 

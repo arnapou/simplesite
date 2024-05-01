@@ -18,8 +18,10 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Allows to expose a PSR-11 Container with magic getters for Twig.
+ *
+ * `$container->NAME` is equivalent to `$container->get('NAME')`.
  */
-final readonly class LazyGetterContainer implements ContainerInterface
+final readonly class ContainerWithMagicGetters implements ContainerInterface
 {
     public function __construct(private ServiceLocator $services)
     {
