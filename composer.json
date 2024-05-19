@@ -13,7 +13,7 @@
     "require": {
         "php": "~8.3.0",
         "arnapou/pfdb": "^6.3",
-        "arnapou/psr": "^2.7",
+        "arnapou/psr": "^3.0",
         "symfony/yaml": "^6.4",
         "twig/twig": "^3.9"
     },

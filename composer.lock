@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce1e380dfa9809a33cb8421ebf0c5627",
+    "content-hash": "0b3dbc164537be79436aa3d21c3668c6",
     "packages": [
         {
             "name": "arnapou/ensure",
@@ -186,16 +186,16 @@
         },
         {
             "name": "arnapou/psr",
-            "version": "v2.9",
+            "version": "v3.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/psr.git",
-                "reference": "01eeb4f355268bfbf2894b6ff5d11dcafc704708"
+                "reference": "f0b9c1d08f1c3496d5383041b84d7a06e2e47a28"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Fpsr/repository/archive.zip?sha=01eeb4f355268bfbf2894b6ff5d11dcafc704708",
-                "reference": "01eeb4f355268bfbf2894b6ff5d11dcafc704708",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Fpsr/repository/archive.zip?sha=f0b9c1d08f1c3496d5383041b84d7a06e2e47a28",
+                "reference": "f0b9c1d08f1c3496d5383041b84d7a06e2e47a28",
                 "shasum": ""
             },
             "require": {
@@ -230,11 +230,6 @@
                 "phpunit/phpunit": "^11.0"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "2.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Arnapou\\Psr\\": "src/"
@@ -253,10 +248,9 @@
             ],
             "description": "Library - KISS PSR classes.",
             "support": {
-                "issues": "https://gitlab.com/arnapou/psr/-/issues",
-                "source": "https://gitlab.com/arnapou/psr/-/tree/v2.9"
+                "source": "https://gitlab.com/arnapou/psr/-/tree/v3.0"
             },
-            "time": "2024-05-06T00:36:51+00:00"
+            "time": "2024-05-19T17:10:04+00:00"
         },
         {
             "name": "nyholm/psr7",
