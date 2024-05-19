@@ -10,11 +10,6 @@
             "homepage": "https://arnapou.net/"
         }
     ],
-    "extra": {
-        "branch-alias": {
-            "dev-main": "6.x-dev"
-        }
-    },
     "require": {
         "php": "~8.3.0",
         "arnapou/pfdb": "^6.3",
@@ -35,6 +30,12 @@
         "ext-imagick": "*"
     },
     "replace": {
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-intl-grapheme": "*",
+        "symfony/polyfill-intl-normalizer": "*",
+        "symfony/polyfill-mbstring": "*",
+        "symfony/polyfill-php83": "*",
+        "symfony/polyfill-php82": "*",
         "symfony/polyfill-php81": "*",
         "symfony/polyfill-php80": "*",
         "symfony/polyfill-php74": "*",
@@ -67,6 +68,32 @@
         "allow-plugins": {
             "phpstan/extension-installer": true
         },
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
         "sort-packages": true
+    },
+    "scripts": {
+        "build:phar": [
+            "@composer install --no-interaction --no-progress --quiet --no-dev",
+            "@php -d 'phar.readonly=Off' ./build/build.php bin/simplesite.phar",
+            "ls -lah bin/simplesite.phar; head -n1 bin/simplesite.phar",
+            "@composer install --no-interaction --no-progress --quiet"
+        ],
+        "build:list": [
+            "@composer install --no-interaction --no-progress --quiet --no-dev",
+            "@php -d 'phar.readonly=Off' ./build/printfiles.php",
+            "@composer install --no-interaction --no-progress --quiet"
+        ],
+        "cs": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix",
+        "sa": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/phpunit --coverage-html tests/coverage --colors=always",
+        "test:ci": "vendor/bin/phpunit --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-text --colors=never",
+        "all": [
+            "@cs",
+            "@sa",
+            "@test"
+        ]
     }
 }

@@ -5,6 +5,7 @@ parameters:
 		- site/php
 		- site/public/index.php
 		- src
+		- tests
 	excludePaths:
 		- build/tmp
 	bootstrapFiles:

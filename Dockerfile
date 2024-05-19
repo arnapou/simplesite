@@ -2,7 +2,7 @@ FROM registry.gitlab.com/arnapou/docker/php:8.3-dev as build
 
 COPY --chown=www-data:www-data . /app
 RUN composer install --no-interaction --no-progress --optimize-autoloader --no-dev \
- && php -d "phar.readonly=Off" ./build/build.php bin/simplesite.phar \
+ && php -d 'phar.readonly=Off' ./build/build.php bin/simplesite.phar \
  && rm composer.json composer.lock \
  && rm -Rf build
 

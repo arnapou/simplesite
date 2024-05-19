@@ -1,10 +1,12 @@
 .idea
-.php_cs.cache
 .php-cs-fixer.cache
-.phpunit*.cache
+.phpunit.cache
+cache
+compose.override.yaml
+phpunit-coverage.xml
+phpunit-report.xml
 tests/coverage
 vendor
-compose.override.yaml
 
 build/tmp
 site/cache

@@ -2,7 +2,7 @@ Arnapou simplesite
 ====================
 
 ![pipeline](https://gitlab.com/arnapou/simplesite/badges/main/pipeline.svg)
-![coverage](https://gitlab.com/arnapou/simplesite/badges/main/coverage.svg?job=test)
+![coverage](https://gitlab.com/arnapou/simplesite/badges/main/coverage.svg?job=test%3A%20%5B8.3%5D)
 
 
 Links
