@@ -11,19 +11,22 @@ stages:
   cache:
     key: "${PHPVER}:${CI_COMMIT_REF_SLUG}:${CI_JOB_NAME}"
     paths: [vendor]
-  parallel: { matrix: [{ PHPVER: [ '8.3' ] }] }
+  parallel:
+    matrix:
+      - PHPVER: [ '8.3' ]
 
 cs:
   extends: .php
-  script: [composer run cs]
+  script: composer run cs
 
 sa:
   extends: .php
-  script: [composer run sa]
+  script: composer run sa
 
 test:
   extends: .php
-  script: [sudo -Eu www-data composer run test:ci]
+  script:
+    - sudo -Eu www-data composer run test:ci
   coverage: '/^\s*Lines:\s*\d+.\d+\%/'
   artifacts:
     when: always

@@ -3,7 +3,7 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
          colors="true"
          bootstrap="vendor/autoload.php"
-         cacheDirectory=".phpunit.cache"
+         cacheDirectory="/tmp/phpunit"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutCoverageMetadata="true"
          failOnDeprecation="true"

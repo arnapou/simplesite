@@ -2,15 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of the Arnapou Simple Site package.
- *
- * (c) Arnaud Buathier <arnaud@arnapou.net>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 $header = <<<HEADER
     This file is part of the Arnapou Simple Site package.
 
@@ -44,12 +35,13 @@ $rules = [
     'phpdoc_var_annotation_correct_order' => true,
     'global_namespace_import' => ['import_classes' => true, 'import_functions' => false, 'import_constants' => false],
     'header_comment' => ['location' => 'after_declare_strict', 'header' => $header],
-    'trailing_comma_in_multiline' => ['elements' => ['arrays', 'arguments', 'parameters']],
+    'trailing_comma_in_multiline' => ['elements' => ['arguments', 'array_destructuring', 'arrays', 'match', 'parameters']],
     'phpdoc_line_span' => ['const' => 'single', 'method' => 'multi', 'property' => 'single'],
     'phpdoc_to_comment' => false,
 ];
 
 return (new PhpCsFixer\Config())
+    ->setCacheFile(sys_get_temp_dir() . '/.php-cs-fixer.cache')
     ->setRiskyAllowed(true)
     ->setRules($rules)
     ->setFinder((new PhpCsFixer\Finder())->in($dirs));

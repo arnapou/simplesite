@@ -128,7 +128,7 @@ final class Image
             'jpg' => $binary(fn () => imagejpeg($resize(imagecreatefromjpeg($filename)), null, 95)),
             'png' => $binary(fn () => imagepng($resize(imagecreatefrompng($filename)), null, 9)),
             'gif' => $binary(fn () => imagegif($resize(imagecreatefromgif($filename)), null)),
-            default => throw new Problem()
+            default => throw new Problem(),
         };
     }
 
