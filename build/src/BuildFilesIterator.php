@@ -16,6 +16,7 @@ namespace Arnapou\SimpleSite\Build;
 use AppendIterator;
 use CallbackFilterIterator;
 use FilesystemIterator;
+use Iterator;
 use IteratorIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -42,6 +43,7 @@ final class BuildFilesIterator extends IteratorIterator
             $this->config->includedDirectories,
         );
 
+        /** @var AppendIterator<int, SplFileInfo, Iterator<int, SplFileInfo>> $iterator */
         $iterator = new AppendIterator();
         foreach ($paths as $path) {
             $iterator->append(

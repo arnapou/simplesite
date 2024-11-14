@@ -105,7 +105,7 @@ final class Image
 
             [$w1, $h1] = [imagesx($img), imagesy($img)];
             [$w2, $h2] = $this->newSize($w1, $h1, $size);
-            $dst = imagecreate($w2, $h2);
+            $dst = imagecreate(max(1, $w2), max(1, $h2));
             if (false === $dst) {
                 throw Problem::imageError();
             }
