@@ -4,32 +4,32 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cce228f780a0f1f92a68a508d73da273",
+    "content-hash": "ba9222cf30c2e0f02bbefc081ea2016f",
     "packages": [
         {
             "name": "arnapou/ensure",
-            "version": "v2.6",
+            "version": "v2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/ensure.git",
-                "reference": "136c0308f265aa4b037a38233102ef7b43ea507d"
+                "reference": "65e487865543dc46e98609bdbcd7916297b51a9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fensure/repository/archive.zip?sha=136c0308f265aa4b037a38233102ef7b43ea507d",
-                "reference": "136c0308f265aa4b037a38233102ef7b43ea507d",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fensure/repository/archive.zip?sha=65e487865543dc46e98609bdbcd7916297b51a9b",
+                "reference": "65e487865543dc46e98609bdbcd7916297b51a9b",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.3.0"
+                "php": "~8.3.0 || ~8.4.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -53,44 +53,39 @@
             "description": "Library - Simple library to make safer php code for SA tools.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/ensure/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/ensure/-/tree/v2.6"
+                "source": "https://gitlab.com/arnapou/lib/ensure/-/tree/v2.7.0"
             },
-            "time": "2024-08-30T12:34:45+00:00"
+            "time": "2024-11-24T23:36:20+00:00"
         },
         {
             "name": "arnapou/lock",
-            "version": "v1.2",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/lock.git",
-                "reference": "46ecc15cd532ff68f44b7817fd6d014f4d9227a3"
+                "reference": "9fcfe083e92ecdfe200365c7c2cd5da56fec064b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Flock/repository/archive.zip?sha=46ecc15cd532ff68f44b7817fd6d014f4d9227a3",
-                "reference": "46ecc15cd532ff68f44b7817fd6d014f4d9227a3",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Flock/repository/archive.zip?sha=9fcfe083e92ecdfe200365c7c2cd5da56fec064b",
+                "reference": "9fcfe083e92ecdfe200365c7c2cd5da56fec064b",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.3.0"
+                "php": "~8.3.0 || ~8.4.0"
             },
             "require-dev": {
                 "ext-redis": "*",
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "1.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Arnapou\\Lock\\": "src/"
@@ -110,38 +105,38 @@
             "description": "Library - Simple lock interface and adapters.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/lock/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/lock/-/tree/v1.2"
+                "source": "https://gitlab.com/arnapou/lib/lock/-/tree/v1.3.0"
             },
-            "time": "2024-04-05T00:03:45+00:00"
+            "time": "2024-11-25T08:49:35+00:00"
         },
         {
             "name": "arnapou/pfdb",
-            "version": "v6.3",
+            "version": "v6.4.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/pfdb.git",
-                "reference": "00a33528efed9ea89a6f0e68032b215223f89d9c"
+                "reference": "ab224ca1427b14fd7b94e8e9c633055e9320a4b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpfdb/repository/archive.zip?sha=00a33528efed9ea89a6f0e68032b215223f89d9c",
-                "reference": "00a33528efed9ea89a6f0e68032b215223f89d9c",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpfdb/repository/archive.zip?sha=ab224ca1427b14fd7b94e8e9c633055e9320a4b4",
+                "reference": "ab224ca1427b14fd7b94e8e9c633055e9320a4b4",
                 "shasum": ""
             },
             "require": {
                 "arnapou/ensure": "^2.3",
                 "arnapou/lock": "^1.2",
-                "php": "~8.3.0"
+                "php": "~8.3.0 || ~8.4.0"
             },
             "require-dev": {
                 "ext-redis": "*",
                 "ext-yaml": "*",
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0",
                 "symfony/yaml": "^5.4"
@@ -151,11 +146,6 @@
                 "symfony/yaml": "If you need YAML file storage. Alternative: ext-yaml."
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "6.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Arnapou\\PFDB\\": "src/"
@@ -175,27 +165,27 @@
             "description": "Library - Flat file storage with query features.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/pfdb/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/pfdb/-/tree/v6.3"
+                "source": "https://gitlab.com/arnapou/lib/pfdb/-/tree/v6.4.0"
             },
-            "time": "2024-04-14T15:48:02+00:00"
+            "time": "2024-11-25T08:55:53+00:00"
         },
         {
             "name": "arnapou/psr-cache",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/psr-cache.git",
-                "reference": "a6996636a05936c32f8daf753b7dd3d24aac10b4"
+                "reference": "e845a25520e33b6d0a5ef083662b4a4417a4caa9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-cache/repository/archive.zip?sha=a6996636a05936c32f8daf753b7dd3d24aac10b4",
-                "reference": "a6996636a05936c32f8daf753b7dd3d24aac10b4",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-cache/repository/archive.zip?sha=e845a25520e33b6d0a5ef083662b4a4417a4caa9",
+                "reference": "e845a25520e33b6d0a5ef083662b4a4417a4caa9",
                 "shasum": ""
             },
             "require": {
                 "arnapou/psr-clock": "^1.0",
-                "php": "~8.2.0 || ~8.3.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/cache": "^2.0 || ^3.0",
                 "psr/simple-cache": "^2.0 || ^3.0"
             },
@@ -209,10 +199,10 @@
                 "ext-redis": "*",
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -237,26 +227,26 @@
             "description": "Library - PSR-6, PSR-16.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/psr-cache/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/psr-cache/-/tree/v1.0.0"
+                "source": "https://gitlab.com/arnapou/lib/psr-cache/-/tree/v1.1.0"
             },
-            "time": "2024-09-09T16:10:16+00:00"
+            "time": "2024-11-24T19:31:31+00:00"
         },
         {
             "name": "arnapou/psr-clock",
-            "version": "v1.0.0",
+            "version": "v1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/psr-clock.git",
-                "reference": "d493f70196606f5d025e963b4b9f55ff7a5fcfd8"
+                "reference": "cdd5fd03432aaad7289a6fbcc2b05ad8ac347ba4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-clock/repository/archive.zip?sha=d493f70196606f5d025e963b4b9f55ff7a5fcfd8",
-                "reference": "d493f70196606f5d025e963b4b9f55ff7a5fcfd8",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-clock/repository/archive.zip?sha=cdd5fd03432aaad7289a6fbcc2b05ad8ac347ba4",
+                "reference": "cdd5fd03432aaad7289a6fbcc2b05ad8ac347ba4",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.2.0 || ~8.3.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/clock": "^1.0"
             },
             "provide": {
@@ -265,10 +255,10 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -292,26 +282,26 @@
             "description": "Library - PSR-20.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/psr-clock/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/psr-clock/-/tree/v1.0.0"
+                "source": "https://gitlab.com/arnapou/lib/psr-clock/-/tree/v1.1.1"
             },
-            "time": "2024-09-09T15:25:58+00:00"
+            "time": "2024-11-25T07:33:01+00:00"
         },
         {
             "name": "arnapou/psr-container",
-            "version": "v1.0.2",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/psr-container.git",
-                "reference": "a56b3da86ac6f67f39a165c95c4f0772c32fe46b"
+                "reference": "da70b8ebc37865aac8d0a989cf2c2e1472d1b869"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-container/repository/archive.zip?sha=a56b3da86ac6f67f39a165c95c4f0772c32fe46b",
-                "reference": "a56b3da86ac6f67f39a165c95c4f0772c32fe46b",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-container/repository/archive.zip?sha=da70b8ebc37865aac8d0a989cf2c2e1472d1b869",
+                "reference": "da70b8ebc37865aac8d0a989cf2c2e1472d1b869",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.2.0 || ~8.3.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/container": "^2.0"
             },
             "provide": {
@@ -320,10 +310,10 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -347,27 +337,27 @@
             "description": "Library - PSR-11.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/psr-container/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/psr-container/-/tree/v1.0.2"
+                "source": "https://gitlab.com/arnapou/lib/psr-container/-/tree/v1.1.0"
             },
-            "time": "2024-09-24T21:21:41+00:00"
+            "time": "2024-11-24T23:56:47+00:00"
         },
         {
             "name": "arnapou/psr-event",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/psr-event.git",
-                "reference": "07de77b92ffbf9c602c0f6d1da44a513dee49e25"
+                "reference": "11095ba2446408b92eb40ab472b3bc76fcb13dca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-event/repository/archive.zip?sha=07de77b92ffbf9c602c0f6d1da44a513dee49e25",
-                "reference": "07de77b92ffbf9c602c0f6d1da44a513dee49e25",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-event/repository/archive.zip?sha=11095ba2446408b92eb40ab472b3bc76fcb13dca",
+                "reference": "11095ba2446408b92eb40ab472b3bc76fcb13dca",
                 "shasum": ""
             },
             "require": {
                 "arnapou/psr-log": "^1.0",
-                "php": "~8.2.0 || ~8.3.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/event-dispatcher": "^1.0"
             },
             "provide": {
@@ -376,10 +366,10 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -403,29 +393,29 @@
             "description": "Library - PSR-14.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/psr-event/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/psr-event/-/tree/v1.0.0"
+                "source": "https://gitlab.com/arnapou/lib/psr-event/-/tree/v1.1.0"
             },
-            "time": "2024-09-09T18:42:09+00:00"
+            "time": "2024-11-24T20:47:56+00:00"
         },
         {
             "name": "arnapou/psr-http",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/psr-http.git",
-                "reference": "a45c480a3433e784712054c8465773cf4040b15c"
+                "reference": "7eef191ee15aaa4f8a8657d6e159cc282a6e958b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-http/repository/archive.zip?sha=a45c480a3433e784712054c8465773cf4040b15c",
-                "reference": "a45c480a3433e784712054c8465773cf4040b15c",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-http/repository/archive.zip?sha=7eef191ee15aaa4f8a8657d6e159cc282a6e958b",
+                "reference": "7eef191ee15aaa4f8a8657d6e159cc282a6e958b",
                 "shasum": ""
             },
             "require": {
                 "arnapou/psr-event": "^1.0",
                 "nyholm/psr7": "^1.8",
                 "nyholm/psr7-server": "^1.1",
-                "php": "~8.2.0 || ~8.3.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/http-client": "^1.0",
                 "psr/http-factory": "^1.0",
                 "psr/http-message": "^1.1 || ^2.0",
@@ -442,10 +432,10 @@
                 "arnapou/dto": "^2.0 || ^3.0 || ^4.0",
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -472,27 +462,27 @@
             "description": "Library - PSR-7, PSR-15, PSR-17, PSR-18.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/psr-http/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/psr-http/-/tree/v1.0.0"
+                "source": "https://gitlab.com/arnapou/lib/psr-http/-/tree/v1.1.0"
             },
-            "time": "2024-09-09T19:33:49+00:00"
+            "time": "2024-11-24T23:51:01+00:00"
         },
         {
             "name": "arnapou/psr-log",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/arnapou/lib/psr-log.git",
-                "reference": "ca76a9b8adb9d14e2d6a24f83c769d178981600c"
+                "reference": "2caa204b9d81d812d544f0c84f6e0ade69572822"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-log/repository/archive.zip?sha=ca76a9b8adb9d14e2d6a24f83c769d178981600c",
-                "reference": "ca76a9b8adb9d14e2d6a24f83c769d178981600c",
+                "url": "https://gitlab.com/api/v4/projects/arnapou%2Flib%2Fpsr-log/repository/archive.zip?sha=2caa204b9d81d812d544f0c84f6e0ade69572822",
+                "reference": "2caa204b9d81d812d544f0c84f6e0ade69572822",
                 "shasum": ""
             },
             "require": {
                 "arnapou/psr-clock": "^1.0",
-                "php": "~8.2.0 || ~8.3.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/log": "^2.0 || ^3.0"
             },
             "provide": {
@@ -501,10 +491,10 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.52",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/phpstan": "^1.10",
-                "phpstan/phpstan-deprecation-rules": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.3",
-                "phpstan/phpstan-strict-rules": "^1.5",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/php-code-coverage": "^11.0",
                 "phpunit/phpunit": "^11.0"
             },
@@ -528,9 +518,9 @@
             "description": "Library - PSR-3.",
             "support": {
                 "issues": "https://gitlab.com/arnapou/lib/psr-log/-/issues",
-                "source": "https://gitlab.com/arnapou/lib/psr-log/-/tree/v1.0.0"
+                "source": "https://gitlab.com/arnapou/lib/psr-log/-/tree/v1.1.0"
             },
-            "time": "2024-09-09T16:34:11+00:00"
+            "time": "2024-11-24T19:54:13+00:00"
         },
         {
             "name": "nyholm/psr7",
@@ -1588,16 +1578,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.14.2",
+            "version": "v3.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "0b6f9d8370bb3b7f1ce5313ed8feb0fafd6e399a"
+                "reference": "2d5b3964cc21d0188633d7ddce732dc8e874db02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/0b6f9d8370bb3b7f1ce5313ed8feb0fafd6e399a",
-                "reference": "0b6f9d8370bb3b7f1ce5313ed8feb0fafd6e399a",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/2d5b3964cc21d0188633d7ddce732dc8e874db02",
+                "reference": "2d5b3964cc21d0188633d7ddce732dc8e874db02",
                 "shasum": ""
             },
             "require": {
@@ -1651,7 +1641,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.14.2"
+                "source": "https://github.com/twigphp/Twig/tree/v3.15.0"
             },
             "funding": [
                 {
@@ -1663,7 +1653,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-11-07T12:36:22+00:00"
+            "time": "2024-11-17T15:59:19+00:00"
         }
     ],
     "packages-dev": [
@@ -2067,16 +2057,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.64.0",
+            "version": "v3.65.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "58dd9c931c785a79739310aef5178928305ffa67"
+                "reference": "79d4f3e77b250a7d8043d76c6af8f0695e8a469f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/58dd9c931c785a79739310aef5178928305ffa67",
-                "reference": "58dd9c931c785a79739310aef5178928305ffa67",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/79d4f3e77b250a7d8043d76c6af8f0695e8a469f",
+                "reference": "79d4f3e77b250a7d8043d76c6af8f0695e8a469f",
                 "shasum": ""
             },
             "require": {
@@ -2086,7 +2076,7 @@
                 "ext-filter": "*",
                 "ext-json": "*",
                 "ext-tokenizer": "*",
-                "fidry/cpu-core-counter": "^1.0",
+                "fidry/cpu-core-counter": "^1.2",
                 "php": "^7.4 || ^8.0",
                 "react/child-process": "^0.6.5",
                 "react/event-loop": "^1.0",
@@ -2106,18 +2096,18 @@
                 "symfony/stopwatch": "^5.4 || ^6.0 || ^7.0"
             },
             "require-dev": {
-                "facile-it/paraunit": "^1.3 || ^2.3",
-                "infection/infection": "^0.29.5",
-                "justinrainbow/json-schema": "^5.2",
+                "facile-it/paraunit": "^1.3.1 || ^2.4",
+                "infection/infection": "^0.29.8",
+                "justinrainbow/json-schema": "^5.3 || ^6.0",
                 "keradus/cli-executor": "^2.1",
-                "mikey179/vfsstream": "^1.6.11",
+                "mikey179/vfsstream": "^1.6.12",
                 "php-coveralls/php-coveralls": "^2.7",
                 "php-cs-fixer/accessible-object": "^1.1",
                 "php-cs-fixer/phpunit-constraint-isidenticalstring": "^1.5",
                 "php-cs-fixer/phpunit-constraint-xmlmatchesxsd": "^1.5",
-                "phpunit/phpunit": "^9.6.19 || ^10.5.21 || ^11.2",
-                "symfony/var-dumper": "^5.4 || ^6.0 || ^7.0",
-                "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
+                "phpunit/phpunit": "^9.6.21 || ^10.5.38 || ^11.4.3",
+                "symfony/var-dumper": "^5.4.47 || ^6.4.15 || ^7.1.8",
+                "symfony/yaml": "^5.4.45 || ^6.4.13 || ^7.1.6"
             },
             "suggest": {
                 "ext-dom": "For handling output formats in XML",
@@ -2158,7 +2148,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.64.0"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.65.0"
             },
             "funding": [
                 {
@@ -2166,7 +2156,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-30T23:09:38+00:00"
+            "time": "2024-11-25T00:39:24+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -2454,16 +2444,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d"
+                "reference": "6c98c7600fc717b2c78c11ef60040d5b1e359c82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d",
-                "reference": "ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6c98c7600fc717b2c78c11ef60040d5b1e359c82",
+                "reference": "6c98c7600fc717b2c78c11ef60040d5b1e359c82",
                 "shasum": ""
             },
             "require": {
@@ -2508,7 +2498,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-11T15:43:04+00:00"
+            "time": "2024-11-17T14:17:00+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -5245,7 +5235,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~8.3.0"
+        "php": "~8.4.0"
     },
     "platform-dev": {
         "ext-gd": "*",

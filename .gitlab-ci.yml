@@ -13,7 +13,7 @@ stages:
     paths: [vendor]
   parallel:
     matrix:
-      - PHPVER: [ '8.3' ]
+      - PHPVER: [ '8.4' ]
 
 cs:
   extends: .php
@@ -67,7 +67,7 @@ release:
     assets:
       links:
         - name: 'simplesite.phar'
-          url: 'https://gitlab.com/arnapou/simplesite/-/jobs/${ARTIFACT_JOB_ID}/artifacts/file/bin/simplesite.phar'
+          url: 'https://gitlab.com/arnapou/project/simplesite/-/jobs/${ARTIFACT_JOB_ID}/artifacts/file/bin/simplesite.phar'
 
 build:
   image: docker:24
