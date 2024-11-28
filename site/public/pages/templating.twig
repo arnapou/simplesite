@@ -79,7 +79,7 @@
         </tr>
         <tr>
             <td rowspan="2"><code>app.router</code></td>
-            <td rowspan="2">objet <code>HttpRouteHandler</code> de <a href="{{ url_routing }}">arnapou/psr</a></td>
+            <td rowspan="2">objet <code>HttpRouteHandler</code> de <a href="{{ url_routing }}">arnapou/psr-http</a></td>
             <td>{% verbatim %}<code>{{ app.router.generateUrl('static_page', { path: 'pages/templating' }) }}</code>{% endverbatim %}</td>
             <td>{{ app.router.generateUrl('static_page', { path: 'pages/templating' }) }}</td>
         </tr>
@@ -121,7 +121,7 @@
         </tr>
         <tr>
             <td rowspan="2"><code>path</code></td>
-            <td rowspan="2">calcule le chemin d'un lien <br><small>(équivalent plus simple que <code>app.urlgenerator</code>)</small></td>
+            <td rowspan="2">calcule le chemin d'un lien</td>
             <td>{% verbatim %}<code>{{ path('static_dir', { path: 'pages' }) }}</code>{% endverbatim %}</td>
             <td>{{ path('static_dir', { path: 'pages' }) }}</td>
         </tr>
@@ -164,38 +164,66 @@
         </thead>
         <tbody>
         <tr>
+            <td><code>markdown_to_html</code></td>
+            <td>convertit du markdown en html</td>
+            <td>{% verbatim %}<pre><code>{% apply markdown_to_html %}
+Title
+=====
+
+Hello!
+{% endapply %}</code></pre>{% endverbatim %}</td>
+            <td><pre><code>{% apply escape %}{% apply markdown_to_html %}
+                            Title
+                            =====
+
+                            Hello!
+                        {% endapply %}{% endapply %}</code></pre>
+            </td>
+        </tr>
+        <tr>
+            <td><code>minify_html</code></td>
+            <td>retire les espaces html superflus</td>
+            <td>{% verbatim %}<pre><code>{% apply minify_html %}
+    &lt;p&gt;
+        Hello &lt;b&gt;World !&lt;/b&gt;
+    &lt;/p&gt;
+{% endapply %}</code></pre>{% endverbatim %}</td>
+            <td><pre><code>{% apply escape %}{% apply minify_html %}
+                            <p>
+                        Hello <b>World !</b>
+                    </p>
+                        {% endapply %}{% endapply %}</code></pre>
+            </td>
+        </tr>
+        <tr>
+            <td><code>path_dir</code></td>
+            <td>url d'un chemin de dossier</td>
+            <td>{% verbatim %}<code>{{ 'pages'|path_dir }}</code>{% endverbatim %}</td>
+            <td>{{ 'pages'|path_dir }}</td>
+        </tr>
+        <tr>
+            <td><code>path_page</code></td>
+            <td>url d'un chemin de page</td>
+            <td>{% verbatim %}<code>{{ 'pages/templating'|path_page }}</code>{% endverbatim %}</td>
+            <td>{{ 'pages/templating'|path_page }}</td>
+        </tr>
+        <tr>
+            <td><code>repeat</code></td>
+            <td>répète un texte</td>
+            <td>{% verbatim %}<code>{{ 'Hello '|repeat(3) }}</code>{% endverbatim %}</td>
+            <td>{{ 'Hello '|repeat(3) }}</td>
+        </tr>
+        <tr>
+            <td><code>slugify</code></td>
+            <td>simplifie un texte en transformant les caractères (utile par exemple pour des ancres)</td>
+            <td>{% verbatim %}<code>{{ 'Wôrķšƥáçè ~~sèťtïñğš~~ 5€'|slugify }}</code>{% endverbatim %}</td>
+            <td>{{ 'Wôrķšƥáçè ~~sèťtïñğš~~ 5€'|slugify }}</td>
+        </tr>
+        <tr>
             <td><code>thumbnail</code></td>
             <td>transforme le chemin d'une image vers celui de sa miniature</td>
             <td>{% verbatim %}<code>{{ '../assets/twig.png'|thumbnail(50) }}</code>{% endverbatim %}</td>
             <td>{{ '../assets/twig.png'|thumbnail(50) }}</td>
-        </tr>
-        <tr>
-            <td rowspan="2"><code>emojis</code></td>
-            <td>affiche des emojis pour certains textes</td>
-            <td>{% verbatim %}<code>{{ ':)'|emojis }}</code>{% endverbatim %}</td>
-            <td>{{ ':)'|emojis }}</td>
-        </tr>
-        <tr>
-            <td>à utiliser plutôt sur des gros textes</td>
-            <td>{% verbatim %}<pre><code>{% apply emojis %}
-    :D    :d     :)    :-)    :s
-    :S    :(     :-(   :p     :P
-    :o    :O     :B    :|     :/
-    ;(    ;-(    ;)    ;-)    :!:
-    :?:   :lol:  ^^    ==>    =D
-    oO    Oo     o_O   ^(     (?)
-    ^)    :fear:
-{% endapply %}</code></pre>{% endverbatim %}</td>
-            <td><pre>{% apply emojis %}
-    :D    :d     :)    :-)    :s
-    :S    :(     :-(   :p     :P
-    :o    :O     :B    :|     :/
-    ;(    ;-(    ;)    ;-)    :!:
-    :?:   :lol:  ^^    ==>    =D
-    oO    Oo     o_O   ^(     (?)
-    ^)    :fear:
-{% endapply %}</pre>
-            </td>
         </tr>
         </tbody>
 

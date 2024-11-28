@@ -12,11 +12,15 @@
     ],
     "require": {
         "php": "~8.4.0",
-        "arnapou/pfdb": "^6.3",
+        "arnapou/pfdb": "^6.4",
         "arnapou/psr-cache": "^1.0",
         "arnapou/psr-container": "^1.0",
         "arnapou/psr-http": "^1.0",
+        "michelf/php-markdown": "^2.0",
+        "symfony/string": "^6.4",
+        "symfony/translation-contracts": "^3.5",
         "symfony/yaml": "^6.4",
+        "twig/markdown-extra": "^3.15",
         "twig/twig": "^3.9"
     },
     "require-dev": {

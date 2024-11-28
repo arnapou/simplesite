@@ -17,12 +17,19 @@ use Arnapou\SimpleSite\PhpCode;
 return new class() implements PhpCode {
     public function init(): void
     {
-        $twigEnvironment = SimpleSite::twigEnvironment();
-        $database = SimpleSite::database();
+        $twig = SimpleSite::twigEnvironment();
+        $parameters = SimpleSite::database()->getTable('twig_globals');
 
-        $parameters = $database->getTable('twig_globals');
         foreach ($parameters as $key => $data) {
-            $twigEnvironment->addGlobal($key, $data['value'] ?? '');
+            $twig->addGlobal($key, $data['value'] ?? '');
         }
+        $twig->addGlobal('simplesite_phar_size', filesize(__DIR__.'/../../bin/simplesite.phar'));
+
+        $twig->addFilter(
+            new \Twig\TwigFilter(
+                'preg_replace',
+                static fn(string $source, string $pattern, string $replace) => preg_replace($pattern, $replace, $source)
+            )
+        );
     }
 };

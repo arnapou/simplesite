@@ -19,7 +19,7 @@ interface Arnapou\SimpleSite\PhpCode
     public function init(): void;
 }</pre>
     <p>Comme dans l'exemple <code>php/twig_globals.php</code> qui injecte en variable global twig des données d'une table yaml :</p>
-    <pre>{{ source('@php/twig_globals.php') | escape }}</pre>
+    {{ _self.code_source('twig_globals.php') }}
 
 
 
@@ -34,7 +34,7 @@ abstract class Arnapou\SimpleSite\Controller
     abstract public function configure(): void;
 }</pre>
     <p>Comme dans l'exemple <code>php/controller.php</code> qui déclare une route <code>hello</code> pour afficher une page bidon :</p>
-    <pre>{{ source('@php/controller.php') | escape }}</pre>
+    {{ _self.code_source('controller.php') }}
 
     <p>
         Exemple de page :
@@ -52,7 +52,7 @@ abstract class Arnapou\SimpleSite\Controller
     <p>On peut ajouter des listeners custom pour changer le comportement du site : changer la réponse par exemple et/ou court-circuiter le routing.</p>
 
     <p>Exemple <code>php/event_hook.php</code> qui court-circuite le routing pour envoyer une autre page :
-    <pre>{{ source('@php/event_hook.php') | escape }}</pre>
+        {{ _self.code_source('event_hook.php') }}
     <p>Tester la page :
         <a href="{{ path('hello', { name: 'world'}) }}?killme=1" target="_blank"><button>
             {{ path('hello', { name: 'world'}) }}?killme=1
@@ -61,3 +61,7 @@ abstract class Arnapou\SimpleSite\Controller
 
 
 {% endblock %}
+
+{% macro code_source(file) %}
+    <pre>{{ source('@php/'~file) | preg_replace('#\\n/\\*.*\\*/\\n#s', '') | escape }}</pre>
+{% endmacro %}

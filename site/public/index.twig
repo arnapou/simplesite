@@ -4,29 +4,61 @@
 
     <h1>Arnapou Simple site</h1>
 
+
+    <h2>Les bases</h2>
+
+    <p>
+        Cette solution de site est à mi-chemin entre le site statique et le site dynamique.
+    </p>
+    <p>
+        En effet, avec un simple fichier PHP <code>simplesite.phar</code> et un <code>index.php</code> initialisant le système,
+        vous aurez un site fonctionnel :
+    </p>
+    <pre>
+&lt;?php
+include '/chemin/vers/simplesite.phar';
+
+SimpleSite::run(
+    // obligatoire
+    name:           'Le nom de mon site',
+    path_public:    '/dossier/public/racine/du/site', // probablement __DIR__
+    path_cache:     '/dossier/prive/de/cache',
+
+    // optionnel
+    path_data:      '/dossier/prive/contenant/des/data/yaml',
+    path_templates: '/dossier/prive/pour/les/templates',
+    path_php:       '/dossier/prive/pour/customiser/le/site/avec/du/php',
+);
+    </pre>
+
+    <p>
+        L'idée consiste à créer un site "statique" de fichiers basés sur <a href="{{ url_twig }}" target="_blank">Twig</a>.
+        Cela permet d'enrichir, de simplifier, de réutiliser du code html pourtant statique au final.
+    </p>
+    <p>
+        On pourrait faire une comparaison avec les générateurs de site statiques, à ceci près qu'ici, vous pouvez enrichir le site avec du php si nécessaire&nbsp;:
+        rajouter des routes, des traitements, etc ...
+    </p>
+
+    <p>
+        Les dépendances PHP sont réduites à l'essentiel pour obtenir un fichier PHAR le plus petit possible.<br>
+        Sa taille sur cette démo est de <code>{{ (simplesite_phar_size / 1024)|round }}&nbsp;Ko</code>.
+    </p>
+
     <h2>Pré-requis</h2>
 
-    <p>Avant toute chose, techniquement, il est nécessaire d'avoir une plateforme en PHP 7.2+</p>
-        <p>Si vous voulez profiter du maximum de possibilités, il vous faudra connaitre :</p>
+    <p>Avoir la bonne version de PHP pour le <code>simplesite.phar</code> concerné.</p>
 
     <ul>
-        <li>évidemment : HTML, CSS, voire JS</li>
-        <li>le format de fichier <a href="{{ url_yaml }}" target="_blank">YAML</a></li>
+        <li>connaitre évidemment : HTML, CSS, voire JS</li>
         <li>le templating <a href="{{ url_twig }}" target="_blank">Twig</a></li>
-        <li>le langage de programmation <a href="{{ url_php }}" target="_blank">PHP</a></li>
-        <li>le composant <a href="{{ url_http_foundation }}" target="_blank">HttpFoundation</a> de symfony</li>
-        <li>web rewriting (cette démo est fournie avec un <code>.htaccess</code> de base)</li>
     </ul>
 
-    <p>Mais il est tout à fait possible de faire un simple site statique twig.</p>
+    <p>Pour profiter du maximum de fonctionnalités, il vous faudra connaitre en plus:</p>
 
-    <p>Le mini-framework est compilé dans un fichier <code>.phar</code> de moins de 500 Ko facile à copier.<br>
-        Il a uniquement ces dépendances :</p>
     <ul>
-        <li><a href="https://packagist.org/packages/arnapou/pfdb" target="_blank">arnapou/pfdb</a></li>
-        <li><a href="https://packagist.org/packages/arnapou/psr" target="_blank">arnapou/psr</a></li>
-        <li><a href="https://packagist.org/packages/symfony/yaml" target="_blank">symfony/yaml</a></li>
-        <li><a href="https://packagist.org/packages/twig/twig" target="_blank">twig/twig</a></li>
+        <li>le format de fichier <a href="{{ url_yaml }}" target="_blank">YAML</a></li>
+        <li>le langage de programmation <a href="{{ url_php }}" target="_blank">PHP</a></li>
     </ul>
 
     <h2>Etat d'esprit</h2>

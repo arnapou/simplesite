@@ -118,19 +118,20 @@ class SimpleSiteTest extends TestCase
 
     public static function dataNotFound(): Generator
     {
-        yield [new ServerRequest('GET', '/assets/twig.abc.png')];
-        yield [new ServerRequest('GET', '/assets/twig.15.png')];
-        yield [new ServerRequest('GET', '/assets/twig.1501.png')];
-        yield [new ServerRequest('GET', '/assets/unknown.200.png')];
+        yield ['GET', '/assets/twig.abc.png'];
+        yield ['GET', '/assets/twig.15.png'];
+        yield ['GET', '/assets/twig.2001.png'];
+        yield ['GET', '/assets/unknown.200.png'];
 
-        yield [new ServerRequest('GET', '/foo/bar')];
-        yield [new ServerRequest('GET', '/not-found/')];
+        yield ['GET', '/foo/bar'];
+        yield ['GET', '/not-found/'];
     }
 
     #[RunInSeparateProcess]
     #[DataProvider('dataNotFound')]
-    public function testNotFound(ServerRequestInterface $request): void
+    public function testNotFound(string $method, string $uri): void
     {
+        $request = new ServerRequest($method, $uri);
         $response = SimpleSite::handle($this->config, $request);
 
         self::assertSame(404, $response->getStatusCode());

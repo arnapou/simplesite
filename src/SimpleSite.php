@@ -42,12 +42,14 @@ use Arnapou\SimpleSite\Core\Image;
 use Arnapou\SimpleSite\Core\LogContextFormatter;
 use Arnapou\SimpleSite\Core\Problem;
 use Arnapou\SimpleSite\Core\TwigExtension;
+use Arnapou\SimpleSite\Core\TwigRuntimeLoader;
 use Arnapou\SimpleSite\Core\Utils;
 use Arnapou\SimpleSite\Core\YamlContext;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
+use Twig\Extra\Markdown\MarkdownExtension;
 use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 
@@ -222,7 +224,9 @@ final class SimpleSite
                     'optimizations' => -1,
                 ],
             );
+            $environment->addRuntimeLoader(new TwigRuntimeLoader());
             $environment->addExtension(new DebugExtension());
+            $environment->addExtension(new MarkdownExtension());
             $environment->addExtension(self::twigExtension());
 
             return $environment;

@@ -4,10 +4,10 @@
 
 -
   id: url_arnapou
-  value: 'http://arnapou.net/'
+  value: 'https://arnapou.net/'
 -
   id: url_gitlab
-  value: 'https://gitlab.com/arnapou/simplesite'
+  value: 'https://gitlab.com/arnapou/project/simplesite'
 -
   id: url_twig
   value: 'https://twig.symfony.com/'
@@ -22,4 +22,4 @@
   value: 'https://www.php-fig.org/psr/psr-7/'
 -
   id: url_routing
-  value: 'https://packagist.org/packages/arnapou/psr'
+  value: 'https://packagist.org/packages/arnapou/psr-http'

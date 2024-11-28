@@ -7,8 +7,16 @@
     <p>On ne considère à ce stade que les <code>404</code> et les <code>500</code></p>
 
     <p>Il existe des pages préconfigurées pour cela, exemples :</p>
-    <p><a href="{{ path('je_plante') }}"><button>Une page qui plante</button></a> pour visualiser la page 500 par défaut.</p>
-    <p><a href="/je_n_existe_pas"><button>Une page qui n'existe pas</button></a> pour visualiser une page 404 personnalisée.</p>
+    <p>
+        Une page qui plante pour visualiser la page 500 par défaut
+        <br>
+        <a href="{{ path('je_plante') }}"><button>{{ path('je_plante') }}</button></a>
+    </p>
+    <p>
+        Une page qui n'existe pas pour visualiser une page 404 personnalisée
+        <br>
+        <a href="/je_n_existe_pas"><button>/je_n_existe_pas</button></a>
+    </p>
 
     <p>Pour personnaliser les pages d'erreur, il suffit d'avoir un dossier de templates configuré via <code>path_templates</code>
         et de définir les fichiers twig suivants dans ce dossier :</p>

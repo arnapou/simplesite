@@ -35,13 +35,13 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
-            new TwigFunction('thumbnail', $this->thumbnail(...)),
             new TwigFunction('asset', $this->asset(...)),
             new TwigFunction('path', $this->path(...)),
             new TwigFunction('path_dir', $this->path_dir(...)),
             new TwigFunction('path_page', $this->path_page(...)),
-            new TwigFunction('emojis', Utils::emojis(...), ['is_safe' => ['html']]),
+            new TwigFunction('thumbnail', $this->thumbnail(...)),
+            new TwigFunction('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFunction('minify_html', Utils::minifyHtml(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -49,14 +49,14 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         return [
             new TwigFilter('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFilter('minify_html', Utils::minifyHtml(...), ['is_safe' => ['html']]),
             new TwigFilter('thumbnail', $this->thumbnail(...)),
             new TwigFilter('chunk', $this->chunk(...)),
             new TwigFilter('thumbnail', $this->thumbnail(...)),
             new TwigFilter('path_dir', $this->path_dir(...)),
             new TwigFilter('path_page', $this->path_page(...)),
-            new TwigFilter('repeat', $this->repeat(...), ['is_safe' => ['html']]),
             new TwigFilter('getclass', $this->getclass(...)),
-            new TwigFilter('emojis', Utils::emojis(...), ['is_safe' => ['html']]),
+            new TwigFilter('repeat', $this->repeat(...), ['is_safe' => ['html']]),
             new TwigFilter('slugify', Utils::slugify(...)),
             new TwigFilter('slug', Utils::slugify(...)),
         ];

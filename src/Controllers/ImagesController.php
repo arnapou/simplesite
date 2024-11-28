@@ -24,7 +24,7 @@ final class ImagesController extends Controller
     {
         $this->addRoute('{path}.{size}.{ext}', $this->routeImage(...), 'images')
             ->setRequirement('path', '.*')
-            ->setRequirement('size', '[0-9]{1,4}')
+            ->setRequirement('size', '[0-9]{2,4}')
             ->setRequirement('ext', '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]');
     }
 
@@ -35,7 +35,7 @@ final class ImagesController extends Controller
         }
 
         $intsize = (int) $size;
-        if ($intsize < 16 || $intsize > 1500) {
+        if ($intsize < 16 || $intsize > 2000) {
             throw new NoResponseFound();
         }
 
