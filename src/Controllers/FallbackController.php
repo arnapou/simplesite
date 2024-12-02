@@ -37,7 +37,7 @@ final class FallbackController extends Controller
         $startDayTimestamp = (int) (floor(time() / 86400) * 86400);
         $etag = base64_encode(hash('sha256', $binary, true));
 
-        return Utils::cachedResponse($etag, 86400, $startDayTimestamp)
+        return Utils::cacheControlResponse($etag, 86400, $startDayTimestamp)
             ->withHeader('Content-Type', 'image/vnd.microsoft.icon')
             ->withHeader('Content-Length', (string) \strlen($binary))
             ->withBody($binary);
@@ -45,7 +45,7 @@ final class FallbackController extends Controller
 
     public function routeRobotsTxt(): Response
     {
-        return (new Response())
+        return new Response()
             ->withStatus(200)
             ->withHeader('Content-Type', 'text/plain')
             ->withBody("User-agent: *\nDisallow:\n");

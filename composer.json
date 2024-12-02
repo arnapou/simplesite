@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": "~8.4.0",
+        "arnapou/ensure": "^2.7",
         "arnapou/pfdb": "^6.4",
         "arnapou/psr-cache": "^1.0",
         "arnapou/psr-container": "^1.0",
@@ -99,8 +100,8 @@
         "all": [
             "@cs",
             "@sa",
-            "@test",
-            "@build:phar"
+            "@build:phar",
+            "@test"
         ]
     }
 }

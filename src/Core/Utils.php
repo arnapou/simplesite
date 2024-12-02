@@ -108,12 +108,12 @@ final class Utils
         return strtolower($slugger->slug($text)->toString());
     }
 
-    public static function cachedResponse(string $etag, int $maxAge, int $lastModified): Response
+    public static function cacheControlResponse(string $etag, int $maxAge, int $lastModified): Response
     {
-        return (new Response())
+        return new Response()
             ->withStatus(200)
             ->withHeader('ETag', $etag)
-            ->withHeader((new CacheControl())->setSharedMaxAge($maxAge))
+            ->withHeader(new CacheControl()->setSharedMaxAge($maxAge))
             ->withHeader(new LastModified($lastModified));
     }
 }

@@ -40,8 +40,8 @@ $rules = [
     'phpdoc_to_comment' => false,
 ];
 
-return (new PhpCsFixer\Config())
+return new PhpCsFixer\Config()
     ->setCacheFile(sys_get_temp_dir() . '/.php-cs-fixer.cache')
     ->setRiskyAllowed(true)
     ->setRules($rules)
-    ->setFinder((new PhpCsFixer\Finder())->in($dirs));
+    ->setFinder(new PhpCsFixer\Finder()->in($dirs));

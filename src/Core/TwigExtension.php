@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\SimpleSite\SimpleSite;
+use Psr\Container\ContainerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
@@ -21,7 +22,7 @@ use Twig\TwigFunction;
 
 final class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private readonly ContainerWithMagicGetters $container)
+    public function __construct(private readonly ContainerInterface $container)
     {
     }
 

@@ -146,7 +146,7 @@ final class Image
     {
         $etag = base64_encode(hash('sha256', $content, true));
 
-        return Utils::cachedResponse($etag, 864000, $filemtime)
+        return Utils::cacheControlResponse($etag, 864000, $filemtime)
             ->withHeader('Content-Type', self::MIME_TYPES[$ext])
             ->withBody($content);
     }

@@ -22,7 +22,7 @@ use Arnapou\SimpleSite\SimpleSite;
 final class StaticController extends Controller
 {
     /** @var list<string> */
-    protected array $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php'];
+    protected array $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php', 'md'];
 
     public function configure(): void
     {

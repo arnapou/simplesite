@@ -24,6 +24,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class SimpleSiteTest extends TestCase
 {
+    public const array SERVER = [
+        'REMOTE_ADDR' => '1.2.3.4',
+        'REMOTE_HOST' => '1.2.3.4',
+        'PHP_SELF' => '/index.php',
+    ];
     private Config $config;
 
     protected function setUp(): void
@@ -41,7 +46,7 @@ class SimpleSiteTest extends TestCase
     #[RunInSeparateProcess]
     public function testRobotTxt(): void
     {
-        $response = SimpleSite::handle($this->config, new ServerRequest('GET', '/robots.txt'));
+        $response = SimpleSite::handle($this->config, self::createServerRequest('GET', '/robots.txt'));
         $body = $response->getBody()->getContents();
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('User-agent', $body);
@@ -50,9 +55,9 @@ class SimpleSiteTest extends TestCase
 
     public static function dataImages(): Generator
     {
-        yield [new ServerRequest('GET', '/favicon.ico')];
-        yield [new ServerRequest('GET', '/assets/twig.200.png')];
-        yield [new ServerRequest('GET', '/assets/twig.400.png')];
+        yield [self::createServerRequest('GET', '/favicon.ico')];
+        yield [self::createServerRequest('GET', '/assets/twig.200.png')];
+        yield [self::createServerRequest('GET', '/assets/twig.400.png')];
     }
 
     #[RunInSeparateProcess]
@@ -69,17 +74,17 @@ class SimpleSiteTest extends TestCase
 
     public static function dataPageHtml(): Generator
     {
-        yield [new ServerRequest('GET', '/'), "<h2>Etat d'esprit</h2>"];
-        yield [new ServerRequest('GET', '/index'), "<h2>Etat d'esprit</h2>"];
+        yield [self::createServerRequest('GET', '/'), "<h2>Etat d'esprit</h2>"];
+        yield [self::createServerRequest('GET', '/index'), "<h2>Etat d'esprit</h2>"];
 
-        yield [new ServerRequest('GET', '/pages/datas'), '<h1>Datas</h1>'];
-        yield [new ServerRequest('GET', '/pages/error_pages'), "<h1>Pages d'erreur</h1>"];
-        yield [new ServerRequest('GET', '/pages/images'), '<h1>Images</h1>'];
-        yield [new ServerRequest('GET', '/pages/logs'), '<h1>Logs</h1>'];
-        yield [new ServerRequest('GET', '/pages/php'), '<h1>Php</h1>'];
-        yield [new ServerRequest('GET', '/pages/templating'), '<h1>Templating Twig</h1>'];
+        yield [self::createServerRequest('GET', '/pages/datas'), '<h1>Datas</h1>'];
+        yield [self::createServerRequest('GET', '/pages/error_pages'), "<h1>Pages d'erreur</h1>"];
+        yield [self::createServerRequest('GET', '/pages/images'), '<h1>Images</h1>'];
+        yield [self::createServerRequest('GET', '/pages/logs'), '<h1>Logs</h1>'];
+        yield [self::createServerRequest('GET', '/pages/php'), '<h1>Php</h1>'];
+        yield [self::createServerRequest('GET', '/pages/templating'), '<h1>Templating Twig</h1>'];
 
-        yield [new ServerRequest('GET', '/hello-world'), '<h1>Hello world !</h1>'];
+        yield [self::createServerRequest('GET', '/hello-world'), '<h1>Hello world !</h1>'];
     }
 
     #[RunInSeparateProcess]
@@ -95,14 +100,14 @@ class SimpleSiteTest extends TestCase
 
     public static function dataRedirect(): Generator
     {
-        yield [new ServerRequest('GET', '/assets'), '/assets/'];
+        yield [self::createServerRequest('GET', '/assets'), '/assets/'];
 
-        yield [new ServerRequest('GET', '/foo/bar.php'), '/foo/bar'];
-        yield [new ServerRequest('GET', '/foo/bar.html'), '/foo/bar'];
-        yield [new ServerRequest('GET', '/foo/bar.htm'), '/foo/bar'];
-        yield [new ServerRequest('GET', '/foo/bar.twig'), '/foo/bar'];
-        yield [new ServerRequest('GET', '/foo/bar.tpl'), '/foo/bar'];
-        yield [new ServerRequest('GET', '/foo/bar.html.twig'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.php'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.html'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.htm'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.twig'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.tpl'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.html.twig'), '/foo/bar'];
     }
 
     #[RunInSeparateProcess]
@@ -131,7 +136,7 @@ class SimpleSiteTest extends TestCase
     #[DataProvider('dataNotFound')]
     public function testNotFound(string $method, string $uri): void
     {
-        $request = new ServerRequest($method, $uri);
+        $request = self::createServerRequest($method, $uri);
         $response = SimpleSite::handle($this->config, $request);
 
         self::assertSame(404, $response->getStatusCode());
@@ -139,8 +144,8 @@ class SimpleSiteTest extends TestCase
 
     public static function dataInternalError(): Generator
     {
-        yield [new ServerRequest('GET', '/je_plante')];
-        yield [new ServerRequest('GET', '/hello-world?killme=1'), 'Arrrgghh .... I am killed ...'];
+        yield [self::createServerRequest('GET', '/je_plante')];
+        yield [self::createServerRequest('GET', '/hello-world?killme=1'), 'Arrrgghh .... I am killed ...'];
     }
 
     #[RunInSeparateProcess]
@@ -151,5 +156,10 @@ class SimpleSiteTest extends TestCase
 
         self::assertSame(500, $response->getStatusCode());
         self::assertStringContainsString($string, $response->getBody()->getContents());
+    }
+
+    private static function createServerRequest(string $method, string $uri): ServerRequestInterface
+    {
+        return new ServerRequest($method, $uri, body: '', serverParams: self::SERVER);
     }
 }

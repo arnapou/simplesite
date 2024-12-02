@@ -14,67 +14,33 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite;
 
 use Arnapou\PFDB\Database;
-use Arnapou\PFDB\Exception\DirectoryNotFoundException;
-use Arnapou\PFDB\Exception\InvalidTableNameException;
-use Arnapou\PFDB\Storage\CachedFileStorage;
-use Arnapou\PFDB\Storage\PhpFileStorage;
-use Arnapou\PFDB\Storage\YamlFileStorage;
 use Arnapou\Psr\Psr11Container\ServiceLocator;
-use Arnapou\Psr\Psr14EventDispatcher\ClassEventDispatcher;
 use Arnapou\Psr\Psr14EventDispatcher\PhpHandlers;
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
-use Arnapou\Psr\Psr16SimpleCache\Decorated\GcPrunableSimpleCache;
-use Arnapou\Psr\Psr16SimpleCache\FileSimpleCache;
 use Arnapou\Psr\Psr17HttpFactories\HttpFactory;
-use Arnapou\Psr\Psr3Logger\Decorator\ContextLogger;
-use Arnapou\Psr\Psr3Logger\Decorator\MinimumLevelLogger;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
-use Arnapou\Psr\Psr3Logger\FileLogger;
-use Arnapou\Psr\Psr3Logger\Formatter\DefaultLogFormatter;
-use Arnapou\Psr\Psr3Logger\Utils\Rotation;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Core\Config;
-use Arnapou\SimpleSite\Core\ContainerWithMagicGetters;
+use Arnapou\SimpleSite\Core\Container;
 use Arnapou\SimpleSite\Core\Counter;
 use Arnapou\SimpleSite\Core\Image;
-use Arnapou\SimpleSite\Core\LogContextFormatter;
 use Arnapou\SimpleSite\Core\Problem;
 use Arnapou\SimpleSite\Core\TwigExtension;
-use Arnapou\SimpleSite\Core\TwigRuntimeLoader;
 use Arnapou\SimpleSite\Core\Utils;
 use Arnapou\SimpleSite\Core\YamlContext;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Twig\Environment;
-use Twig\Extension\DebugExtension;
-use Twig\Extra\Markdown\MarkdownExtension;
-use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 final class SimpleSite
 {
-    /**
-     * @var array{
-     *     config?: Config,
-     *     container?: ServiceLocator,
-     *     counter?: Counter,
-     *     database?: Database,
-     *     image?: Image,
-     *     logger?: ThrowableLogger,
-     *     phpHandlers?: PhpHandlers,
-     *     request?: ServerRequestInterface,
-     *     router?: HttpRouteHandler,
-     *     twigEnvironment?: Environment,
-     *     twigExtension?: TwigExtension,
-     *     twigLoader?: LoaderInterface,
-     *     yamlContext?: YamlContext,
-     * }
-     */
-    private static array $instances = [];
+    private static Container $container;
 
     /**
      * @throws Problem
@@ -96,189 +62,20 @@ final class SimpleSite
         self::handle($config)->send();
     }
 
-    public static function config(): Config
-    {
-        return self::$instances['config']
-            ?? throw new Problem('Config is not initialized, you must start the project running SimpleSite::run().');
-    }
-
-    public static function container(): ServiceLocator
-    {
-        return self::$instances['container'] ??= (static function () {
-            $container = new ServiceLocator();
-            $container->registerFactory('counter', self::counter(...));
-            $container->registerFactory('db', self::database(...));
-            $container->registerFactory('database', self::database(...));
-            $container->registerFactory('img', self::image(...));
-            $container->registerFactory('image', self::image(...));
-            $container->registerFactory('logger', self::logger(...));
-            $container->registerFactory('phpHandlers', self::phpHandlers(...));
-            $container->registerFactory('request', self::request(...));
-            $container->registerFactory('router', self::router(...));
-            $container->registerFactory('twig', self::twigEnvironment(...));
-            $container->registerFactory('twigEnvironment', self::twigEnvironment(...));
-            $container->registerFactory('twigExtension', self::twigExtension(...));
-            $container->registerFactory('twigLoader', self::twigLoader(...));
-            $container->registerFactory('yamlContext', self::yamlContext(...));
-
-            return $container;
-        })();
-    }
-
-    public static function counter(): Counter
-    {
-        return self::$instances['counter'] ??= new Counter(
-            new PhpFileStorage(
-                self::config()->pathData(),
-                'compteur',
-            ),
-        );
-    }
-
-    public static function database(): Database
-    {
-        return self::$instances['database'] ??= (static function () {
-            try {
-                return new Database(
-                    new CachedFileStorage(
-                        new YamlFileStorage(self::config()->pathData()),
-                        self::config()->pathCache('database'),
-                    ),
-                );
-            } catch (DirectoryNotFoundException|InvalidTableNameException $e) {
-                throw new Problem($e->getMessage(), 0, $e);
-            }
-        })();
-    }
-
-    public static function image(): Image
-    {
-        return self::$instances['image'] ??= new Image(
-            self::logger(),
-            new GcPrunableSimpleCache(
-                new FileSimpleCache(
-                    self::config()->pathCache('images'),
-                    86400 * 30,
-                ),
-                1,
-                1000,
-            ),
-            self::config()->path_public,
-        );
-    }
-
-    public static function logger(): ThrowableLogger
-    {
-        return self::$instances['logger'] ??= (static function () {
-            $context = new ContextLogger(
-                new FileLogger(
-                    self::config()->log_path,
-                    'site',
-                    Rotation::EveryDay,
-                    self::config()->log_max_files,
-                    0o777,
-                    logFormatter: new DefaultLogFormatter('Y-m-d H:i:s', new LogContextFormatter()),
-                ),
-            );
-            try {
-                $context->addContext(['url' => (string) self::request()->getUri()]);
-                $context->addContext(['ip' => $_SERVER['REMOTE_ADDR'] ?? '?']);
-
-                if (isset($_SERVER['HTTP_REFERER'])) {
-                    $context->addContext(['referer' => $_SERVER['HTTP_REFERER']]);
-                }
-            } catch (Throwable) {
-            }
-
-            return new ThrowableLogger(new MinimumLevelLogger($context, self::config()->log_level));
-        })();
-    }
-
-    public static function phpHandlers(): PhpHandlers
-    {
-        return self::$instances['phpHandlers'] ??= new PhpHandlers(self::logger());
-    }
-
-    public static function request(): ServerRequestInterface
-    {
-        return self::$instances['request'] ??= (new HttpFactory())->createServerRequestFromGlobals();
-    }
-
-    public static function router(): HttpRouteHandler
-    {
-        return self::$instances['router'] ??= new HttpRouteHandler(new ClassEventDispatcher(logger: self::logger()));
-    }
-
-    public static function twigEnvironment(): Environment
-    {
-        return self::$instances['twigEnvironment'] ??= (static function () {
-            $environment = new Environment(
-                self::twigLoader(),
-                [
-                    'debug' => true,
-                    'charset' => 'UTF-8',
-                    'strict_variables' => false,
-                    'autoescape' => 'html',
-                    'cache' => self::config()->pathCache('twig'),
-                    'auto_reload' => true,
-                    'optimizations' => -1,
-                ],
-            );
-            $environment->addRuntimeLoader(new TwigRuntimeLoader());
-            $environment->addExtension(new DebugExtension());
-            $environment->addExtension(new MarkdownExtension());
-            $environment->addExtension(self::twigExtension());
-
-            return $environment;
-        })();
-    }
-
-    public static function twigExtension(): TwigExtension
-    {
-        return self::$instances['twigExtension'] ??= new TwigExtension(new ContainerWithMagicGetters(self::container()));
-    }
-
-    public static function twigLoader(): LoaderInterface
-    {
-        return self::$instances['twigLoader'] ??= (static function () {
-            $loader = new FilesystemLoader();
-
-            /** @var array<string, string> $namespaces */
-            $namespaces = [
-                $loader::MAIN_NAMESPACE => self::config()->path_public,
-                'internal' => __DIR__ . '/Views',
-                'templates' => self::config()->path_templates,
-                'data' => self::config()->path_data,
-                'php' => self::config()->path_php,
-                'public' => self::config()->path_public,
-                'logs' => self::config()->log_path,
-            ];
-
-            foreach ($namespaces as $namespace => $path) {
-                if ('' !== $path) {
-                    $loader->addPath($path, $namespace);
-                }
-            }
-
-            return $loader;
-        })();
-    }
-
-    public static function yamlContext(): YamlContext
-    {
-        return self::$instances['yamlContext'] ??= new YamlContext();
-    }
-
     public static function handle(Config $config, ?ServerRequestInterface $request = null): Response
     {
-        self::container()->registerInstance('config', self::$instances['config'] = $config);
+        $request ??= new HttpFactory()->createServerRequestFromGlobals();
+
+        self::container()->registerInstance(Config::class, $config);
+        self::container()->registerInstance(ServerRequestInterface::class, $request);
+
         self::phpHandlers()->registerAll();
         self::phpHandlers()->eventDispatcher->listen(self::throwableHandler(...));
 
         try {
             self::loadPhpFiles();
 
-            return new Response(self::router()->handle($request ?? self::request()));
+            return new Response(self::router()->handle($request));
         } catch (NoResponseFound $e) {
             self::logger()->warning('404 Not Found');
 
@@ -288,6 +85,79 @@ final class SimpleSite
 
             return self::error(500, $e);
         }
+    }
+
+    public static function config(): Config
+    {
+        try {
+            return self::container()->get(Config::class);
+        } catch (NotFoundExceptionInterface) {
+            throw new Problem('Config is not initialized, you must start the project running SimpleSite::run().');
+        }
+    }
+
+    public static function container(): ServiceLocator
+    {
+        return self::$container ??= new Container();
+    }
+
+    public static function counter(): Counter
+    {
+        return self::container()->get(Counter::class);
+    }
+
+    public static function database(): Database
+    {
+        return self::container()->get(Database::class);
+    }
+
+    public static function image(): Image
+    {
+        return self::container()->get(Image::class);
+    }
+
+    public static function logger(): ThrowableLogger
+    {
+        return self::container()->get(ThrowableLogger::class);
+    }
+
+    public static function phpHandlers(): PhpHandlers
+    {
+        return self::container()->get(PhpHandlers::class);
+    }
+
+    public static function request(): ServerRequestInterface
+    {
+        try {
+            return self::container()->get(ServerRequestInterface::class);
+        } catch (NotFoundExceptionInterface) {
+            throw new Problem('Request is not initialized, you must start the project running SimpleSite::run().');
+        }
+    }
+
+    public static function router(): HttpRouteHandler
+    {
+        return self::container()->get(HttpRouteHandler::class);
+    }
+
+    public static function twigEnvironment(): Environment
+    {
+        return self::container()->get(Environment::class);
+    }
+
+    public static function twigExtension(): TwigExtension
+    {
+        return self::container()->get(TwigExtension::class);
+    }
+
+    public static function twigLoader(): LoaderInterface
+    {
+        return self::container()->get(LoaderInterface::class);
+    }
+
+    public static function yamlContext(): YamlContext
+    {
+        return self::container()->get(YamlContext::class);
     }
 
     private static function loadPhpFiles(): void
@@ -306,9 +176,9 @@ final class SimpleSite
             }
         }
 
-        (new Controllers\FallbackController())->init();
-        (new Controllers\ImagesController())->init();
-        (new Controllers\StaticController())->init();
+        new Controllers\FallbackController()->init();
+        new Controllers\ImagesController()->init();
+        new Controllers\StaticController()->init();
     }
 
     private static function throwableHandler(Throwable $throwable): void
