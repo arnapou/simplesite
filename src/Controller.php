@@ -41,6 +41,8 @@ abstract class Controller implements PhpCode
 
     protected function addRoute(string $path, callable $controller, ?string $name = null): Route
     {
+        $path = SimpleSite::config()->base_path_root . ltrim($path, '/');
+
         return SimpleSite::router()->addRoute($path, $controller, $name, $this->routePriority());
     }
 

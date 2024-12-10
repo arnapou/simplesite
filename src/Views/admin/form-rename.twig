@@ -1,0 +1,24 @@
+{% extends "@internal/admin/form.twig" %}
+{% import "@internal/admin/form.twig" as form %}
+
+{% block main %}
+    {{ form.breadcrumb(node, true) }}
+
+    <form action="{{ node|adminUrl('admin_rename') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        {{ form.notice(flash_message) }}
+
+        <p>
+            <label for="name">Rename <code>{{ node.name }}</code> to:</label>
+            <input type="text" name="name" id="name" value="{{ node.name }}" style="width: 100%" autofocus>
+        </p>
+
+        <p class="text-info">
+            You can move files and folders by using relative path like ../.<br>
+            But note that you cannot move files and folders outside the @scopes.
+        </p>
+
+        {{ form.buttons('Rename', node.parent|adminUrl) }}
+    </form>
+{% endblock %}

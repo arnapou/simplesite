@@ -1,0 +1,19 @@
+{% extends "@internal/admin/form.twig" %}
+{% import "@internal/admin/form.twig" as form %}
+
+{% block main %}
+    {{ form.breadcrumb(node) }}
+
+    <form action="{{ node|adminUrl(folder ? 'admin_create_folder' : 'admin_create_file') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        {{ form.notice(flash_message) }}
+
+        <p>
+            <label for="name">Create <code>{{ folder ? 'folder' : 'file' }}</code>:</label>
+            <input type="text" name="name" id="name" value="" style="width: 100%" autofocus>
+        </p>
+
+        {{ form.buttons('Create', node|adminUrl) }}
+    </form>
+{% endblock %}

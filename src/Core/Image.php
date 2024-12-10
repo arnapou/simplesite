@@ -13,26 +13,19 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
+use Arnapou\Psr\Psr7HttpMessage\FileResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use GdImage;
 use Imagick;
 use ImagickException;
 use Psr\Log\LoggerInterface;
-use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 final class Image
 {
-    public const array MIME_TYPES = [
-        'jpg' => 'image/jpeg',
-        'png' => 'image/png',
-        'gif' => 'image/gif',
-    ];
-
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly CacheInterface $cache,
-        private readonly string $pathPublic,
+        private readonly Cache $cache,
     ) {
     }
 
@@ -41,24 +34,28 @@ final class Image
      * @throws InvalidArgumentException
      * @throws ImagickException
      */
-    public function thumbnail(string $path, string $ext, int $size): ?Response
+    public function thumbnail(string $filename, string $ext, ?int $size): ?Response
     {
-        if (!is_file($filename = $this->pathPublic . "/$path.$ext")) {
+        if (!is_file($filename)) {
             return null;
         }
 
         $filemtime = (int) filemtime($filename);
-        $filesize = filesize($filename);
-        $key = md5($path) . ".$size.$ext.$filemtime.$filesize";
+        if (null === $size) {
+            $content = (string) file_get_contents($filename);
+        } else {
+            $content = $this->cache->from(
+                'arnapou.simplesite.' . sha1($filename) . ".$size.$ext.$filemtime." . filesize($filename),
+                function () use ($filename, $ext, $size) {
+                    $content = $this->imgResize($filename, strtolower($ext), $size);
+                    $this->logger->notice('Image resize', ['size' => $size]);
 
-        $content = $this->cache->get($key);
-        if (!\is_string($content) || !$this->cache->has($key)) {
-            $content = $this->imgResize($filename, strtolower($ext), $size);
-            $this->logger->notice('Image resize', ['size' => $size]);
-            $this->cache->set($key, $content);
+                    return $content;
+                },
+            );
         }
 
-        return $this->fileResponse($content, strtolower($ext), $filemtime);
+        return new FileResponse($content, Config::IMAGE_MIME_TYPES[strtolower($ext)]);
     }
 
     /**
@@ -140,14 +137,5 @@ final class Image
         return $width > $height
             ? [$size, (int) floor($size * $height / $width)]
             : [(int) floor($size * $width / $height), $size];
-    }
-
-    private function fileResponse(string $content, string $ext, int $filemtime): Response
-    {
-        $etag = base64_encode(hash('sha256', $content, true));
-
-        return Utils::cacheControlResponse($etag, 864000, $filemtime)
-            ->withHeader('Content-Type', self::MIME_TYPES[$ext])
-            ->withBody($content);
     }
 }

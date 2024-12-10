@@ -25,6 +25,8 @@ $rules = [
     '@PHP80Migration' => true,
     '@PHP81Migration' => true,
     '@PHP82Migration' => true,
+    '@PHP83Migration' => true,
+    '@PHP84Migration' => true,
     'declare_strict_types' => true,
     'concat_space' => ['spacing' => 'one'],
     'ordered_imports' => ['sort_algorithm' => 'alpha', 'imports_order' => ['const', 'class', 'function']],

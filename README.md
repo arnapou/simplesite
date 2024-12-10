@@ -13,6 +13,37 @@ Links
 > Phar file 👉️ [bin/simplesite.phar](bin/simplesite.phar)
 
 
+Docker
+--------------------
+
+Web server
+--------------------
+
+You can directly use our php image if you want something working out of the box :
+- `registry.gitlab.com/arnapou/docker/php:8.4-frankenphp`
+
+We recommend 
+- [FrankenPHP](https://frankenphp.dev/)
+- [Caddy](https://caddyserver.com/) with [php-fpm](https://hub.docker.com/_/php/tags?name=fpm) backend
+
+If you want to use [Apache](https://hub.docker.com/_/php/tags?name=apache), we suggest a `.htaccess` like this :
+
+```apacheconf
+RewriteEngine On
+
+DirectorySlash Off
+
+FileETag MTime Size
+Options -Indexes -MultiViews -ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule . index.php [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L,QSA]
+```
+
+
 Php versions
 --------------------
 

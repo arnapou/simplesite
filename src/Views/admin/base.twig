@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Admin</title>
+    <link rel="icon" type="image/svg" href="{{ authenticated ? path('admin_favicon_authenticated') : path('admin_favicon_unauthenticated') }}"/>
+    <style>
+        {{ source('@internal/simple.css') }}
+        {{ source('@internal/admin/style.css') }}
+    </style>
+    {% block style %}{% endblock %}
+</head>
+<body>
+<header>
+    <h1>{{ (authenticated ? 'icon-user' : 'icon-lock')|svgUse }} Admin</h1>
+    <nav>
+        <a href="{{ path_dir('') }}"><i>{{ 'icon-public'|svgUse }}</i>Public</a>
+        <a href="{{ path('admin_home') }}"><i>{{ 'icon-home'|svgUse }}</i>Admin</a>
+        {% if authenticated %}
+            <a href="{{ path('admin_logout') }}"><i>{{ 'action-logout'|svgUse }}</i>Logout</a>
+        {% endif %}
+    </nav>
+</header>
+<main>
+    {% block main %}{% endblock %}
+</main>
+<footer>
+    <a href="https://gitlab.com/arnapou/project/simplesite">GitLab project</a>
+</footer>
+<!-- Icon source : https://www.svgrepo.com/collection/duotone-oval-interface-icons/ -->
+<svg style="display: none" version="2.0">
+    <defs>
+        {{ '@internal/svg/action-create.svg'|svgSymbol }}
+        {{ '@internal/svg/action-delete.svg'|svgSymbol }}
+        {{ '@internal/svg/action-edit.svg'|svgSymbol }}
+        {{ '@internal/svg/action-goto.svg'|svgSymbol }}
+        {{ '@internal/svg/action-logout.svg'|svgSymbol }}
+        {{ '@internal/svg/action-rename.svg'|svgSymbol }}
+        {{ '@internal/svg/action-download.svg'|svgSymbol }}
+        {{ '@internal/svg/action-upload.svg'|svgSymbol }}
+
+        {{ '@internal/svg/file-forbidden.svg'|svgSymbol }}
+        {{ '@internal/svg/file-generic.svg'|svgSymbol }}
+        {{ '@internal/svg/file-picture.svg'|svgSymbol }}
+        {{ '@internal/svg/file-sound.svg'|svgSymbol }}
+        {{ '@internal/svg/file-text.svg'|svgSymbol }}
+        {{ '@internal/svg/file-video.svg'|svgSymbol }}
+
+        {{ '@internal/svg/icon-error.svg'|svgSymbol }}
+        {{ '@internal/svg/icon-folder.svg'|svgSymbol }}
+        {{ '@internal/svg/icon-home.svg'|svgSymbol }}
+        {{ '@internal/svg/icon-lock.svg'|svgSymbol }}
+        {{ '@internal/svg/icon-public.svg'|svgSymbol }}
+        {{ '@internal/svg/icon-user.svg'|svgSymbol }}
+    </defs>
+</svg>
+</body>
+</html>

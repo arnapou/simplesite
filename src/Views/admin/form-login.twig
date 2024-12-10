@@ -1,0 +1,36 @@
+{% extends "@internal/admin/form.twig" %}
+{% import "@internal/admin/form.twig" as form %}
+
+{% block main %}
+    <form action="{{ path('admin_login') }}" method="POST">
+        <fieldset>
+            {% if init %}
+                <legend>Set the admin password</legend>
+
+                {{ form.notice(flash_message) }}
+
+                <p>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="password" name="password" placeholder="minimum 8 characters" autofocus>
+                </p>
+
+                <p class="text-info">
+                    This password should be as strong as possible, and completely private.
+                </p>
+
+                {{ form.buttons('Set password') }}
+            {% else %}
+                <legend>Login</legend>
+
+                {{ form.notice(flash_message) }}
+
+                <p>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="password" name="password" placeholder="type your password" autofocus>
+                </p>
+
+                {{ form.buttons('Login') }}
+            {% endif %}
+        </fieldset>
+    </form>
+{% endblock %}

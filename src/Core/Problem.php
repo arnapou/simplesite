@@ -13,10 +13,36 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
+use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError;
+use Arnapou\Psr\Psr7HttpMessage\Status\StatusServerError;
 use Exception;
+use Throwable;
 
 class Problem extends Exception
 {
+    private StatusClientError|StatusServerError|null $status;
+
+    public function __construct(string $message = '', int|StatusClientError|StatusServerError $code = 0, ?Throwable $previous = null)
+    {
+        if (\is_int($code)) {
+            $this->status = null;
+            parent::__construct($message, $code, $previous);
+        } else {
+            $this->status = $code;
+            parent::__construct($message, $code->value, $previous);
+        }
+    }
+
+    public function getStatus(): StatusServerError|StatusClientError|null
+    {
+        return $this->status;
+    }
+
+    public static function fromStatus(StatusClientError|StatusServerError $status): self
+    {
+        return new self("$status->name.", $status);
+    }
+
     public static function emptyVariable(string $name): self
     {
         return new self("Config variable '$name' cannot be empty");

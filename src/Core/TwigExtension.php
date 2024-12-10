@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\SimpleSite;
+use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
 use Psr\Container\ContainerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
@@ -22,8 +22,13 @@ use Twig\TwigFunction;
 
 final class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private readonly ContainerInterface $container)
-    {
+    public function __construct(
+        private readonly Config $config,
+        private readonly ContainerInterface $container,
+        private readonly HttpRouteHandler $router,
+        private readonly Helper $helper,
+        private readonly TwigLoader $twigLoader,
+    ) {
     }
 
     public function getGlobals(): array
@@ -41,16 +46,16 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('path_dir', $this->path_dir(...)),
             new TwigFunction('path_page', $this->path_page(...)),
             new TwigFunction('thumbnail', $this->thumbnail(...)),
-            new TwigFunction('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
-            new TwigFunction('minify_html', Utils::minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFunction('minifyHtml', $this->helper->minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFunction('minify_html', $this->helper->minifyHtml(...), ['is_safe' => ['html']]),
         ];
     }
 
     public function getFilters(): array
     {
         return [
-            new TwigFilter('minifyHtml', Utils::minifyHtml(...), ['is_safe' => ['html']]),
-            new TwigFilter('minify_html', Utils::minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFilter('minifyHtml', $this->helper->minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFilter('minify_html', $this->helper->minifyHtml(...), ['is_safe' => ['html']]),
             new TwigFilter('thumbnail', $this->thumbnail(...)),
             new TwigFilter('chunk', $this->chunk(...)),
             new TwigFilter('thumbnail', $this->thumbnail(...)),
@@ -58,9 +63,20 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('path_page', $this->path_page(...)),
             new TwigFilter('getclass', $this->getclass(...)),
             new TwigFilter('repeat', $this->repeat(...), ['is_safe' => ['html']]),
-            new TwigFilter('slugify', Utils::slugify(...)),
-            new TwigFilter('slug', Utils::slugify(...)),
+            new TwigFilter('slugify', $this->helper->slugify(...)),
+            new TwigFilter('slug', $this->helper->slugify(...)),
+            new TwigFilter('snake', $this->helper->toSnakeCase(...)),
+            new TwigFilter('camel', $this->helper->toCamelCase(...)),
+            new TwigFilter('svgSymbol', $this->svgSymbol(...), ['is_safe' => ['html']]),
+            new TwigFilter('svgUse', $this->helper->svgSymbolUse(...), ['is_safe' => ['html']]),
         ];
+    }
+
+    public function svgSymbol(string $view, ?string $name = null): string
+    {
+        $source = $this->twigLoader->getSourceContext($view);
+
+        return $this->helper->svgSymbol($source->getPath(), $name);
     }
 
     /**
@@ -85,7 +101,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function thumbnail(string $path, int $size = 200): string
     {
-        if (\array_key_exists($ext = strtolower(Utils::extension($path)), Image::MIME_TYPES)) {
+        if (\array_key_exists($ext = strtolower($this->helper->fileExtension($path)), Config::IMAGE_MIME_TYPES)) {
             $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
         }
 
@@ -94,12 +110,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function asset(string $path): string
     {
-        return SimpleSite::config()->base_path_url . ltrim($path, '/');
-    }
-
-    public function path_dir(string $path): string
-    {
-        return $this->path('static_dir', ['path' => $path]);
+        return $this->config->base_path_root . ltrim($path, '/');
     }
 
     /**
@@ -107,9 +118,14 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function path(string $name, array $parameters = []): string
     {
-        $url = SimpleSite::config()->base_path_url . ltrim(SimpleSite::router()->generateUrl($name, $parameters), '/');
+        $url = $this->router->generateUrl($name, $parameters);
 
         return '//' === $url ? '/' : $url;
+    }
+
+    public function path_dir(string $path): string
+    {
+        return $this->path('static_dir', ['path' => $path]);
     }
 
     public function path_page(string $path): string

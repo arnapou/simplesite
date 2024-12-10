@@ -50,9 +50,7 @@ final class BuildFilesIterator extends IteratorIterator
                 new RecursiveIteratorIterator(
                     new RecursiveDirectoryIterator(
                         $path,
-                        FilesystemIterator::KEY_AS_PATHNAME
-                        | FilesystemIterator::SKIP_DOTS
-                        | FilesystemIterator::CURRENT_AS_FILEINFO,
+                        FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_FILEINFO,
                     ),
                     RecursiveIteratorIterator::LEAVES_ONLY,
                 ),

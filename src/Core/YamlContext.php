@@ -13,14 +13,21 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\SimpleSite\SimpleSite;
-use Symfony\Component\Yaml\Yaml;
+use Arnapou\SimpleSite\YamlContextLoader;
+use Psr\Log\LoggerInterface;
 use Throwable;
+use Twig\Loader\LoaderInterface;
 
 final class YamlContext
 {
     /** @var list<YamlContextLoader> */
     private array $loaders = [];
+
+    public function __construct(
+        private readonly LoaderInterface $twigLoader,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
 
     public function addLoader(YamlContextLoader $loader): self
     {
@@ -50,17 +57,15 @@ final class YamlContext
      */
     private function default(string $view): array
     {
-        $yamlFile = substr($view, 0, -\strlen(Utils::extension($view))) . 'yaml';
+        $helper = new Helper();
+        $yamlFile = substr($view, 0, -\strlen($helper->fileExtension($view))) . 'yaml';
         try {
-            if (SimpleSite::twigLoader()->exists($yamlFile)) {
-                $yaml = SimpleSite::twigLoader()->getSourceContext($yamlFile)->getCode();
-                $parsed = Yaml::parse($yaml);
-
-                return \is_array($parsed) ? $parsed : [];
+            if ($this->twigLoader->exists($yamlFile)) {
+                return $helper->yamlParse($this->twigLoader->getSourceContext($yamlFile)->getCode());
             }
-        } catch (Throwable $exception) {
-            $context = ['yaml' => $yamlFile, 'throwable' => $exception];
-            SimpleSite::logger()->error('Yaml parsing failed', $context);
+        } catch (Throwable $e) {
+            $context = ['yaml' => $yamlFile, 'throwable' => $e];
+            $this->logger->error('Yaml parsing failed', $context);
         }
 
         return [];

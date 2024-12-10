@@ -1,0 +1,64 @@
+{% extends "@internal/admin/base.twig" %}
+
+{% block style %}
+    <style>
+        textarea {
+            font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+            font-size: .8rem;
+        }
+
+        form a.cancel {
+            background-color: var(--accent-bg);
+            color: var(--text);
+        }
+
+        form a.cancel:hover {
+            background-color: var(--accent-hover);
+            color: var(--accent-text);
+        }
+    </style>
+{% endblock %}
+
+
+{% macro breadcrumb(node, remove_last) %}
+    <style>
+        .breadcrumb a:first-child svg {
+            margin: 0;
+        }
+
+        .breadcrumb span {
+            margin: 0 .6rem;
+        }
+    </style>
+    <div class="breadcrumb">
+        {% for item in node.breadcrumb %}
+            {% if not loop.last or not remove_last %}
+                {% if not loop.first %}<span>/</span>{% endif %}
+                <a href="{{ item|adminUrl }}"><i>{{ item.symbol|svgUse }}</i>{{ item.name }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+
+{% macro buttons(action, cancel) %}
+    <p>
+        {% if cancel %}
+            <input type="submit" value="{{ action }}" style="float: right">
+            <a class="button cancel" href="{{ cancel }}">Cancel</a>
+        {% else %}
+            <input type="submit" value="{{ action }}">
+        {% endif %}
+    </p>
+{% endmacro %}
+
+
+{% macro notice(flash_message) %}
+    {% if flash_message %}
+        <p id="fleeting_message">
+            <mark>{{ flash_message }}</mark>
+        </p>
+    {% endif %}
+
+    <script>(o = document.getElementById('fleeting_message')) && window.setTimeout(() => o.style.display = 'none', 4000);</script>
+{% endmacro %}

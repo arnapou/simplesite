@@ -16,35 +16,50 @@ namespace Arnapou\SimpleSite\Controllers;
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Controller;
-use Arnapou\SimpleSite\SimpleSite;
+use Arnapou\SimpleSite\Core\Config;
+use Arnapou\SimpleSite\Core\Image;
 
 final class ImagesController extends Controller
 {
-    public function configure(): void
-    {
-        $this->addRoute('{path}.{size}.{ext}', $this->routeImage(...), 'images')
-            ->setRequirement('path', '.*')
-            ->setRequirement('size', '[0-9]{2,4}')
-            ->setRequirement('ext', '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]');
+    private const string REGEX_EXT = '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]';
+
+    public function __construct(
+        private readonly Config $config,
+        private readonly Image $image,
+    ) {
     }
 
-    public function routeImage(string $path, string $size, string $ext): Response
+    public function configure(): void
     {
-        if (!ctype_digit($size)) {
-            throw new NoResponseFound();
+        $this->addRoute('{path}.{size}.{ext}', $this->routeImageResize(...), 'images')
+            ->setRequirement('path', '.*')
+            ->setRequirement('size', '\d+')
+            ->setRequirement('ext', self::REGEX_EXT);
+    }
+
+    public function routeImageResize(string $path, string $ext, string $size): Response
+    {
+        $filename = $this->findFile($path, $ext) ?? throw new NoResponseFound();
+        $intsize = $this->getSize($size) ?? throw new NoResponseFound();
+
+        return $this->image->thumbnail($filename, $ext, $intsize) ?? throw new NoResponseFound();
+    }
+
+    private function findFile(string $path, string $ext): ?string
+    {
+        if (is_file($filename = $this->config->path_public . "/$path.$ext")) {
+            return $filename;
+        }
+        if (is_file($filename = $this->config->path_pages . "/$path.$ext")) {
+            return $filename;
         }
 
-        $intsize = (int) $size;
-        if ($intsize < 16 || $intsize > 2000) {
-            throw new NoResponseFound();
-        }
+        return null;
+    }
 
-        $response = SimpleSite::image()->thumbnail($path, $ext, $intsize);
-        if (null === $response) {
-            throw new NoResponseFound();
-        }
-
-        return $response;
+    private function getSize(string $size): ?int
+    {
+        return !ctype_digit($size) || (int) $size < 16 || (int) $size > 2000 ? null : (int) $size;
     }
 
     public function routePriority(): int

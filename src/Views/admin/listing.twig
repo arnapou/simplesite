@@ -1,0 +1,112 @@
+{% extends "@internal/admin/form.twig" %}
+{% import "@internal/admin/form.twig" as form %}
+
+{% block style %}
+    {{ parent() }}
+    <style>
+        table {
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        td.size {
+            text-align: right;
+            width: 1em;
+            white-space: nowrap;
+            min-width: 4rem;
+        }
+
+        td.center {
+            text-align: center;
+            width: 1em;
+            white-space: nowrap;
+        }
+
+        td:not(:first-child) svg {
+            margin: 0;
+            padding: -.5rem;
+        }
+
+        td a:hover svg {
+            transform: scale(1.2);
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    {{ form.breadcrumb(node) }}
+
+    {{ form.notice(flash_message) }}
+
+    {% if node.list|length %}
+        <table>
+            <tbody>
+            {% for item in node.list %}
+                <tr>
+                    <td>
+                        {% if item.isDir %}
+                            <a href="{{ item|adminUrl }}"><i>{{ item.symbol|svgUse }}</i>{{ item.name }}/</a>
+                        {% else %}
+                            <i>{{ item.symbol|svgUse }}</i>{{ item.name }}
+                        {% endif %}
+                    </td>
+                    <td class="size"><small>{{ item.isDir ? '':item.size }}</small></td>
+                    <td class="center"><small>{{ item.time }}</small></td>
+                    <td class="center">
+                        {% if item.canDownload %}
+                            <a href="{{ item|adminUrl('admin_download') }}" target="_blank" title="download"><i>{{ 'action-download'|svgUse }}</i></a>
+                        {% else %}
+                            <i>{{ ''|svgUse }}</i>
+                        {% endif %}
+                    </td>
+                    <td class="center">
+                        {% set url = item.publicUrl %}
+                        {% if url %}
+                            <a href="{{ url }}" target="_blank" title="open in another tab"><i>{{ 'action-goto'|svgUse }}</i></a>
+                        {% else %}
+                            <i>{{ ''|svgUse }}</i>
+                        {% endif %}
+                    </td>
+                    <td class="center">
+                        {% if item.canRename %}
+                            <a href="{{ item|adminUrl('admin_rename') }}" title="rename"><i>{{ 'action-rename'|svgUse }}</i></a>
+                        {% else %}
+                            <i>{{ ''|svgUse }}</i>
+                        {% endif %}
+                    </td>
+                    <td class="center">
+                        {% if item.canEdit %}
+                            <a href="{{ item|adminUrl }}" title="edit"><i>{{ 'action-edit'|svgUse }}</i></a>
+                        {% else %}
+                            <i>{{ ''|svgUse }}</i>
+                        {% endif %}
+                    </td>
+                    <td class="center">
+                        {% if item.canDelete %}
+                            <a href="{{ item|adminUrl('admin_delete') }}" title="delete"><i>{{ 'action-delete'|svgUse }}</i></a>
+                        {% else %}
+                            <i>{{ ''|svgUse }}</i>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="notice">
+            <i>{{ 'icon-error'|svgUse }}</i> <code>Empty folder ...</code>
+        </p>
+    {% endif %}
+
+    <p style="float: right">
+        <small>
+            {% if node.canCreate %}
+                <a href="{{ node|adminUrl('admin_create_folder') }}"><i>{{ 'action-create'|svgUse }}</i>Create folder</a>
+                <i>{{ ''|svgUse }}</i>
+                <a href="{{ node|adminUrl('admin_create_file') }}"><i>{{ 'action-create'|svgUse }}</i>Create file</a>
+                <i>{{ ''|svgUse }}</i>
+            {% endif %}
+            <a href="{{ node|adminUrl('admin_upload') }}"><i>{{ 'action-upload'|svgUse }}</i>Upload</a>
+        </small>
+    </p>
+{% endblock %}

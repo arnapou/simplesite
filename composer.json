@@ -12,11 +12,13 @@
     ],
     "require": {
         "php": "~8.4.0",
+        "arnapou/encoder": "^2.3",
         "arnapou/ensure": "^2.7",
         "arnapou/pfdb": "^6.4",
         "arnapou/psr-cache": "^1.0",
         "arnapou/psr-container": "^1.0",
         "arnapou/psr-http": "^1.0",
+        "arnapou/zip": "^1.4",
         "michelf/php-markdown": "^2.0",
         "symfony/string": "^6.4",
         "symfony/translation-contracts": "^3.5",
@@ -25,6 +27,8 @@
         "twig/twig": "^3.9"
     },
     "require-dev": {
+        "ext-gd": "*",
+        "ext-imagick": "*",
         "friendsofphp/php-cs-fixer": "^3.52",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan": "^2.0",
@@ -33,8 +37,8 @@
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpunit/php-code-coverage": "^11.0",
         "phpunit/phpunit": "^11.0",
-        "ext-gd": "*",
-        "ext-imagick": "*"
+        "symfony/css-selector": "^7.2",
+        "symfony/dom-crawler": "^7.2"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",

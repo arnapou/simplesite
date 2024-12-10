@@ -2,8 +2,8 @@ parameters:
 	level: max
 	paths:
 		- build
-		- site/php
-		- site/public/index.php
+		- demo/src
+		- demo/public/index.php
 		- src
 		- tests
 	excludePaths:

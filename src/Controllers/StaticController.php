@@ -16,13 +16,15 @@ namespace Arnapou\SimpleSite\Controllers;
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Controller;
-use Arnapou\SimpleSite\Core\Utils;
-use Arnapou\SimpleSite\SimpleSite;
+use Arnapou\SimpleSite\Core\Config;
+use Arnapou\SimpleSite\Core\Helper;
 
 final class StaticController extends Controller
 {
-    /** @var list<string> */
-    protected array $extensions = ['twig', 'htm', 'html', 'tpl', 'html.twig', 'php', 'md'];
+    public function __construct(
+        private readonly Config $config,
+    ) {
+    }
 
     public function configure(): void
     {
@@ -33,13 +35,10 @@ final class StaticController extends Controller
 
     public function routeStaticDir(string $path = ''): Response
     {
-        $pathPublic = SimpleSite::config()->path_public;
-
-        if (is_dir($realpath = "$pathPublic/$path")) {
-            foreach ($this->extensions as $extension) {
-                if (is_file("$realpath/index.$extension")) {
-                    return $this->render("$path/index.$extension");
-                }
+        if (is_dir($realpath = $this->config->path_pages . "/$path")) {
+            $extension = $this->findExtension("$realpath/index");
+            if (null !== $extension) {
+                return $this->render("$path/index.$extension");
             }
         }
         throw new NoResponseFound();
@@ -47,35 +46,28 @@ final class StaticController extends Controller
 
     public function routeStaticPage(string $path = ''): Response
     {
-        $pathPublic = SimpleSite::config()->path_public;
-        $basePath = SimpleSite::config()->base_path_url;
-
-        $pathExtension = Utils::extension($path);
-        if (\in_array($pathExtension, $this->extensions, true)) {
-            return $this->redirect($basePath . substr($path, 0, -\strlen($pathExtension) - 1));
+        if (null !== ($extension = new Helper()->pageExtension($path))) {
+            return $this->redirect($this->config->base_path_root . substr($path, 0, -\strlen($extension) - 1));
         }
 
-        $realpath = "$pathPublic/$path";
-        foreach ($this->extensions as $extension) {
-            if (is_file("$realpath.$extension")) {
-                return $this->render("$path.$extension");
-            }
+        $extension = $this->findExtension($realpath = $this->config->path_pages . "/$path");
+        if (null !== $extension) {
+            return $this->render("$path.$extension");
         }
 
         if (is_dir($realpath)) {
-            return $this->redirect($basePath . "$path/", 301);
+            return $this->redirect($this->config->base_path_root . "$path/", 301);
         }
 
         throw new NoResponseFound();
     }
 
-    protected function render(string $view, array $context = []): Response
+    private function findExtension(string $basePath): ?string
     {
-        if (str_ends_with($view, '.php')) {
-            throw new NoResponseFound();
-        }
-
-        return parent::render($view, $context);
+        return array_find(
+            Config::PAGE_EXTENSIONS,
+            static fn ($extension) => is_file("$basePath.$extension"),
+        );
     }
 
     public function routePriority(): int

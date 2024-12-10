@@ -24,6 +24,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class SimpleSiteTest extends TestCase
 {
+    use ConfigTestTrait;
+
     public const array SERVER = [
         'REMOTE_ADDR' => '1.2.3.4',
         'REMOTE_HOST' => '1.2.3.4',
@@ -33,14 +35,7 @@ class SimpleSiteTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->config = new Config(
-            'test',
-            path_public: __DIR__ . '/../site/public',
-            path_cache: __DIR__ . '/../site/cache',
-            path_data: __DIR__ . '/../site/data',
-            path_templates: __DIR__ . '/../site/templates',
-            path_php: __DIR__ . '/../site/php',
-        );
+        $this->config = self::createConfigSite();
     }
 
     #[RunInSeparateProcess]
@@ -56,8 +51,12 @@ class SimpleSiteTest extends TestCase
     public static function dataImages(): Generator
     {
         yield [self::createServerRequest('GET', '/favicon.ico')];
+        yield [self::createServerRequest('GET', '/php.100.png')];
         yield [self::createServerRequest('GET', '/assets/twig.200.png')];
         yield [self::createServerRequest('GET', '/assets/twig.400.png')];
+
+        yield [self::createServerRequest('GET', '/admin/lock.svg')];
+        yield [self::createServerRequest('GET', '/admin/user.svg')];
     }
 
     #[RunInSeparateProcess]
@@ -77,14 +76,16 @@ class SimpleSiteTest extends TestCase
         yield [self::createServerRequest('GET', '/'), "<h2>Etat d'esprit</h2>"];
         yield [self::createServerRequest('GET', '/index'), "<h2>Etat d'esprit</h2>"];
 
-        yield [self::createServerRequest('GET', '/pages/datas'), '<h1>Datas</h1>'];
-        yield [self::createServerRequest('GET', '/pages/error_pages'), "<h1>Pages d'erreur</h1>"];
-        yield [self::createServerRequest('GET', '/pages/images'), '<h1>Images</h1>'];
-        yield [self::createServerRequest('GET', '/pages/logs'), '<h1>Logs</h1>'];
-        yield [self::createServerRequest('GET', '/pages/php'), '<h1>Php</h1>'];
-        yield [self::createServerRequest('GET', '/pages/templating'), '<h1>Templating Twig</h1>'];
+        yield [self::createServerRequest('GET', '/menu/datas'), '<h1>Datas</h1>'];
+        yield [self::createServerRequest('GET', '/menu/error_pages'), "<h1>Pages d'erreur</h1>"];
+        yield [self::createServerRequest('GET', '/menu/images'), '<h1>Images</h1>'];
+        yield [self::createServerRequest('GET', '/menu/logs'), '<h1>Logs</h1>'];
+        yield [self::createServerRequest('GET', '/menu/php'), '<h1>Php</h1>'];
+        yield [self::createServerRequest('GET', '/menu/templating'), '<h1>Templating Twig</h1>'];
 
         yield [self::createServerRequest('GET', '/hello-world'), '<h1>Hello world !</h1>'];
+
+        yield [self::createServerRequest('GET', '/admin/login'), '<legend>Login</legend>'];
     }
 
     #[RunInSeparateProcess]
@@ -98,16 +99,48 @@ class SimpleSiteTest extends TestCase
         self::assertStringContainsString($string, $response->getBody()->getContents());
     }
 
+    public static function dataPageXml(): Generator
+    {
+        yield [
+            self::createServerRequest('GET', '/sitemap.xml'),
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">',
+            '</lastmod><loc>http://localhost/menu/error_pages</loc></url>',
+            '</lastmod><loc>http://localhost/menu/datas</loc></url>',
+            '</lastmod><loc>http://localhost/menu/logs</loc></url>',
+            '</lastmod><loc>http://localhost/menu/php</loc></url>',
+            '</lastmod><loc>http://localhost/menu/images</loc></url>',
+            '</lastmod><loc>http://localhost/menu/templating</loc></url>',
+            '</lastmod><loc>http://localhost/</loc></url>',
+            '</urlset>',
+        ];
+    }
+
+    #[RunInSeparateProcess]
+    #[DataProvider('dataPageXml')]
+    public function testPageXml(ServerRequestInterface $request, string ...$strings): void
+    {
+        $response = SimpleSite::handle($this->config, $request);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertStringStartsWith('text/xml', $response->getHeader('Content-Type')[0] ?? '');
+
+        $contents = $response->getBody()->getContents();
+        foreach ($strings as $string) {
+            self::assertStringContainsString($string, $contents);
+        }
+    }
+
     public static function dataRedirect(): Generator
     {
-        yield [self::createServerRequest('GET', '/assets'), '/assets/'];
+        yield [self::createServerRequest('GET', '/menu'), '/menu/'];
 
-        yield [self::createServerRequest('GET', '/foo/bar.php'), '/foo/bar'];
         yield [self::createServerRequest('GET', '/foo/bar.html'), '/foo/bar'];
-        yield [self::createServerRequest('GET', '/foo/bar.htm'), '/foo/bar'];
         yield [self::createServerRequest('GET', '/foo/bar.twig'), '/foo/bar'];
-        yield [self::createServerRequest('GET', '/foo/bar.tpl'), '/foo/bar'];
-        yield [self::createServerRequest('GET', '/foo/bar.html.twig'), '/foo/bar'];
+        yield [self::createServerRequest('GET', '/foo/bar.html.twig'), '/foo/bar.html'];
+
+        yield [self::createServerRequest('GET', '/admin'), '/admin/'];
+        yield [self::createServerRequest('GET', '/admin/'), '/admin/login'];
     }
 
     #[RunInSeparateProcess]
@@ -128,8 +161,10 @@ class SimpleSiteTest extends TestCase
         yield ['GET', '/assets/twig.2001.png'];
         yield ['GET', '/assets/unknown.200.png'];
 
+        yield ['GET', '/admin/init'];
+
         yield ['GET', '/foo/bar'];
-        yield ['GET', '/not-found/'];
+        yield ['GET', '/je_n_existe_pas'];
     }
 
     #[RunInSeparateProcess]

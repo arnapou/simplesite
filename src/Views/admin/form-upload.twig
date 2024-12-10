@@ -1,0 +1,82 @@
+{% extends "@internal/admin/form.twig" %}
+{% import "@internal/admin/form.twig" as form %}
+
+{% block style %}
+    {{ parent() }}
+    <style>
+        table {
+            width: 100%;
+            font-size: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    {{ form.breadcrumb(node) }}
+
+    {% if upload %}
+
+        <p>
+            Upload result.
+        </p>
+        <table>
+            <thead>
+            <tr>
+                <th>Filename</th>
+                <th>Detail</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in upload.errors %}
+                <tr>
+                    <td class="text-error">{{ item.0 }}</td>
+                    <td class="text-error">{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+            {% for item in upload.warnings %}
+                <tr>
+                    <td class="text-warning">{{ item.0 }}</td>
+                    <td class="text-warning">{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+            {% for item in upload.success %}
+                <tr>
+                    <td>{{ item.0 }}</td>
+                    <td>{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <p>
+            <a class="button" href="{{ node|adminUrl }}">OK</a>
+        </p>
+
+    {% else %}
+
+        <form action="{{ node|adminUrl('admin_upload') }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            {{ form.notice(flash_message) }}
+
+            <p>
+                <label for="file">File(s) to upload:</label>
+                <input id="file" name="files[]" type="file" multiple>
+            </p>
+
+            <p>
+                <label for="isZip">
+                    Unzip after upload: <input id="isZip" name="isZip" type="checkbox" value="1">
+                </label>
+            </p>
+
+            <p class="text-info">
+                The checkbox only applies on 'zip' files.<br>
+                Max file size: {{ 'upload_max_filesize'|ini_get }}.<br>
+                Global max size: {{ 'post_max_size'|ini_get }}.<br>
+            </p>
+
+            {{ form.buttons('Upload', node|adminUrl) }}
+        </form>
+    {% endif %}
+{% endblock %}

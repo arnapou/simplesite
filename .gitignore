@@ -6,5 +6,5 @@ tests/coverage
 vendor
 
 build/tmp
-site/cache
-site/data/compteur.*.php
+demo/cache
+demo/data/table.admin.config.yaml

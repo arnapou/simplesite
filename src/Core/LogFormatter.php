@@ -17,9 +17,10 @@ use Arnapou\Psr\Psr3Logger\Formatter\ContextFormatter;
 use Arnapou\Psr\Psr3Logger\Formatter\DefaultLogFormatter;
 use Arnapou\Psr\Psr3Logger\Formatter\JsonContextFormatter;
 use Arnapou\Psr\Psr3Logger\Utils\Psr3Level;
-use Arnapou\SimpleSite\SimpleSite;
 use DateTimeImmutable;
 use JsonSerializable;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Stringable;
 use Throwable;
 use Traversable;
@@ -29,10 +30,11 @@ final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatt
     private DefaultLogFormatter $logFormatter;
     private JsonContextFormatter $contextFormatter;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ContainerInterface $container,
+    ) {
         $this->logFormatter = new DefaultLogFormatter('Y-m-d H:i:s', $this);
-        $this->contextFormatter = new JsonContextFormatter();
+        $this->contextFormatter = new JsonContextFormatter(JSON_PRESERVE_ZERO_FRACTION | JSON_PRETTY_PRINT);
     }
 
     public function formatLine(DateTimeImmutable $date, Psr3Level $level, string $message, array $context): string
@@ -72,7 +74,8 @@ final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatt
     {
         $common = [];
         try {
-            $serverRequest = SimpleSite::request();
+            /** @var ServerRequestInterface $serverRequest */
+            $serverRequest = $this->container->get(ServerRequestInterface::class);
             $serverParams = $serverRequest->getServerParams();
 
             $common['url'] = (string) $serverRequest->getUri();

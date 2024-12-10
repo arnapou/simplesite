@@ -1,12 +1,11 @@
-FROM registry.gitlab.com/arnapou/docker/php:8.4-dev as build
+FROM registry.gitlab.com/arnapou/docker/php:8.4-dev AS build
 
 COPY --chown=www-data:www-data . /app
-RUN composer install --no-interaction --no-progress --optimize-autoloader --no-dev \
- && php -d 'phar.readonly=Off' ./build/build.php bin/simplesite.phar \
- && rm composer.json composer.lock \
- && rm -Rf build
+RUN composer run build:phar
 
-FROM registry.gitlab.com/arnapou/docker/php:8.4-frankenphp as final
+FROM registry.gitlab.com/arnapou/docker/php:8.4-frankenphp AS final
 
-COPY --from=build /app /app
-RUN sed -i -E 's#(^\s+root +[^ ]+ +).*public#\1/app/site/public#' /etc/caddy/Caddyfile
+COPY --from=build /app/bin/simplesite.phar /srv/simplesite.phar
+COPY --from=build /app/bin/simplesite.sh   /srv/simplesite.sh
+
+CMD ["/srv/simplesite.sh"]

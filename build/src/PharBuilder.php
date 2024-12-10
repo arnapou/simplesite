@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
+use Arnapou\SimpleSite\Core\Helper;
 use LogicException;
 use Phar;
 use Throwable;
@@ -95,13 +96,18 @@ __HALT_COMPILER(); ?>";
             }
 
             $destPathname = $this->config->buildTempDir . substr($file->getPathname(), \strlen($rootDir));
-
             $this->mkdir(\dirname($destPathname));
-            if ('php' === strtolower($file->getExtension())) {
-                file_put_contents($destPathname, php_strip_whitespace($file->getPathname()));
-            } else {
-                copy($file->getPathname(), $destPathname);
-            }
+            $contents = (string) file_get_contents($file->getPathname());
+
+            file_put_contents(
+                $destPathname,
+                match (strtolower($file->getExtension())) {
+                    'php' => php_strip_whitespace($file->getPathname()),
+                    'twig', 'svg' => new Helper()->minifyHtml($contents),
+                    'css' => preg_replace('!/\*.*?\*/!', '', new Helper()->minifyHtml($contents)),
+                    default => $contents,
+                },
+            );
         }
     }
 

@@ -1,6 +1,17 @@
 services:
 
-  app:
-    image: registry.gitlab.com/arnapou/simplesite:latest
+  demo:
+    build:
+      context: .
+      dockerfile: demo/Dockerfile
     ports:
       - '8080:80'
+    user: 1000:1000
+    volumes: &volumes
+      - ./:/app
+
+  # Use the container below for development tools (composer, ...)
+  dev:
+    image: registry.gitlab.com/arnapou/docker/php:8.4-dev
+    user: 1000:1000
+    volumes: *volumes
