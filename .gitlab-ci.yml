@@ -76,8 +76,12 @@ docker-build:
   services: [docker:24-dind]
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+    # registry.gitlab.com/arnapou/project/simplesite:<TAG>
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --target=final .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    # registry.gitlab.com/arnapou/project/simplesite:latest
+    - docker build -t $CI_REGISTRY_IMAGE:latest --target=final .
+    - docker push $CI_REGISTRY_IMAGE:latest
 
 docker-demo:
   image: docker:24
@@ -86,5 +90,6 @@ docker-demo:
   services: [docker:24-dind]
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE:demo -f demo/Dockerfile .
+    # registry.gitlab.com/arnapou/project/simplesite:demo
+    - docker build -t $CI_REGISTRY_IMAGE:demo --target=demo .
     - docker push $CI_REGISTRY_IMAGE:demo

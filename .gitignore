@@ -6,5 +6,5 @@ tests/coverage
 vendor
 
 build/tmp
-demo/cache
-demo/data/table.admin.config.yaml
+demo/log
+demo/data/table.admin.config.*

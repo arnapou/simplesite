@@ -81,6 +81,6 @@ EOF
 chown www-data:www-data /app/pages/index.twig
 fi
 
-# Start FrankenPhp.
+# Start FrankenPHP.
 
 exec frankenphp run --config /etc/caddy/Caddyfile
