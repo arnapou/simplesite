@@ -10,7 +10,7 @@
         {{ form.notice(flash_message) }}
 
         <p class="notice">
-            Are you sure to delete the <code>{{ node.name }}</code> {{ node.isDir ? 'folder' : 'file' }}?
+            Are you sure to delete the <code>{{ node.name }}</code> {{ node.dir ? 'folder' : 'file' }}?
         </p>
 
         {{ form.buttons('Delete', node.parent|adminUrl) }}

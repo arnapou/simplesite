@@ -44,13 +44,13 @@
             {% for item in node.list %}
                 <tr>
                     <td>
-                        {% if item.isDir %}
+                        {% if item.dir %}
                             <a href="{{ item|adminUrl }}"><i>{{ item.symbol|svgUse }}</i>{{ item.name }}/</a>
                         {% else %}
                             <i>{{ item.symbol|svgUse }}</i>{{ item.name }}
                         {% endif %}
                     </td>
-                    <td class="size"><small>{{ item.isDir ? '':item.size }}</small></td>
+                    <td class="size"><small>{{ item.size }}</small></td>
                     <td class="center"><small>{{ item.time }}</small></td>
                     <td class="center">
                         {% if item.canDownload %}

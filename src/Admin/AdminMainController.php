@@ -63,7 +63,7 @@ final class AdminMainController extends AdminController
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
-                    $node->isDir => $this->render('listing.twig', $context),
+                    $node->dir => $this->render('listing.twig', $context),
                     $node->canEdit() => $this->render('form-edit.twig', $context),
                     default => throw Problem::fromStatus(StatusClientError::Forbidden),
                 },
@@ -123,13 +123,13 @@ final class AdminMainController extends AdminController
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
-                    $node->isDir && $node->canCreate() => $this->render('form-upload.twig', $context),
+                    $node->dir && $node->canCreate() => $this->render('form-upload.twig', $context),
                     default => throw Problem::fromStatus(StatusClientError::Forbidden),
                 },
                 'POST' => match ($params = $this->csrfRequestParams($request)) {
                     null => $this->renderInvalidCsrf('form-upload.twig', $context),
                     default => match (true) {
-                        $node->isDir && $node->canCreate() => $this->doUpload($node, $params, $request->getUploadedFiles()),
+                        $node->dir && $node->canCreate() => $this->doUpload($node, $params, $request->getUploadedFiles()),
                         default => throw Problem::fromStatus(StatusClientError::Forbidden),
                     },
                 },
@@ -198,7 +198,7 @@ final class AdminMainController extends AdminController
     private function doEdit(AdminNode $node, array $params): Response
     {
         $source = str_replace("\r", '', Ensure::string($params['source']));
-        file_put_contents($node->pathname, $source, LOCK_EX);
+        file_put_contents($node->path, $source, LOCK_EX);
         $this->flashMessage = \sprintf('The file "%s" was saved.', $node->name());
 
         return $this->redirect($this->getAdminUrl($node->parent()));
@@ -206,9 +206,9 @@ final class AdminMainController extends AdminController
 
     private function doDelete(AdminNode $node): Response
     {
-        if ($node->isDir) {
+        if ($node->dir) {
             $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($node->pathname, FilesystemIterator::SKIP_DOTS),
+                new RecursiveDirectoryIterator($node->path, FilesystemIterator::SKIP_DOTS),
                 RecursiveIteratorIterator::CHILD_FIRST,
             );
 
@@ -223,10 +223,10 @@ final class AdminMainController extends AdminController
                 }
             }
 
-            rmdir($node->pathname);
+            rmdir($node->path);
             $this->flashMessage = \sprintf('The folder "%s" and %d files were deleted.', $node->name(), $count);
         } else {
-            unlink($node->pathname);
+            unlink($node->path);
             $this->flashMessage = \sprintf('The file "%s" was deleted.', $node->name());
         }
 
@@ -248,7 +248,7 @@ final class AdminMainController extends AdminController
 
         $renamed = $node->rename($name);
 
-        if ($node->pathname === $renamed->pathname) {
+        if ($node->path === $renamed->path) {
             $this->flashMessage = \sprintf('The file "%s" was not renamed: it is the same!', basename($name));
 
             return $this->redirect($this->getAdminUrl($renamed->parent()));
@@ -260,13 +260,13 @@ final class AdminMainController extends AdminController
             return $this->render('form-rename.twig', $context);
         }
 
-        if (!is_dir(\dirname($renamed->pathname))) {
+        if (!is_dir(\dirname($renamed->path))) {
             $this->flashMessage = \sprintf('The target folder for "%s" does not exist.', $name);
 
             return $this->render('form-rename.twig', $context);
         }
 
-        rename($node->pathname, $renamed->pathname);
+        rename($node->path, $renamed->path);
         $this->flashMessage = \sprintf('The file "%s" was renamed to "%s".', $node->name(), $renamed->name());
 
         return $this->redirect($this->getAdminUrl($renamed->parent()));
@@ -299,7 +299,7 @@ final class AdminMainController extends AdminController
     private function doCreateFile(AdminNode $created, string $name): Response
     {
         $this->mkdir($created);
-        touch($created->pathname);
+        touch($created->path);
         $this->flashMessage = \sprintf('The file "%s" was created.', $name);
 
         return $created->canEdit()
@@ -309,8 +309,8 @@ final class AdminMainController extends AdminController
 
     private function doCreateFolder(AdminNode $created, string $name): Response
     {
-        if (!mkdir($created->pathname, 0o777, true) && !is_dir($created->pathname)) {
-            throw new Problem(\sprintf('Directory "%s" was not created', $created->pathname));
+        if (!mkdir($created->path, 0o777, true) && !is_dir($created->path)) {
+            throw new Problem(\sprintf('Directory "%s" was not created', $created->path));
         }
         $this->flashMessage = \sprintf('The folder "%s" was created.', $name);
 
@@ -321,10 +321,10 @@ final class AdminMainController extends AdminController
     {
         session_write_close();
 
-        if ($node->isDir) {
+        if ($node->dir) {
             $response = new AdminZipResponse($node, $filename = $node->name() . '.zip');
         } else {
-            $response = FileResponse::fromFilename($node->pathname);
+            $response = FileResponse::fromFilename($node->path);
             $filename = $node->name();
         }
 
@@ -392,7 +392,7 @@ final class AdminMainController extends AdminController
     private function doUploadFile(UploadedFileInterface $file, AdminNode $target, AdminUpload $upload): void
     {
         if ($target->isForbidden()) {
-            $upload->addError($target->pathname, 'Forbidden.');
+            $upload->addError($target->path, 'Forbidden.');
         } elseif ($upload->unzip && 'zip' === strtolower($target->ext)) {
             // https://www.php.net/stream_get_meta_data
             $metadata = Ensure::array($file->getStream()->getMetadata());
@@ -409,7 +409,7 @@ final class AdminMainController extends AdminController
                     $existed = $zippedFileTarget->exists();
 
                     $this->mkdir($zippedFileTarget);
-                    file_put_contents($zippedFileTarget->pathname, $zippedFile->getContent(), LOCK_EX);
+                    file_put_contents($zippedFileTarget->path, $zippedFile->getContent(), LOCK_EX);
 
                     if ($existed) {
                         $upload->addWarning($zippedFile->getName(), $detail . 'Overridden.');
@@ -421,17 +421,17 @@ final class AdminMainController extends AdminController
                 }
             }
         } elseif ($target->exists()) {
-            $file->moveTo($target->pathname);
+            $file->moveTo($target->path);
             $upload->addWarning($target->name(), 'Overridden.');
         } else {
-            $file->moveTo($target->pathname);
+            $file->moveTo($target->path);
             $upload->addSuccess($target->name(), 'Upload OK.');
         }
     }
 
     private function mkdir(AdminNode $node): void
     {
-        $dir = $node->isDir ? $node->pathname : \dirname($node->pathname);
+        $dir = $node->dir ? $node->path : \dirname($node->path);
         if (!is_dir($dir) && !mkdir($dir, 0o777, true) && !is_dir($dir)) {
             throw new Problem(\sprintf('Directory "%s" was not created', $dir));
         }

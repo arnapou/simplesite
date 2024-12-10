@@ -28,18 +28,18 @@ final class AdminZipResponse extends FileResponse
 
         set_time_limit(1800);
         $this->zip = new ZipWriter('php://output', new ZipStreamWriteOnly());
-        $this->addNode($node, \strlen($node->pathname) + 1);
+        $this->addNode($node, \strlen($node->path) + 1);
     }
 
     private function addNode(AdminNode $node, int $rootLength): void
     {
         if (!$node->isForbidden()) {
-            if ($node->isDir) {
+            if ($node->dir) {
                 foreach ($node->list() as $item) {
                     $this->addNode($item, $rootLength);
                 }
             } else {
-                $this->zip->addFile($node->pathname, substr($node->pathname, $rootLength));
+                $this->zip->addFile($node->path, substr($node->path, $rootLength));
             }
         }
     }

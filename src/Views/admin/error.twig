@@ -26,26 +26,28 @@
         <code>{{ error.message }}</code>
     </p>
 
-    <details>
-        <summary>Details</summary>
+    {% if 'dev' == 'APP_ENV'|getenv %}
+        <details>
+            <summary>Details</summary>
 
-        <div>
-            class: <code>{{ error|getclass }}</code><br>
-            file: <code>{{ error.file }}</code><br>
-            line: <code>{{ error.line }}</code><br>
-        </div>
-        <pre>{{ error.getTraceAsString }}</pre>
-
-        {% if error.previous %}
             <div>
-                message: <code>{{ error.previous.message }}</code><br>
-                class: <code>{{ error.previous|getclass }}</code><br>
-                file: <code>{{ error.previous.file }}</code><br>
-                line: <code>{{ error.previous.line }}</code><br>
+                class: <code>{{ error|getclass }}</code><br>
+                file: <code>{{ error.file }}</code><br>
+                line: <code>{{ error.line }}</code><br>
             </div>
-            <pre>{{ error.previous.getTraceAsString }}</pre>
-        {% endif %}
-    </details>
+            <pre>{{ error.getTraceAsString }}</pre>
+
+            {% if error.previous %}
+                <div>
+                    message: <code>{{ error.previous.message }}</code><br>
+                    class: <code>{{ error.previous|getclass }}</code><br>
+                    file: <code>{{ error.previous.file }}</code><br>
+                    line: <code>{{ error.previous.line }}</code><br>
+                </div>
+                <pre>{{ error.previous.getTraceAsString }}</pre>
+            {% endif %}
+        </details>
+    {% endif %}
 
     <p class="error">{{ 'icon-error'|svgUse }}</p>
 {% endblock %}

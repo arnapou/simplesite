@@ -30,10 +30,10 @@ class AdminNodeTest extends TestCase
         $node = AdminNode::from($config, '');
         self::assertSame('', $node->root);
         self::assertNull($node->scope);
-        self::assertSame('', $node->pathname);
-        self::assertSame('/', $node->relative);
+        self::assertSame('', $node->path);
+        self::assertSame('/', $node->rel);
         self::assertSame('', $node->ext);
-        self::assertTrue($node->isDir);
+        self::assertTrue($node->dir);
 
         self::assertSame('', (string) $node);
     }
@@ -44,10 +44,10 @@ class AdminNodeTest extends TestCase
         $node = AdminNode::from($config, '@pages/');
         self::assertSame($config->path_pages, $node->root);
         self::assertSame(AdminScope::pages, $node->scope);
-        self::assertSame($config->path_pages, $node->pathname);
-        self::assertSame('/', $node->relative);
+        self::assertSame($config->path_pages, $node->path);
+        self::assertSame('/', $node->rel);
         self::assertSame('', $node->ext);
-        self::assertTrue($node->isDir);
+        self::assertTrue($node->dir);
     }
 
     public function testInstanceScopeFolder(): void
@@ -56,10 +56,10 @@ class AdminNodeTest extends TestCase
         $node = AdminNode::from($config, '@public/assets/');
         self::assertSame($config->path_public, $node->root);
         self::assertSame(AdminScope::public, $node->scope);
-        self::assertSame($config->path_public . '/assets', $node->pathname);
-        self::assertSame('/assets', $node->relative);
+        self::assertSame($config->path_public . '/assets', $node->path);
+        self::assertSame('/assets', $node->rel);
         self::assertSame('', $node->ext);
-        self::assertTrue($node->isDir);
+        self::assertTrue($node->dir);
     }
 
     public function testInstanceScopeFile(): void
@@ -68,10 +68,10 @@ class AdminNodeTest extends TestCase
         $node = AdminNode::from($config, '@public/assets/favicon.svg');
         self::assertSame($config->path_public, $node->root);
         self::assertSame(AdminScope::public, $node->scope);
-        self::assertSame($config->path_public . '/assets/favicon.svg', $node->pathname);
-        self::assertSame('/assets/favicon.svg', $node->relative);
+        self::assertSame($config->path_public . '/assets/favicon.svg', $node->path);
+        self::assertSame('/assets/favicon.svg', $node->rel);
         self::assertSame('svg', $node->ext);
-        self::assertFalse($node->isDir);
+        self::assertFalse($node->dir);
 
         self::assertTrue($node->canDelete(), 'canDelete');
         self::assertFalse($node->canEdit(), 'canEdit');

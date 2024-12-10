@@ -3,10 +3,12 @@ services:
   demo:
     build:
       context: .
-      dockerfile: demo/Dockerfile
+      target: demo
     ports:
       - '8080:80'
     user: 1000:1000
+    environment:
+      APP_ENV: 'dev'
     volumes: &volumes
       - ./:/app
 

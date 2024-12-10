@@ -29,11 +29,12 @@ final class AdminNode implements Stringable
 {
     public readonly string $root;
     public readonly ?AdminScope $scope;
-    public readonly string $pathname;
+    public readonly string $path;
     /** @var non-empty-string */
-    public readonly string $relative;
+    public readonly string $rel;
     public readonly string $ext;
-    public readonly bool $isDir;
+    public readonly bool $dir;
+    private ?FileNode $node;
 
     private function __construct(public Config $config, string|AdminScope|null $scope, string $relative)
     {
@@ -41,18 +42,19 @@ final class AdminNode implements Stringable
 
         try {
             if (null === $this->scope) {
+                $this->node = null;
                 $this->root = '';
                 $this->ext = '';
-                $this->pathname = '';
-                $this->relative = '/';
-                $this->isDir = true;
+                $this->path = '';
+                $this->rel = '/';
+                $this->dir = true;
             } else {
-                $node = new FileNode($this->scope->toPath($this->config), $relative);
-                $this->root = $node->root;
-                $this->ext = $node->extension() ?? '';
-                $this->pathname = $node->fullPath;
-                $this->relative = $node->relativePath;
-                $this->isDir = $node->isFolder;
+                $this->node = new FileNode($this->scope->toPath($this->config), $relative);
+                $this->root = $this->node->root;
+                $this->ext = $this->node->extension() ?? '';
+                $this->path = $this->node->fullPath;
+                $this->rel = $this->node->relativePath;
+                $this->dir = $this->node->isFolder;
             }
         } catch (DomainException $e) {
             throw new Problem($e->getMessage(), StatusClientError::BadRequest, $e);
@@ -61,7 +63,7 @@ final class AdminNode implements Stringable
 
     public function canDelete(): bool
     {
-        return !$this->isForbidden() && '/' !== $this->relative;
+        return !$this->isForbidden() && !$this->isRoot() && $this->exists();
     }
 
     public function canDownload(): bool
@@ -71,65 +73,70 @@ final class AdminNode implements Stringable
 
     public function canEdit(): bool
     {
-        return !$this->isForbidden() && $this->isText();
+        return !$this->isForbidden() && !$this->isRoot() && $this->isText();
     }
 
     public function canRename(): bool
     {
-        return !$this->isForbidden() && $this->exists();
+        return !$this->isForbidden() && !$this->isRoot() && $this->exists();
     }
 
     public function canCreate(): bool
     {
-        return !$this->isForbidden() && $this->isDir && null !== $this->scope;
+        return $this->dir && null !== $this->scope;
+    }
+
+    public function isRoot(): bool
+    {
+        return null === $this->scope || '/' === $this->rel;
     }
 
     public function isForbidden(): bool
     {
-        return AdminScope::public === $this->scope && '/index.php' === $this->relative;
+        return AdminScope::public === $this->scope && '/index.php' === $this->rel;
     }
 
     public function isPicture(): bool
     {
-        return !$this->isDir && \in_array(strtolower($this->ext), ['gif', 'png', 'jpg', 'svg'], true);
+        return !$this->dir && \in_array(strtolower($this->ext), ['gif', 'png', 'jpg', 'svg'], true);
     }
 
     public function isSound(): bool
     {
-        return !$this->isDir && \in_array(strtolower($this->ext), ['mp3', 'wav', 'ogg', 'aac', 'wma'], true);
+        return !$this->dir && \in_array(strtolower($this->ext), ['mp3', 'wav', 'ogg', 'aac', 'wma'], true);
     }
 
     public function isText(): bool
     {
-        return !$this->isDir && \in_array(strtolower($this->ext), ['txt', 'css', 'js', 'json', 'twig', 'html', 'md', 'yaml', 'yml', 'php'], true);
+        return !$this->dir && \in_array(strtolower($this->ext), ['txt', 'css', 'js', 'json', 'twig', 'html', 'md', 'yaml', 'yml', 'php'], true);
     }
 
     public function isVideo(): bool
     {
-        return !$this->isDir && \in_array(strtolower($this->ext), ['mp4', 'mpg', 'mov', 'avi', 'mkv'], true);
+        return !$this->dir && \in_array(strtolower($this->ext), ['mp4', 'mpg', 'mov', 'avi', 'mkv'], true);
     }
 
     public function name(): string
     {
-        return Enforce::nullableNonEmptyString(basename($this->relative)) ?? $this->scope?->toString() ?? '';
+        return Enforce::nullableNonEmptyString(basename($this->rel)) ?? $this->scope?->toString() ?? '';
     }
 
     public function parent(): self
     {
-        return new self($this->config, $this->scope, \dirname($this->relative) . '/');
+        return new self($this->config, $this->scope, \dirname($this->rel) . '/');
     }
 
     public function publicUrl(): string
     {
         return match ($this->scope) {
             AdminScope::pages => match (true) {
-                $this->isDir => $this->relative,
+                $this->dir => $this->rel,
                 !\in_array($this->ext, Config::PAGE_EXTENSIONS, true) => '',
-                default => substr($this->relative, 0, -\strlen($this->ext) - 1),
+                default => substr($this->rel, 0, -\strlen($this->ext) - 1),
             },
             AdminScope::public => match (true) {
-                str_ends_with($this->relative, '/index.php') => substr($this->relative, 0, -9),
-                default => $this->relative,
+                str_ends_with($this->rel, '/index.php') => substr($this->rel, 0, -9),
+                default => $this->rel,
             },
             default => '',
         };
@@ -137,10 +144,10 @@ final class AdminNode implements Stringable
 
     public function size(): string
     {
-        $size = filesize($this->pathname);
+        $size = $this->node?->filesize() ?? 0;
 
         return match (true) {
-            $this->isDir => '',
+            $this->dir => '',
             $size < 1024 => $size . ' B',
             $size < 1048576 => number_format($size / 1024, 1) . ' KB',
             $size < 1073741824 => number_format($size / 1048576, 1) . ' MB',
@@ -152,7 +159,7 @@ final class AdminNode implements Stringable
     {
         return match (true) {
             null === $this->scope => 'icon-home',
-            $this->isDir => 'icon-folder',
+            $this->dir => 'icon-folder',
             $this->isForbidden() => 'file-forbidden',
             $this->isPicture() => 'file-picture',
             $this->isSound() => 'file-sound',
@@ -164,7 +171,7 @@ final class AdminNode implements Stringable
 
     public function time(): string
     {
-        return date('Y-m-d H:i', (int) filemtime($this->pathname));
+        return date('Y-m-d H:i', (int) filemtime($this->path));
     }
 
     /**
@@ -172,7 +179,7 @@ final class AdminNode implements Stringable
      */
     public function list(): array
     {
-        if (!$this->isDir) {
+        if (!$this->dir) {
             return [];
         }
 
@@ -185,14 +192,14 @@ final class AdminNode implements Stringable
         }
 
         $dirs = $files = [];
-        foreach (new DirectoryIterator($this->pathname) as $item) {
+        foreach (new DirectoryIterator($this->path) as $item) {
             if ($item->isDot() || $item->isLink()) {
                 continue;
             }
 
             $node = new self($this->config, $this->scope, substr($item->getPathname(), \strlen($this->root) + 1));
 
-            if ($node->isDir) {
+            if ($node->dir) {
                 $dirs[] = $node;
             } else {
                 $files[] = $node;
@@ -218,7 +225,7 @@ final class AdminNode implements Stringable
             new self($this->config, $this->scope, ''),
         ];
 
-        if ('' === ($relative = ltrim($this->relative, '/'))) {
+        if ('' === ($relative = ltrim($this->rel, '/'))) {
             return $list;
         }
 
@@ -233,13 +240,13 @@ final class AdminNode implements Stringable
 
     public function exists(): bool
     {
-        return file_exists($this->pathname);
+        return $this->node->exists ?? false;
     }
 
     public function rename(string $name): self
     {
         return match ($this->canRename()) {
-            true => new self($this->config, $this->scope, \dirname($this->relative) . '/' . $name),
+            true => new self($this->config, $this->scope, \dirname($this->rel) . '/' . $name),
             false => throw new Problem("Cannot rename '$this'.", StatusClientError::BadRequest),
         };
     }
@@ -247,7 +254,7 @@ final class AdminNode implements Stringable
     public function create(string $name): self
     {
         return match ($this->canCreate()) {
-            true => new self($this->config, $this->scope, $this->relative . '/' . $name),
+            true => new self($this->config, $this->scope, $this->rel . '/' . $name),
             false => throw new Problem("Cannot create from '$this'.", StatusClientError::BadRequest),
         };
     }
@@ -267,6 +274,6 @@ final class AdminNode implements Stringable
 
     public function __toString(): string
     {
-        return null === $this->scope ? '' : $this->scope->toString() . $this->relative;
+        return null === $this->scope ? '' : $this->scope->toString() . $this->rel;
     }
 }

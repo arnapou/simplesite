@@ -114,7 +114,7 @@ class ConfigTest extends TestCase
         self::assertSame("$dir/data", $config->path_data);
         self::assertSame("$dir/templates", $config->path_templates);
         self::assertSame("$dir/php", $config->path_php);
-        self::assertSame("$dir/logs", $config->log_path);
+        self::assertSame("$dir/log", $config->log_path);
         self::assertSame(0, $config->log_max_files);
         self::assertSame(Psr3Level::Debug, $config->log_level);
         self::assertSame('/base_path_root/', $config->base_path_root);

@@ -9,7 +9,7 @@ SimpleSite::run(
     name: 'Arnapou simple site',
     path_public: __DIR__,
     path_pages: \dirname(__DIR__) . '/pages',
-    path_cache: \dirname(__DIR__) . '/cache',
+    path_cache: '/tmp/simplesite',
 
     // optional folders: if you don't need them, you don't need to create them
     path_data: \dirname(__DIR__) . '/data',
@@ -17,7 +17,7 @@ SimpleSite::run(
     path_php: \dirname(__DIR__) . '/src',
 
     // logging: change only if needed
-    // log_path: \dirname(__DIR__) . '/cache/logs',
+    log_path: \dirname(__DIR__) . '/log',
     // log_max_files: 7, // days
     // log_level: 'debug',
     // log_level: 'info',

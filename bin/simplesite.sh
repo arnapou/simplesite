@@ -65,14 +65,6 @@ cat <<EOF >> /app/pages/index.twig
     or the <a href="https://gitlab.com/arnapou/project/simplesite">GitLab project</a>.
   </p>
   <p>Enjoy and have fun 🙂</p>
-EOF
-if [[ -n "${SIMPLESITE_ADMIN}" ]]; then
-echo -n "<p>The php server info <a href='/phpinfo.php'>is there</a>: for security reasons, you need to delete the file.</p>" >> /app/pages/index.twig
-echo -n "<p>You setup an admin page, and you can <a href='/${SIMPLESITE_ADMIN}'>start there</a>.</p>" >> /app/pages/index.twig
-echo -n "<?php phpinfo();" >> /app/public/phpinfo.php
-chown www-data:www-data /app/public/phpinfo.php
-fi
-cat <<EOF >> /app/pages/index.twig
 </main>
 </body>
 </html>
@@ -81,6 +73,6 @@ EOF
 chown www-data:www-data /app/pages/index.twig
 fi
 
-# Start FrankenPhp.
+# Start FrankenPHP.
 
 exec frankenphp run --config /etc/caddy/Caddyfile

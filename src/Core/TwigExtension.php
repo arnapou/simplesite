@@ -56,6 +56,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
         return [
             new TwigFilter('minifyHtml', $this->helper->minifyHtml(...), ['is_safe' => ['html']]),
             new TwigFilter('minify_html', $this->helper->minifyHtml(...), ['is_safe' => ['html']]),
+            new TwigFilter('getenv', getenv(...)),
             new TwigFilter('thumbnail', $this->thumbnail(...)),
             new TwigFilter('chunk', $this->chunk(...)),
             new TwigFilter('thumbnail', $this->thumbnail(...)),
