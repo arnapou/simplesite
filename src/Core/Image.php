@@ -15,9 +15,6 @@ namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\Psr\Psr7HttpMessage\FileResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
-use GdImage;
-use Imagick;
-use ImagickException;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -32,7 +29,7 @@ final class Image
     /**
      * @throws Problem
      * @throws InvalidArgumentException
-     * @throws ImagickException
+     * @throws \ImagickException
      */
     public function thumbnail(string $filename, string $ext, ?int $size): ?Response
     {
@@ -60,7 +57,7 @@ final class Image
 
     /**
      * @throws Problem
-     * @throws ImagickException
+     * @throws \ImagickException
      */
     private function imgResize(string $filename, string $ext, int $size): string
     {
@@ -70,7 +67,7 @@ final class Image
     }
 
     /**
-     * @throws ImagickException
+     * @throws \ImagickException
      */
     private function tryResizeImagick(string $filename, int $size): ?string
     {
@@ -78,10 +75,10 @@ final class Image
             return null;
         }
 
-        $img = new Imagick($filename);
+        $img = new \Imagick($filename);
         [$w1, $h1] = [$img->getImageWidth(), $img->getImageHeight()];
         [$w2, $h2] = $this->newSize($w1, $h1, $size);
-        $img->resizeImage($w2, $h2, Imagick::FILTER_LANCZOS, 1);
+        $img->resizeImage($w2, $h2, \Imagick::FILTER_LANCZOS, 1);
 
         return $img->getImageBlob();
     }
@@ -95,7 +92,7 @@ final class Image
             return null;
         }
 
-        $resize = function (false|GdImage $img) use ($size): GdImage {
+        $resize = function (false|\GdImage $img) use ($size): \GdImage {
             if (false === $img) {
                 throw Problem::imageError();
             }

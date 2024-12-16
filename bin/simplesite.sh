@@ -27,7 +27,6 @@ cat <<EOF > /app/public/index.php
 declare(strict_types=1);
 require '/srv/simplesite.phar';
 SimpleSite::run(
-    name:            getenv('SIMPLESITE_NAME') ?: 'SimpleSite',
     base_path_admin: getenv('SIMPLESITE_ADMIN') ?: '',
     path_data:       '/app/data',
     log_path:        '/app/log',
@@ -43,7 +42,7 @@ chmod 644 /app/public/index.php
 
 # Set up a default Home page if it does not exists
 if [[ ! -f /app/pages/index.twig ]]; then
-cat <<EOF >> /app/pages/index.twig
+cat <<EOF > /app/pages/index.twig
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -17,13 +17,8 @@ use Arnapou\Psr\Psr3Logger\Formatter\ContextFormatter;
 use Arnapou\Psr\Psr3Logger\Formatter\DefaultLogFormatter;
 use Arnapou\Psr\Psr3Logger\Formatter\JsonContextFormatter;
 use Arnapou\Psr\Psr3Logger\Utils\Psr3Level;
-use DateTimeImmutable;
-use JsonSerializable;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Stringable;
-use Throwable;
-use Traversable;
 
 final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatter, ContextFormatter
 {
@@ -37,7 +32,7 @@ final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatt
         $this->contextFormatter = new JsonContextFormatter(JSON_PRESERVE_ZERO_FRACTION | JSON_PRETTY_PRINT);
     }
 
-    public function formatLine(DateTimeImmutable $date, Psr3Level $level, string $message, array $context): string
+    public function formatLine(\DateTimeImmutable $date, Psr3Level $level, string $message, array $context): string
     {
         return $this->logFormatter->formatLine($date, $level, $message, $this->commonContext() + $context);
     }
@@ -53,10 +48,10 @@ final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatt
                 \is_string($value) => $value,
                 null === $value => 'NULL',
                 \is_array($value),
-                $value instanceof JsonSerializable,
-                $value instanceof Traversable => $this->contextFormatter->formatContext([$key => $value]),
-                $value instanceof Throwable => $value->getMessage() . ' ' . $this->contextFormatter->formatContext([$key => $value]),
-                $value instanceof Stringable,
+                $value instanceof \JsonSerializable,
+                $value instanceof \Traversable => $this->contextFormatter->formatContext([$key => $value]),
+                $value instanceof \Throwable => $value->getMessage() . ' ' . $this->contextFormatter->formatContext([$key => $value]),
+                $value instanceof \Stringable,
                 \is_object($value) && method_exists($value, '__toString') => (string) $value,
                 default => 'type: ' . get_debug_type($value),
             };
@@ -84,7 +79,7 @@ final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatt
             if (isset($serverParams['HTTP_REFERER'])) {
                 $common['referer'] = $serverParams['HTTP_REFERER'];
             }
-        } catch (Throwable) {
+        } catch (\Throwable) {
         }
 
         return $common;

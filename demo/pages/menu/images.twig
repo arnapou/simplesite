@@ -4,41 +4,41 @@
 
     <h1>Images</h1>
 
-    <p>Un petit outil de resize d'image basique est intégré au système du site.</p>
+    <p>A small basic image resizing tool is built into the site's system.</p>
 
-    <p>Le resize est fait sur la plus grande largeur et l'image resizée est mise en cache.<br>
-        L'image en cache est mise à jour automatiquement si l'image d'origine change.</p>
+    <p>The resize is done to the largest width and the resized image is cached.<br>
+        The cached image is automatically updated if the original image changes.</p>
 
-    <h3>Exemple d'image brute</h3>
+    <h3>Raw image</h3>
 
     <ul>
-        <li>Code twig : <code>{% verbatim %}&lt;img src="{{ asset('../assets/twig.png') }}"&gt;{% endverbatim %}</code></li>
-        <li>Aperçu : <img src="{{ asset('../assets/twig.png', 50) }}"></li>
+        <li>Twig code: <code>{% verbatim %}&lt;img src="{{ asset('../assets/twig.png') }}"&gt;{% endverbatim %}</code></li>
+        <li>Rendering: <img src="{{ asset('../assets/twig.png', 50) }}"></li>
     </ul>
 
 
-    <h3>Exemple d'image resizée</h3>
+    <h3>Resized image</h3>
 
     <ul>
-        <li>Code twig : <code>{% verbatim %}&lt;img src="{{ thumbnail('../assets/twig.png', 200) }}"&gt;{% endverbatim %}</code></li>
-        <li>Aperçu : <img src="{{ thumbnail('../assets/twig.png', 200) }}"></li>
+        <li>Twig code: <code>{% verbatim %}&lt;img src="{{ thumbnail('../assets/twig.png', 200) }}"&gt;{% endverbatim %}</code></li>
+        <li>Rendering: <img src="{{ thumbnail('../assets/twig.png', 200) }}"></li>
     </ul>
 
     <p>
-        En provenance du dossier <code>pages</code> et non <code>public</code>, seul l'accès via resize est possible :
+        Coming from the <code>pages</code> folder and not <code>public</code>, only access via resize is possible:
     </p>
     <ul>
-        <li>Code twig : <code>{% verbatim %}&lt;img src="{{ thumbnail('../php.png', 100) }}"&gt;{% endverbatim %}</code></li>
-        <li>Aperçu : <img src="{{ thumbnail('../php.png', 100) }}"></li>
+        <li>Twig code: <code>{% verbatim %}&lt;img src="{{ thumbnail('../php.png', 100) }}"&gt;{% endverbatim %}</code></li>
+        <li>Rendering: <img src="{{ thumbnail('../php.png', 100) }}"></li>
     </ul>
 
-    <h3>Format d'url</h3>
+    <h3>Url format</h3>
 
-    <table>
+    <table class="fixed">
         <thead>
         <tr>
-            <th>Image d'origine</th>
-            <th>Image avec resize</th>
+            <th>Original image</th>
+            <th>Resized image</th>
         </tr>
         </thead>
         <tbody>
@@ -54,8 +54,8 @@
     </table>
 
     <ul>
-        <li>Extensions supportées : <code>jpg</code>, <code>png</code>, <code>gif</code></li>
-        <li>Resize supporté : minimum <code>16</code>, maximum <code>2000</code></li>
+        <li>Supported extensions: <code>jpg</code>, <code>png</code>, <code>gif</code></li>
+        <li>Supported dimensions: minimum <code>16</code>, maximum <code>2000</code></li>
     </ul>
 
     <style>

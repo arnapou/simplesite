@@ -18,7 +18,6 @@ use Arnapou\Encoder\Book\Book;
 use Arnapou\Encoder\Book\OneByteBookEncoder;
 use Arnapou\Encoder\Encoder;
 use Arnapou\Encoder\PipelineEncoder;
-use Arnapou\SimpleSite\Admin\AdminScope;
 
 final readonly class UrlEncoder implements Encoder
 {
@@ -43,9 +42,9 @@ final readonly class UrlEncoder implements Encoder
             {
                 return [
                     // scopes: 3
-                    AdminScope::pages->toString(),
-                    AdminScope::public->toString(),
-                    AdminScope::templates->toString(),
+                    Scope::pages->toString(),
+                    Scope::public->toString(),
+                    Scope::templates->toString(),
                     // special: 16
                     ...str_split('\' ~+-*/,.!#@&=:_'),
                     // digits: 62

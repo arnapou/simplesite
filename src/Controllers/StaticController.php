@@ -15,14 +15,15 @@ namespace Arnapou\SimpleSite\Controllers;
 
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr7HttpMessage\Response;
+use Arnapou\SimpleSite\Admin;
 use Arnapou\SimpleSite\Controller;
-use Arnapou\SimpleSite\Core\Config;
-use Arnapou\SimpleSite\Core\Helper;
+use Arnapou\SimpleSite\Core;
 
 final class StaticController extends Controller
 {
     public function __construct(
-        private readonly Config $config,
+        private readonly Core\Container $container,
+        private readonly Core\Config $config,
     ) {
     }
 
@@ -41,37 +42,64 @@ final class StaticController extends Controller
                 return $this->render("$path/index.$extension");
             }
         }
-        throw new NoResponseFound();
+
+        return $this->hardRedirect("$path/") ?? throw new NoResponseFound();
     }
 
     public function routeStaticPage(string $path = ''): Response
     {
-        if (null !== ($extension = new Helper()->pageExtension($path))) {
-            return $this->redirect($this->config->base_path_root . substr($path, 0, -\strlen($extension) - 1));
+        /** @var Core\Helper $helper */
+        $helper = $this->container->get(Core\Helper::class);
+
+        if (null !== ($ext = $helper->pageExtension($path))) {
+            $relative = str_ends_with("/$path", "/index.$ext")
+                ? substr($path, 0, -\strlen("index.$ext"))
+                : substr($path, 0, -\strlen(".$ext"));
+
+            return $this->redirect($this->config->base_path_root . $relative);
         }
 
-        $extension = $this->findExtension($realpath = $this->config->path_pages . "/$path");
-        if (null !== $extension) {
-            return $this->render("$path.$extension");
+        if (null !== ($ext = $this->findExtension($realpath = $this->config->path_pages . "/$path"))) {
+            return $this->render("$path.$ext");
         }
 
         if (is_dir($realpath)) {
             return $this->redirect($this->config->base_path_root . "$path/", 301);
         }
 
-        throw new NoResponseFound();
+        return $this->hardRedirect($path) ?? throw new NoResponseFound();
+    }
+
+    public function hardRedirect(string $path): ?Response
+    {
+        /** @var Admin\AdminConfig $adminConfig */
+        $adminConfig = $this->container->get(Admin\AdminConfig::class);
+
+        foreach ($adminConfig->getRedirects() as $data) {
+            $strict = str_ends_with($data['from'], '/');
+
+            if ($strict && $data['from'] === $path) {
+                return $this->redirect($data['link'], 301);
+            }
+
+            if (!$strict && rtrim($data['from'], '/') === rtrim($path, '/')) {
+                return $this->redirect($data['link'], 301);
+            }
+        }
+
+        return null;
     }
 
     private function findExtension(string $basePath): ?string
     {
         return array_find(
-            Config::PAGE_EXTENSIONS,
+            Core\Config::PAGE_EXTENSIONS,
             static fn ($extension) => is_file("$basePath.$extension"),
         );
     }
 
     public function routePriority(): int
     {
-        return self::PRIORITY_LOWEST;
+        return self::PRIORITY_LOWEST - 2;
     }
 }

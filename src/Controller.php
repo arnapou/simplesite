@@ -18,6 +18,7 @@ use Arnapou\Psr\Psr3Logger\Decorator\ContextLogger;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\Psr\Psr7HttpMessage\RedirectResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
+use Arnapou\SimpleSite\Core\View;
 
 abstract class Controller implements PhpCode
 {
@@ -51,9 +52,13 @@ abstract class Controller implements PhpCode
      */
     protected function render(string $view, array $context = []): Response
     {
-        $context = SimpleSite::yamlContext()->getContext($view, $context);
+        $helper = SimpleSite::helper();
+        $data = $helper->data($helper->replaceExtension($view, 'yaml'), false);
 
-        return new HtmlResponse(SimpleSite::twigEnvironment()->render($view, $context));
+        $data['view'] = View::tryFrom($view); // set the current view name
+        unset($context['app'], $data['app']); // secure the global app variable
+
+        return new HtmlResponse(SimpleSite::twig()->render($view, $data + $context));
     }
 
     protected function redirect(string $url, int $status = 302): RedirectResponse
@@ -73,7 +78,7 @@ abstract class Controller implements PhpCode
 
     protected function asset(string $path): string
     {
-        return SimpleSite::twigExtension()->asset($path);
+        return SimpleSite::helper()->asset($path);
     }
 
     protected function logger(): ContextLogger

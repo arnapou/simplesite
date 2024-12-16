@@ -15,8 +15,9 @@ namespace Arnapou\SimpleSite\Tests\Admin;
 
 use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError;
 use Arnapou\SimpleSite\Admin\AdminNode;
-use Arnapou\SimpleSite\Admin\AdminScope;
+use Arnapou\SimpleSite\Core\Config;
 use Arnapou\SimpleSite\Core\Problem;
+use Arnapou\SimpleSite\Core\View;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -24,54 +25,52 @@ class AdminNodeTest extends TestCase
 {
     use ConfigTestTrait;
 
+    private Config $config;
+
+    protected function setUp(): void
+    {
+        $container = self::resetContainer();
+        $container->registerInstance(Config::class, $this->config = self::createConfigDemo());
+    }
+
     public function testInstanceRoot(): void
     {
-        $config = self::createConfigSite();
-        $node = AdminNode::from($config, '');
-        self::assertSame('', $node->root);
-        self::assertNull($node->scope);
-        self::assertSame('', $node->path);
-        self::assertSame('/', $node->rel);
-        self::assertSame('', $node->ext);
+        $node = new AdminNode('');
+        self::assertNull($node->view);
         self::assertTrue($node->dir);
-
+        self::assertSame('', $node->path);
+        self::assertSame('', $node->ext);
         self::assertSame('', (string) $node);
     }
 
     public function testInstanceScopeRoot(): void
     {
-        $config = self::createConfigSite();
-        $node = AdminNode::from($config, '@pages/');
-        self::assertSame($config->path_pages, $node->root);
-        self::assertSame(AdminScope::pages, $node->scope);
-        self::assertSame($config->path_pages, $node->path);
-        self::assertSame('/', $node->rel);
-        self::assertSame('', $node->ext);
+        $node = new AdminNode(new View('@pages/'));
+        self::assertSame('@pages', $node->view?->name);
         self::assertTrue($node->dir);
+        self::assertSame($this->config->path_pages, $node->path);
+        self::assertSame('', $node->ext);
+        self::assertSame('@pages', (string) $node);
     }
 
     public function testInstanceScopeFolder(): void
     {
-        $config = self::createConfigSite();
-        $node = AdminNode::from($config, '@public/assets/');
-        self::assertSame($config->path_public, $node->root);
-        self::assertSame(AdminScope::public, $node->scope);
-        self::assertSame($config->path_public . '/assets', $node->path);
-        self::assertSame('/assets', $node->rel);
-        self::assertSame('', $node->ext);
+        $node = new AdminNode('@public/assets/');
+        self::assertSame('@public/assets', $node->view?->name);
         self::assertTrue($node->dir);
+        self::assertSame($this->config->path_public . '/assets', $node->path);
+        self::assertSame('', $node->ext);
+        self::assertSame('@public/assets', (string) $node);
     }
 
     public function testInstanceScopeFile(): void
     {
-        $config = self::createConfigSite();
-        $node = AdminNode::from($config, '@public/assets/favicon.svg');
-        self::assertSame($config->path_public, $node->root);
-        self::assertSame(AdminScope::public, $node->scope);
-        self::assertSame($config->path_public . '/assets/favicon.svg', $node->path);
-        self::assertSame('/assets/favicon.svg', $node->rel);
-        self::assertSame('svg', $node->ext);
+        $node = new AdminNode('@public/assets/favicon.svg');
+        self::assertSame('@public/assets/favicon.svg', $node->view?->name);
         self::assertFalse($node->dir);
+        self::assertSame($this->config->path_public . '/assets/favicon.svg', $node->path);
+        self::assertSame('svg', $node->ext);
+        self::assertSame('@public/assets/favicon.svg', (string) $node);
 
         self::assertTrue($node->canDelete(), 'canDelete');
         self::assertFalse($node->canEdit(), 'canEdit');
@@ -92,19 +91,11 @@ class AdminNodeTest extends TestCase
         self::assertMatchesRegularExpression('/^\d\d\d\d-\d\d-\d\d \d\d:\d\d$/', $node->time(), 'time');
     }
 
-    public function testFailureBadScope(): void
-    {
-        $this->expectException(Problem::class);
-        $this->expectExceptionMessage('Invalid path');
-        $this->expectExceptionCode(StatusClientError::BadRequest->value);
-        AdminNode::from(self::createConfigSite(), '@public');
-    }
-
     public function testFailurePathTraversable(): void
     {
         $this->expectException(Problem::class);
         $this->expectExceptionMessage('Unauthorized access outside root paths.');
         $this->expectExceptionCode(StatusClientError::BadRequest->value);
-        AdminNode::from(self::createConfigSite(), '@public/path/../../truc');
+        new AdminNode('@public/path/../../truc');
     }
 }

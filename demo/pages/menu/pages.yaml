@@ -1,0 +1,10 @@
+invoice_number: 314159
+name: Santa Claus
+address:
+  street: Santa Claus Lane
+  zip: 12345
+  city: North Pole
+
+order_items:
+  - Sled
+  - Wrapping Paper

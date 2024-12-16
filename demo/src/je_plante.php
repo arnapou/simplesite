@@ -17,9 +17,9 @@ return new class() extends Controller {
     public function configure(): void
     {
         $this->addRoute(
-            'je_plante',
-            static fn () => throw new \RuntimeException('Plantage volontaire', 0, new \Exception('previous')),
-            'je_plante'
+            'crashed',
+            static fn () => throw new \RuntimeException('Intentional crash', 0, new \Exception('previous')),
+            'crashed'
         );
     }
 };

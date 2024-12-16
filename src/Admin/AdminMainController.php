@@ -19,19 +19,16 @@ use Arnapou\Psr\Psr15HttpHandlers\Routing\Endpoint\Endpoint;
 use Arnapou\Psr\Psr15HttpHandlers\Routing\Route;
 use Arnapou\Psr\Psr7HttpMessage\FileResponse;
 use Arnapou\Psr\Psr7HttpMessage\Header\ContentDisposition;
+use Arnapou\Psr\Psr7HttpMessage\MimeType;
 use Arnapou\Psr\Psr7HttpMessage\Response;
-use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError;
+use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError as Error;
 use Arnapou\SimpleSite\Core\Problem;
+use Arnapou\Zip\Psr\Prs7ZipResponseStream;
+use Arnapou\Zip\Writing\Zipped\ZippedFile;
 use Arnapou\Zip\ZipReader;
-use Exception;
-use FilesystemIterator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use SplFileInfo;
-use Throwable;
 
 final class AdminMainController extends AdminController
 {
@@ -46,6 +43,7 @@ final class AdminMainController extends AdminController
 
         return [
             new Endpoint(new Route('/', self::HOME), $this->routeListing(...)),
+            new Endpoint(new Route('/redirects', 'admin_redirects')->setMethods('GET', 'POST'), $this->routeRedirects(...)),
             new Endpoint($common(new Route('{dir}/', self::MAIN)), $this->routeListing(...)),
             new Endpoint($common(new Route('{dir}/delete', 'admin_delete')), $this->routeDelete(...)),
             new Endpoint($common(new Route('{dir}/download', 'admin_download')), $this->routeDownload(...)),
@@ -59,22 +57,36 @@ final class AdminMainController extends AdminController
     private function routeListing(ServerRequestInterface $request, string $dir = ''): mixed
     {
         return $this->firewall(function () use ($request, $dir) {
-            $context = ['node' => $node = $this->getNode($dir)];
+            $context = ['node' => $node = $this->node($dir)];
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
                     $node->dir => $this->render('listing.twig', $context),
                     $node->canEdit() => $this->render('form-edit.twig', $context),
-                    default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                    default => throw Problem::fromStatus(Error::Forbidden),
                 },
-                'POST' => match ($params = $this->csrfRequestParams($request)) {
+                'POST' => match ($params = $this->requestParams($request)) {
                     null => $this->renderInvalidCsrf('form-edit.twig', $context),
                     default => match (true) {
                         $node->canEdit() => $this->doEdit($node, $params),
-                        default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                        default => throw Problem::fromStatus(Error::Forbidden),
                     },
                 },
-                default => throw Problem::fromStatus(StatusClientError::MethodNotAllowed),
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
+            };
+        });
+    }
+
+    private function routeRedirects(ServerRequestInterface $request): mixed
+    {
+        return $this->firewall(function () use ($request) {
+            return match ($request->getMethod()) {
+                'GET' => $this->render('form-redirects.twig', ['redirects' => $this->admin->getRedirects()]),
+                'POST' => match ($params = $this->requestParams($request)) {
+                    null => $this->renderInvalidCsrf('form-redirects.twig', ['redirects' => $this->admin->getRedirects()]),
+                    default => $this->doRedirects($params),
+                },
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
             };
         });
     }
@@ -82,21 +94,21 @@ final class AdminMainController extends AdminController
     private function routeDelete(ServerRequestInterface $request, string $dir): mixed
     {
         return $this->firewall(function () use ($request, $dir) {
-            $context = ['node' => $node = $this->getNode($dir)];
+            $context = ['node' => $node = $this->node($dir)];
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
                     $node->canDelete() => $this->render('form-delete.twig', $context),
-                    default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                    default => throw Problem::fromStatus(Error::Forbidden),
                 },
-                'POST' => match ($this->csrfRequestParams($request)) {
+                'POST' => match ($this->requestParams($request)) {
                     null => $this->renderInvalidCsrf('form-delete.twig', $context),
                     default => match (true) {
                         $node->canDelete() => $this->doDelete($node),
-                        default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                        default => throw Problem::fromStatus(Error::Forbidden),
                     },
                 },
-                default => throw Problem::fromStatus(StatusClientError::MethodNotAllowed),
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
             };
         });
     }
@@ -104,14 +116,14 @@ final class AdminMainController extends AdminController
     private function routeDownload(ServerRequestInterface $request, string $dir): mixed
     {
         return $this->firewall(function () use ($request, $dir) {
-            $node = $this->getNode($dir);
+            $node = $this->node($dir);
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
                     $node->canDownload() => $this->doDownload($node),
-                    default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                    default => throw Problem::fromStatus(Error::Forbidden),
                 },
-                default => throw Problem::fromStatus(StatusClientError::MethodNotAllowed),
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
             };
         });
     }
@@ -119,21 +131,21 @@ final class AdminMainController extends AdminController
     private function routeUpload(ServerRequestInterface $request, string $dir = ''): mixed
     {
         return $this->firewall(function () use ($request, $dir) {
-            $context = ['node' => $node = $this->getNode($dir)];
+            $context = ['node' => $node = $this->node($dir)];
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
                     $node->dir && $node->canCreate() => $this->render('form-upload.twig', $context),
-                    default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                    default => throw Problem::fromStatus(Error::Forbidden),
                 },
-                'POST' => match ($params = $this->csrfRequestParams($request)) {
+                'POST' => match ($params = $this->requestParams($request)) {
                     null => $this->renderInvalidCsrf('form-upload.twig', $context),
                     default => match (true) {
                         $node->dir && $node->canCreate() => $this->doUpload($node, $params, $request->getUploadedFiles()),
-                        default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                        default => throw Problem::fromStatus(Error::Forbidden),
                     },
                 },
-                default => throw Problem::fromStatus(StatusClientError::MethodNotAllowed),
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
             };
         });
     }
@@ -141,21 +153,21 @@ final class AdminMainController extends AdminController
     private function routeRename(ServerRequestInterface $request, string $dir): mixed
     {
         return $this->firewall(function () use ($request, $dir) {
-            $context = ['node' => $node = $this->getNode($dir)];
+            $context = ['node' => $node = $this->node($dir)];
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
                     $node->canRename() => $this->render('form-rename.twig', $context),
-                    default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                    default => throw Problem::fromStatus(Error::Forbidden),
                 },
-                'POST' => match ($params = $this->csrfRequestParams($request)) {
+                'POST' => match ($params = $this->requestParams($request)) {
                     null => $this->renderInvalidCsrf('form-rename.twig', $context),
                     default => match (true) {
                         $node->canRename() => $this->doRename($node, $params),
-                        default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                        default => throw Problem::fromStatus(Error::Forbidden),
                     },
                 },
-                default => throw Problem::fromStatus(StatusClientError::MethodNotAllowed),
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
             };
         });
     }
@@ -173,21 +185,21 @@ final class AdminMainController extends AdminController
     private function routeCreate(ServerRequestInterface $request, string $dir, bool $folder): mixed
     {
         return $this->firewall(function () use ($request, $dir, $folder) {
-            $node = $this->getNode($dir);
+            $node = $this->node($dir);
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
                     $node->canCreate() => $this->render('form-create.twig', ['node' => $node, 'folder' => $folder]),
-                    default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                    default => throw Problem::fromStatus(Error::Forbidden),
                 },
-                'POST' => match ($params = $this->csrfRequestParams($request)) {
+                'POST' => match ($params = $this->requestParams($request)) {
                     null => $this->renderInvalidCsrf('form-create.twig', ['node' => $node, 'folder' => $folder]),
                     default => match (true) {
                         $node->canCreate() => $this->doCreate($node, $params, $folder),
-                        default => throw Problem::fromStatus(StatusClientError::Forbidden),
+                        default => throw Problem::fromStatus(Error::Forbidden),
                     },
                 },
-                default => throw Problem::fromStatus(StatusClientError::MethodNotAllowed),
+                default => throw Problem::fromStatus(Error::MethodNotAllowed),
             };
         });
     }
@@ -198,22 +210,67 @@ final class AdminMainController extends AdminController
     private function doEdit(AdminNode $node, array $params): Response
     {
         $source = str_replace("\r", '', Ensure::string($params['source']));
-        file_put_contents($node->path, $source, LOCK_EX);
-        $this->flashMessage = \sprintf('The file "%s" was saved.', $node->name());
 
-        return $this->redirect($this->getAdminUrl($node->parent()));
+        if (\in_array($node->ext, ['yml', 'yaml'], true) && \is_string($validation = $this->helper->yamlValidate($source))) {
+            $this->session->flashMessage = $validation;
+
+            return $this->render('form-edit.twig', ['node' => $node, 'source' => $source]);
+        }
+
+        if ('json' === $node->ext && false === json_validate($source)) {
+            $this->session->flashMessage = 'The JSON is not valid.';
+
+            return $this->render('form-edit.twig', ['node' => $node, 'source' => $source]);
+        }
+
+        file_put_contents($node->path, $source, LOCK_EX);
+        $this->session->flashMessage = \sprintf('The file "%s" was saved.', $node->name());
+
+        return $this->redirect($this->adminUrl($node->parent()));
+    }
+
+    /**
+     * @param array<mixed> $params
+     */
+    private function doRedirects(array $params): Response
+    {
+        $source = Ensure::string($params['source']);
+
+        if (\is_string($validation = $this->helper->yamlValidate($source))) {
+            $this->session->flashMessage = $validation;
+
+            return $this->render('form-redirects.twig', ['source' => $source]);
+        }
+
+        if (!\is_array($decoded = $this->helper->yamlDecode($source))) {
+            $this->session->flashMessage = 'The YAML must be a list.';
+
+            return $this->render('form-redirects.twig', ['source' => $source]);
+        }
+
+        try {
+            $this->admin->setRedirects($decoded);
+        } catch (\Throwable $e) {
+            $this->session->flashMessage = $e->getMessage();
+
+            return $this->render('form-redirects.twig', ['source' => $source]);
+        }
+
+        $this->session->flashMessage = 'The redirects were saved.';
+
+        return $this->redirectToRoute(self::HOME);
     }
 
     private function doDelete(AdminNode $node): Response
     {
         if ($node->dir) {
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($node->path, FilesystemIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::CHILD_FIRST,
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($node->path, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST,
             );
 
             $count = 0;
-            /** @var iterable<SplFileInfo> $files */
+            /** @var iterable<\SplFileInfo> $files */
             foreach ($files as $fileinfo) {
                 if ($fileinfo->isDir()) {
                     rmdir($fileinfo->getPathname());
@@ -224,13 +281,13 @@ final class AdminMainController extends AdminController
             }
 
             rmdir($node->path);
-            $this->flashMessage = \sprintf('The folder "%s" and %d files were deleted.', $node->name(), $count);
+            $this->session->flashMessage = \sprintf('The folder "%s" and %d files were deleted.', $node->name(), $count);
         } else {
             unlink($node->path);
-            $this->flashMessage = \sprintf('The file "%s" was deleted.', $node->name());
+            $this->session->flashMessage = \sprintf('The file "%s" was deleted.', $node->name());
         }
 
-        return $this->redirect($this->getAdminUrl($node->parent()));
+        return $this->redirect($this->adminUrl($node->parent()));
     }
 
     /**
@@ -241,7 +298,7 @@ final class AdminMainController extends AdminController
         $context = ['node' => $node];
 
         if ('' === ($name = trim(Ensure::string($params['name'])))) {
-            $this->flashMessage = 'The name cannot be empty.';
+            $this->session->flashMessage = 'The name cannot be empty.';
 
             return $this->render('form-rename.twig', $context);
         }
@@ -249,27 +306,27 @@ final class AdminMainController extends AdminController
         $renamed = $node->rename($name);
 
         if ($node->path === $renamed->path) {
-            $this->flashMessage = \sprintf('The file "%s" was not renamed: it is the same!', basename($name));
+            $this->session->flashMessage = \sprintf('The file "%s" was not renamed: it is the same!', basename($name));
 
-            return $this->redirect($this->getAdminUrl($renamed->parent()));
+            return $this->redirect($this->adminUrl($renamed->parent()));
         }
 
         if ($renamed->exists()) {
-            $this->flashMessage = \sprintf('The name "%s" is already used in the folder.', $name);
+            $this->session->flashMessage = \sprintf('The name "%s" is already used in the folder.', $name);
 
             return $this->render('form-rename.twig', $context);
         }
 
         if (!is_dir(\dirname($renamed->path))) {
-            $this->flashMessage = \sprintf('The target folder for "%s" does not exist.', $name);
+            $this->session->flashMessage = \sprintf('The target folder for "%s" does not exist.', $name);
 
             return $this->render('form-rename.twig', $context);
         }
 
         rename($node->path, $renamed->path);
-        $this->flashMessage = \sprintf('The file "%s" was renamed to "%s".', $node->name(), $renamed->name());
+        $this->session->flashMessage = \sprintf('The file "%s" was renamed to "%s".', $node->name(), $renamed->name());
 
-        return $this->redirect($this->getAdminUrl($renamed->parent()));
+        return $this->redirect($this->adminUrl($renamed->parent()));
     }
 
     /**
@@ -278,14 +335,14 @@ final class AdminMainController extends AdminController
     private function doCreate(AdminNode $node, array $params, bool $folder): Response
     {
         if ('' === ($name = trim(Ensure::string($params['name'])))) {
-            $this->flashMessage = 'The name cannot be empty.';
+            $this->session->flashMessage = 'The name cannot be empty.';
 
             return $this->render('form-create.twig', ['node' => $node, 'folder' => $folder]);
         }
 
         $created = $node->create($name);
         if ($created->exists()) {
-            $this->flashMessage = \sprintf('The name "%s" is already used in the folder.', $name);
+            $this->session->flashMessage = \sprintf('The name "%s" is already used in the folder.', $name);
 
             return $this->render('form-create.twig', ['node' => $node, 'folder' => $folder]);
         }
@@ -300,11 +357,11 @@ final class AdminMainController extends AdminController
     {
         $this->mkdir($created);
         touch($created->path);
-        $this->flashMessage = \sprintf('The file "%s" was created.', $name);
+        $this->session->flashMessage = \sprintf('The file "%s" was created.', $name);
 
         return $created->canEdit()
-            ? $this->redirect($this->getAdminUrl($created))
-            : $this->redirect($this->getAdminUrl($created->parent()));
+            ? $this->redirect($this->adminUrl($created))
+            : $this->redirect($this->adminUrl($created->parent()));
     }
 
     private function doCreateFolder(AdminNode $created, string $name): Response
@@ -312,9 +369,9 @@ final class AdminMainController extends AdminController
         if (!mkdir($created->path, 0o777, true) && !is_dir($created->path)) {
             throw new Problem(\sprintf('Directory "%s" was not created', $created->path));
         }
-        $this->flashMessage = \sprintf('The folder "%s" was created.', $name);
+        $this->session->flashMessage = \sprintf('The folder "%s" was created.', $name);
 
-        return $this->redirect($this->getAdminUrl($created));
+        return $this->redirect($this->adminUrl($created));
     }
 
     private function doDownload(AdminNode $node): Response
@@ -322,13 +379,32 @@ final class AdminMainController extends AdminController
         session_write_close();
 
         if ($node->dir) {
-            $response = new AdminZipResponse($node, $filename = $node->name() . '.zip');
+            $filename = $node->name() . '.zip';
+            $response = new FileResponse($stream = new Prs7ZipResponseStream(), MimeType::detect($filename));
+            $this->doDownloadAddNode($stream, $node, \strlen($node->path) + 1);
         } else {
-            $response = FileResponse::fromFilename($node->path);
             $filename = $node->name();
+            $response = FileResponse::fromFilename($node->path);
         }
 
         return $response->withHeader(ContentDisposition::attachment($filename));
+    }
+
+    private function doDownloadAddNode(Prs7ZipResponseStream $stream, AdminNode $node, int $trim): void
+    {
+        if (!$node->isForbidden()) {
+            if ($node->dir) {
+                foreach ($node->list() as $item) {
+                    $this->doDownloadAddNode($stream, $item, $trim);
+                }
+            } else {
+                $item = new ZippedFile(
+                    Ensure::nonEmptyString($node->path),
+                    Ensure::nonEmptyString(substr($node->path, $trim)),
+                );
+                $stream->addZipItem($item);
+            }
+        }
     }
 
     /**
@@ -344,9 +420,9 @@ final class AdminMainController extends AdminController
             return $this->render('form-upload.twig', ['node' => $node, 'upload' => $upload]);
         }
 
-        $this->flashMessage = \sprintf('%d files were uploaded.', \count($upload->success));
+        $this->session->flashMessage = \sprintf('%d files were uploaded.', \count($upload->success));
 
-        return $this->redirect($this->getAdminUrl($node));
+        return $this->redirect($this->adminUrl($node));
     }
 
     private function doUploadFiles(AdminNode $node, mixed $files, AdminUpload $upload): void
@@ -383,7 +459,7 @@ final class AdminMainController extends AdminController
         } else {
             try {
                 $this->doUploadFile($files, $node->create($filename), $upload);
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 $upload->addError($filename, $e->getMessage());
             }
         }
@@ -393,12 +469,12 @@ final class AdminMainController extends AdminController
     {
         if ($target->isForbidden()) {
             $upload->addError($target->path, 'Forbidden.');
-        } elseif ($upload->unzip && 'zip' === strtolower($target->ext)) {
+        } elseif ($upload->unzip && 'zip' === $target->ext) {
             // https://www.php.net/stream_get_meta_data
             $metadata = Ensure::array($file->getStream()->getMetadata());
             $tempFile = Ensure::nullableString($metadata['uri'] ?? null);
             if (null === $tempFile || !is_file($tempFile)) {
-                throw new Exception('Undefined uploaded zip temporary filename.');
+                throw new \Exception('Undefined uploaded zip temporary filename.');
             }
 
             $reader = new ZipReader($tempFile);
@@ -416,7 +492,7 @@ final class AdminMainController extends AdminController
                     } else {
                         $upload->addSuccess($zippedFile->getName(), $detail . 'Upload OK.');
                     }
-                } catch (Throwable $e) {
+                } catch (\Throwable $e) {
                     $upload->addError($zippedFile->getName(), $detail . $e->getMessage());
                 }
             }

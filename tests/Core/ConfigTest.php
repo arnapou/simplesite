@@ -17,8 +17,6 @@ use Arnapou\Psr\Psr3Logger\Utils\Psr3Level;
 use Arnapou\SimpleSite\Core\Config;
 use Arnapou\SimpleSite\Core\Problem;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
-use Closure;
-use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -33,41 +31,41 @@ class ConfigTest extends TestCase
         @mkdir(self::EXIST, recursive: true);
     }
 
-    public static function dataEmptyProperty(): Generator
+    public static function dataEmptyProperty(): \Generator
     {
         // mandatory properties
-        yield ['path_public', fn () => new Config(name: 'name', path_public: '', path_pages: self::EXIST, path_cache: self::EXIST)];
-        yield ['path_pages', fn () => new Config(name: 'name', path_public: self::EXIST, path_pages: '', path_cache: self::EXIST)];
-        yield ['path_cache', fn () => new Config(name: 'name', path_public: self::EXIST, path_pages: self::EXIST, path_cache: '')];
+        yield ['path_public', fn () => new Config(path_public: '', path_pages: self::EXIST, path_cache: self::EXIST)];
+        yield ['path_pages', fn () => new Config(path_public: self::EXIST, path_pages: '', path_cache: self::EXIST)];
+        yield ['path_cache', fn () => new Config(path_public: self::EXIST, path_pages: self::EXIST, path_cache: '')];
     }
 
     #[DataProvider('dataEmptyProperty')]
-    public function testEmptyProperty(string $name, Closure $closure): void
+    public function testEmptyProperty(string $name, \Closure $closure): void
     {
         $this->expectExceptionObject(Problem::emptyVariable($name));
         $closure();
     }
 
-    public static function dataPathDoesNotExists(): Generator
+    public static function dataPathDoesNotExists(): \Generator
     {
         // mandatory properties
-        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(name: 'name', path_public: $tmp, path_pages: self::EXIST, path_cache: self::EXIST)];
-        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(name: 'name', path_public: self::EXIST, path_pages: $tmp, path_cache: self::EXIST)];
+        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(path_public: $tmp, path_pages: self::EXIST, path_cache: self::EXIST)];
+        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(path_public: self::EXIST, path_pages: $tmp, path_cache: self::EXIST)];
 
         // optional properties
-        yield [$tmp = uniqid('/tmp/', true), fn () => new Config('name', self::EXIST, self::EXIST, self::EXIST, path_data: $tmp)];
-        yield [$tmp = uniqid('/tmp/', true), fn () => new Config('name', self::EXIST, self::EXIST, self::EXIST, path_templates: $tmp)];
-        yield [$tmp = uniqid('/tmp/', true), fn () => new Config('name', self::EXIST, self::EXIST, self::EXIST, path_php: $tmp)];
+        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(self::EXIST, self::EXIST, self::EXIST, path_data: $tmp)];
+        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(self::EXIST, self::EXIST, self::EXIST, path_templates: $tmp)];
+        yield [$tmp = uniqid('/tmp/', true), fn () => new Config(self::EXIST, self::EXIST, self::EXIST, path_php: $tmp)];
     }
 
     #[DataProvider('dataPathDoesNotExists')]
-    public function testPathDoesNotExists(string $path, Closure $closure): void
+    public function testPathDoesNotExists(string $path, \Closure $closure): void
     {
         $this->expectExceptionObject(Problem::pathNotExists($path));
         $closure();
     }
 
-    public static function dataBasePathUrl(): Generator
+    public static function dataBasePathUrl(): \Generator
     {
         yield ['/', ''];
         yield ['/', '/'];
@@ -80,12 +78,12 @@ class ConfigTest extends TestCase
     #[DataProvider('dataBasePathUrl')]
     public function testBasePathUrl(string $expected, string $basePath): void
     {
-        $config = new Config('name', self::EXIST, self::EXIST, self::EXIST, base_path_root: $basePath);
+        $config = new Config(self::EXIST, self::EXIST, self::EXIST, base_path_root: $basePath);
 
         self::assertSame($expected, $config->base_path_root);
     }
 
-    public static function dataBasePathAdmin(): Generator
+    public static function dataBasePathAdmin(): \Generator
     {
         yield [null, ''];
         yield [null, '/'];
@@ -98,7 +96,7 @@ class ConfigTest extends TestCase
     #[DataProvider('dataBasePathAdmin')]
     public function testBasePathAdmin(?string $expected, string $basePath): void
     {
-        $config = new Config('name', self::EXIST, self::EXIST, self::EXIST, base_path_admin: $basePath);
+        $config = new Config(self::EXIST, self::EXIST, self::EXIST, base_path_admin: $basePath);
 
         self::assertSame($expected, $config->base_path_admin);
     }
@@ -107,7 +105,6 @@ class ConfigTest extends TestCase
     {
         [$dir, $config] = self::createConfigTest();
 
-        self::assertSame('name', $config->name);
         self::assertSame("$dir/public", $config->path_public);
         self::assertSame("$dir/pages", $config->path_pages);
         self::assertSame("$dir/cache", $config->path_cache);

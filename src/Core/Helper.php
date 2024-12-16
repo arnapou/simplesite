@@ -14,40 +14,65 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\Ensure\Enforce;
+use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Yaml\Yaml;
+use Twig\Source;
 
 final readonly class Helper
 {
-    /**
-     * @return non-empty-string|null
-     */
-    public function pageExtension(string $filename): ?string
-    {
-        $ext = $this->fileExtension($filename);
-
-        return \in_array($ext, Config::PAGE_EXTENSIONS, true) ? $ext : null;
+    public function __construct(
+        private Config $config,
+        private HttpRouteHandler $router,
+        private TwigLoader $twigLoader,
+    ) {
     }
 
-    public function fileExtension(string $filename): string
+    public function asset(string $path): string
     {
-        return pathinfo($filename, \PATHINFO_EXTENSION);
+        return $this->config->base_path_root . ltrim($path, '/');
     }
 
-    public function slugify(string $text): string
+    public function baseUrl(ServerRequestInterface $request, bool $withScheme = true): string
     {
-        return strtolower(new AsciiSlugger()->slug($text)->toString());
+        $parsed = parse_url((string) $request->getUri());
+        $scheme = Enforce::string($parsed['scheme'] ?? 'http');
+        $host = Enforce::string($parsed['host'] ?? 'localhost');
+        $port = Enforce::string($parsed['port'] ?? '80');
+
+        $domain = match ($scheme) {
+            'http' => \in_array($port, ['80', ''], true) ? $host : "$host:$port",
+            'https' => \in_array($port, ['443', ''], true) ? $host : "$host:$port",
+            default => "$host:$port",
+        };
+
+        return $withScheme ? "$scheme://$domain/" : $domain;
     }
 
     /**
      * @return array<mixed>
      */
-    public function yamlParse(string $yaml): array
+    public function data(string $view, bool $strict = true): array
     {
-        $result = \function_exists('yaml_parse') ? yaml_parse($yaml) : Yaml::parse($yaml);
+        if (!$strict && !$this->twigLoader->exists($view)) {
+            return [];
+        }
+
+        $source = $this->view($view)->getCode();
+
+        $result = match (strtolower($this->fileExtension($view))) {
+            'yml', 'yaml' => $this->yamlDecode($source),
+            'json' => json_decode($source, true),
+            default => null,
+        };
 
         return \is_array($result) ? $result : [];
+    }
+
+    public function fileExtension(string $filename): string
+    {
+        return pathinfo($filename, \PATHINFO_EXTENSION);
     }
 
     public function minifyHtml(string $source): string
@@ -76,41 +101,49 @@ final readonly class Helper
         return strtr($source, $blocks);
     }
 
-    public function getBaseUrl(ServerRequestInterface $request): string
+    /**
+     * @return non-empty-string|null
+     */
+    public function pageExtension(string $filename): ?string
     {
-        $parsed = parse_url((string) $request->getUri());
-        $scheme = Enforce::string($parsed['scheme'] ?? 'http');
-        $host = Enforce::string($parsed['host'] ?? 'localhost');
-        $port = Enforce::string($parsed['port'] ?? '80');
+        $ext = $this->fileExtension($filename);
 
-        $domain = match ($scheme) {
-            'http' => \in_array($port, ['80', ''], true) ? $host : "$host:$port",
-            'https' => \in_array($port, ['443', ''], true) ? $host : "$host:$port",
-            default => "$host:$port",
-        };
-
-        return "$scheme://$domain/";
+        return \in_array($ext, Config::PAGE_EXTENSIONS, true) ? $ext : null;
     }
 
-    public function toSnakeCase(string $str): string
+    /**
+     * @param array<string,string|int|float> $parameters
+     */
+    public function path(string $name, array $parameters = []): string
     {
-        $str = (string) preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $str);
-        $str = str_replace('-', '_', $this->slugify($str));
+        $url = $this->router->generateUrl($name, $parameters);
 
-        return strtolower($str);
+        return '//' === $url ? '/' : $url;
     }
 
-    public function toCamelCase(string $str, bool $ucfirst = false): string
+    public function pathDir(string $path): string
     {
-        $str = (string) preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $str);
-        $str = str_replace('-', ' ', $this->slugify($str));
-        $str = str_replace(' ', '', ucwords(strtolower($str)));
-
-        return $ucfirst ? $str : lcfirst($str);
+        return $this->path('static_dir', ['path' => $path]);
     }
 
-    public function svgSymbol(string $filename, ?string $name = null): string
+    public function pathPage(string $path): string
     {
+        return $this->path('static_page', ['path' => $path]);
+    }
+
+    public function replaceExtension(string $filename, string $extension): string
+    {
+        return substr($filename, 0, -\strlen($this->fileExtension($filename))) . $extension;
+    }
+
+    public function slugify(string $text): string
+    {
+        return strtolower(new AsciiSlugger()->slug($text)->toString());
+    }
+
+    public function svgSymbol(string $view, ?string $name = null): string
+    {
+        $filename = $this->view($view)->getPath();
         $name ??= $this->slugify(basename($filename, '.' . $this->fileExtension($filename)));
 
         return $this->minifyHtml(
@@ -125,5 +158,93 @@ final readonly class Helper
     public function svgSymbolUse(string $name): string
     {
         return '<svg version="2.0">' . ('' === $name ? '' : '<use href="#' . htmlentities($name) . '" />') . '</svg>';
+    }
+
+    public function throwableToText(\Throwable $throwable): string
+    {
+        $text = '';
+        while ($throwable) {
+            $text .= '  class: ' . $throwable::class . "\n";
+            $text .= 'message: ' . $throwable->getMessage() . "\n";
+            $text .= '   file: ' . $throwable->getFile() . '(' . $throwable->getLine() . ')' . "\n";
+            if (0 !== $throwable->getCode()) {
+                $text .= '   code: ' . $throwable->getCode() . "\n";
+            }
+            $text .= '  trace: ' . ltrim(
+                implode(
+                    "\n",
+                    array_map(
+                        static fn (string $line): string => '         ' . trim($line),
+                        explode("\n", trim($throwable->getTraceAsString())),
+                    ),
+                ),
+            ) . "\n";
+            if (null !== ($throwable = $throwable->getPrevious())) {
+                $text .= "\n";
+            }
+        }
+
+        return "\n$text\n";
+    }
+
+    public function thumbnail(string $path, int $size = 200): string
+    {
+        if (\array_key_exists($ext = strtolower($this->fileExtension($path)), Config::IMAGE_MIME_TYPES)) {
+            $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
+        }
+
+        return $this->asset($path);
+    }
+
+    public function toCamelCase(string $str, bool $ucfirst = false): string
+    {
+        $str = (string) preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $str);
+        $str = str_replace('-', ' ', $this->slugify($str));
+        $str = str_replace(' ', '', ucwords(strtolower($str)));
+
+        return $ucfirst ? $str : lcfirst($str);
+    }
+
+    public function toSnakeCase(string $str): string
+    {
+        $str = (string) preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $str);
+        $str = str_replace('-', '_', $this->slugify($str));
+
+        return strtolower($str);
+    }
+
+    public function view(string $view): Source
+    {
+        return $this->twigLoader->getSourceContext($view);
+    }
+
+    public function yamlDecode(string $source): mixed
+    {
+        return match (true) {
+            \function_exists('yaml_parse') => yaml_parse($source),
+            default => Yaml::parse($source),
+        };
+    }
+
+    public function yamlEncode(mixed $data): string
+    {
+        return match (true) {
+            \function_exists('yaml_emit') => yaml_emit($data, YAML_UTF8_ENCODING, YAML_LN_BREAK),
+            default => Yaml::dump($data),
+        };
+    }
+
+    public function yamlValidate(string $source): bool|string
+    {
+        set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline) {
+            throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
+        });
+        try {
+            return \is_array($this->yamlDecode($source));
+        } catch (\Throwable $e) {
+            return $e->getMessage();
+        } finally {
+            restore_error_handler();
+        }
     }
 }

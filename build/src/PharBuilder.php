@@ -13,14 +13,12 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
-use Arnapou\SimpleSite\Core\Helper;
-use LogicException;
-use Phar;
-use Throwable;
+use Arnapou\SimpleSite\Core;
+use Arnapou\SimpleSite\SimpleSite;
 
 final class PharBuilder
 {
-    private const int COMPRESSION = Phar::GZ;
+    private const int COMPRESSION = \Phar::GZ;
 
     public function __construct(private readonly BuildConfig $config)
     {
@@ -49,7 +47,7 @@ final class PharBuilder
             $this->copyAllFilesToTmp();
             $this->unlinkPreviousBuilds($pharfile);
 
-            $phar = new Phar($pharfile);
+            $phar = new \Phar($pharfile);
 
             // Phars created from iterator (unlike from directory) does not have full-fledged directory structure.
             // For example, functions like opendir() will fail, although fopen() does not.
@@ -59,7 +57,7 @@ final class PharBuilder
             $phar->setStub($this->getStub(basename($pharfile)));
 
             $phar->compressFiles(self::COMPRESSION);
-        } catch (Throwable $exception) {
+        } catch (\Throwable $exception) {
             $this->bye('⚠️ ' . $exception->getMessage());
         }
     }
@@ -85,9 +83,24 @@ __HALT_COMPILER(); ?>";
         }
     }
 
+    private function getHelper(): Core\Helper
+    {
+        SimpleSite::container()->registerInstance(
+            Core\Config::class,
+            new Core\Config(
+                path_public: __DIR__ . '/../../demo/public',
+                path_pages: __DIR__ . '/../../demo/pages',
+                path_cache: '/tmp/simplesite',
+            ),
+        );
+
+        return SimpleSite::helper();
+    }
+
     private function copyAllFilesToTmp(): void
     {
         $rootDir = $this->config->projectRootDir;
+        $minifyHtml = $this->getHelper()->minifyHtml(...);
 
         $this->cleanupTmp();
         foreach ($this->allfiles() as $file) {
@@ -103,8 +116,8 @@ __HALT_COMPILER(); ?>";
                 $destPathname,
                 match (strtolower($file->getExtension())) {
                     'php' => php_strip_whitespace($file->getPathname()),
-                    'twig', 'svg' => new Helper()->minifyHtml($contents),
-                    'css' => preg_replace('!/\*.*?\*/!', '', new Helper()->minifyHtml($contents)),
+                    'twig', 'svg' => $minifyHtml($contents),
+                    'css' => preg_replace('!/\*.*?\*/!', '', $minifyHtml($contents)),
                     default => $contents,
                 },
             );
@@ -116,7 +129,7 @@ __HALT_COMPILER(); ?>";
         if (is_dir($tempDir = $this->config->buildTempDir)) {
             exec('rm -Rf ' . escapeshellarg($tempDir), $output, $code);
             if (0 !== $code) {
-                throw new LogicException("I was not able to cleanup the temporary folder $tempDir");
+                throw new \LogicException("I was not able to cleanup the temporary folder $tempDir");
             }
         }
         $this->mkdir($tempDir);
@@ -129,7 +142,7 @@ __HALT_COMPILER(); ?>";
 
     private function canCompress(): bool
     {
-        return Phar::canCompress(self::COMPRESSION);
+        return \Phar::canCompress(self::COMPRESSION);
     }
 
     private function isPharReadonly(): bool

@@ -35,7 +35,7 @@ $rules = [
     'combine_consecutive_unsets' => true,
     'phpdoc_order' => true,
     'phpdoc_var_annotation_correct_order' => true,
-    'global_namespace_import' => ['import_classes' => true, 'import_functions' => false, 'import_constants' => false],
+    'global_namespace_import' => ['import_classes' => false, 'import_functions' => false, 'import_constants' => false],
     'header_comment' => ['location' => 'after_declare_strict', 'header' => $header],
     'trailing_comma_in_multiline' => ['elements' => ['arguments', 'array_destructuring', 'arrays', 'match', 'parameters']],
     'phpdoc_line_span' => ['const' => 'single', 'method' => 'multi', 'property' => 'single'],

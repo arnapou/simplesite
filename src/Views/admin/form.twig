@@ -34,7 +34,7 @@
         {% for item in node.breadcrumb %}
             {% if not loop.last or not remove_last %}
                 {% if not loop.first %}<span>/</span>{% endif %}
-                <a href="{{ item|adminUrl }}"><i>{{ item.symbol|svgUse }}</i>{{ item.name }}</a>
+                <a href="{{ item|admin_url }}"><i>{{ item.symbol|svg_use }}</i>{{ item.name }}</a>
             {% endif %}
         {% endfor %}
     </div>
@@ -60,5 +60,5 @@
         </p>
     {% endif %}
 
-    <script>(o = document.getElementById('fleeting_message')) && window.setTimeout(() => o.style.display = 'none', 4000);</script>
+    <script>(o = document.getElementById('fleeting_message')) && window.setTimeout(() => o.style.display = 'none', 8000);</script>
 {% endmacro %}

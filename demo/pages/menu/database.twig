@@ -2,32 +2,33 @@
 
 {% block content %}
 
-    <h1>Datas</h1>
+    <h1>Database</h1>
 
-    <p>Les datas sont stockées dans des "tables" dans des fichiers à plat en <a href="{{ url_yaml }}">YAML</a>.</p>
+    <p>The "database" is a bunch of "tables", each stored into flat files of <a href="{{ url_yaml }}">YAML</a> format.</p>
 
-    <p>Les fichiers sont dans le dossier de la config <code>path_data</code> et ont le nom suivant <code>table.&lt;nom_de_table&gt;.yaml</code></p>
+    <p>Yaml files are into <code>path_data</code> with the following naming pattern <code>table.&lt;table_name&gt;.yaml</code></p>
 
-    <p>Exemple du fichier fourni dans cette démo <code>table.persons.yaml</code> :</p>
+    <p>Example of this demo file <code>table.persons.yaml</code> :</p>
     <pre style="overflow: auto;max-height: 15rem">{{ source('@data/table.persons.yaml') }}</pre>
 
     <p>
-        La lib <a href="https://gitlab.com/arnapou/lib/pfdb" target="_blank">arnapou/pfdb</a> sur GitLab qui permet de faire des recherches, des groupements, des tris et aussi de modifier les données.<br>
-        Tout ce qui est faisable en code PHP est faisable dans twig à travers l'objet <code>app.db</code>.</p>
+        It is based on <a href="https://gitlab.com/arnapou/lib/pfdb" target="_blank">arnapou/pfdb</a>
+        library which allows you to search, group, sort and also modify data.<br>
+        Anything that is doable in PHP code is doable in twig through the object <code>app.db</code>.</p>
 
-    <h3>Retrouver un élément à partir de son id</h3>
+    <h3>Find an item from its id</h3>
 
     <p>
-        L'élément ayant pour id 5<br>
+        The element with id 5<br>
         {% verbatim %}<code><span class="text-muted">{{ </span>app.db.table('persons').get(5)<span class="text-muted"> | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}</span></code>{% endverbatim %}
     </p>
 
     <pre>{{ app.db.table('persons').get(5) | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}</pre>
 
-    <h3>Lister</h3>
+    <h3>Listing</h3>
 
     <p>
-        5 lignes à partir de la dizième<br>
+        5 lines from 10th<br>
         {% verbatim %}<code><span class="text-muted">{% for person in </span>app.db.table('persons').find.limit(10, 5)<span class="text-muted"> %}</span></code>{% endverbatim %}
     </p>
 
@@ -44,10 +45,10 @@
         </tbody>
     </table>
 
-    <h3>Chercher et trier</h3>
+    <h3>Finding and sorting</h3>
 
     <p>
-        Les noms contenant <code>an</code> puis trié par nom<br>
+        Names which contains <code>"an"</code> than sorted by name<br>
         {% verbatim %}<code><span class="text-muted">{% for person in </span>app.db.table('persons').find(app.db.expr.contains('name', 'an')).sort('name')<span class="text-muted"> %}</span></code>{% endverbatim %}
     </p>
 

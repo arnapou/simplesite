@@ -1,0 +1,51 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+
+    <h1>Logs</h1>
+
+    <p>The site logs a number of things such as <code>404</code>, <code>500</code>, etc ...</p>
+
+    <p>The log folder is in the <code>path_logs</code> config option and if it is not defined we use the <code>logs</code> subfolder of the <code>path_cache</code> option</p>
+
+    <p>A retention of several days is kept and configurable with the <code>log_max_files</code> option.</p>
+
+    <p>The log level can be chosen with the <code>log_level</code> option which must have one of the following values:</p>
+
+    <ul>
+        <li><code>debug</code></li>
+        <li><code>info</code></li>
+        <li><code>notice</code> (par défaut)</li>
+        <li><code>warning</code></li>
+        <li><code>error</code></li>
+        <li><code>critical</code></li>
+        <li><code>alert</code></li>
+        <li><code>emergency</code></li>
+    </ul>
+
+    <h1>Error pages</h1>
+
+    <p>At this stage, we only consider <code>40X</code> and <code>50X</code>.</p>
+
+    <p>There are pre-configured pages for this, examples:</p>
+    <p>
+        A page that crashes to view the default 500 page
+        <br>
+        <a href="{{ path('crashed') }}"><button>{{ path('crashed') }}</button></a>
+    </p>
+    <p>
+        A page that does not exist to view a custom 404 page
+        <br>
+        <a href="/do_not_exist"><button>/do_not_exist</button></a>
+    </p>
+
+    <p>To customize error pages, you just need to have a templates folder configured via <code>path_templates</code>
+        and define the following twig files in that folder:</p>
+
+    <ul>
+        <li><code>error.40x.twig</code></li>
+        <li><code>error.50x.twig</code></li>
+    </ul>
+
+
+{% endblock %}

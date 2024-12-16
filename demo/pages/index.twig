@@ -4,73 +4,82 @@
 
     <h1>Arnapou Simple site</h1>
 
-
-    <h2>Les bases</h2>
+    <h2>Docker</h2>
 
     <p>
-        Cette solution de site est à mi-chemin entre le site statique et le site dynamique.
+        This is the <b>recommended way</b> if you don't want to bother.<br>
     </p>
     <p>
-        En effet, avec un simple fichier PHP <code>simplesite.phar</code> et un <code>index.php</code> initialisant le système,
-        vous aurez un site fonctionnel :
+        Useful links:
+    </p>
+
+    <ul>
+        <li><a href="{{ url_gitlab }}/container_registry/6775210">Container versions</a> on GitLab</li>
+        <li><a href="{{ url_gitlab }}/-/blob/main/README.md">README.md</a> on GitLab <small>(with a <code>docker compose</code> example)</small></li>
+    </ul>
+
+    <h2>Basics</h2>
+
+    <p>
+        This solution is halfway between a static website and a dynamic website.
+    </p>
+    <p>
+        With a simple PHP file <code>simplesite.phar</code> and an <code>index.php</code> which initialize the website,
+        you will have a fully functional website :
     </p>
     <pre>
 &lt;?php
-include '/chemin/vers/simplesite.phar';
+include '/path/to/simplesite.phar';
 
 SimpleSite::run(
-    // obligatoire
-    name:           'Le nom de mon site',
-    path_public:    '/dossier/public/racine/du/site', // probablement __DIR__
-    path_pages:     '/dossier/prive/pour/les/pages',
-    path_cache:     '/dossier/prive/de/cache',
+    // mandatory
+    path_public: '/public/root/folder/of/website', // probably __DIR__
+    path_pages:  '/private/folder/for/pages',
+    path_cache:  '/private/folder/for/caching',
 
-    // optionnel
-    path_data:      '/dossier/prive/pour/les/data/en/yaml',
-    path_templates: '/dossier/prive/pour/les/templates',
-    path_php:       '/dossier/prive/pour/customiser/le/site/avec/du/php',
+    // ... there are other optional parameters
+    // ... you can check their description into the index.php of this demo
 );
     </pre>
 
     <p>
-        L'idée consiste à créer un site "statique" de fichiers basés sur <a href="{{ url_twig }}" target="_blank">Twig</a>.
-        Cela permet d'enrichir, de simplifier, de réutiliser du code html pourtant statique au final.
+        The idea is to create a "static" website composed of <a href="{{ url_twig }}" target="_blank">Twig</a> files.
+        This allows you to enrich, simplify and reuse HTML code that is static inside twig html files.
     </p>
     <p>
-        On pourrait faire une comparaison avec les générateurs de site statiques, à ceci près qu'ici, vous pouvez enrichir le site avec du php si nécessaire&nbsp;:
-        rajouter des routes, des traitements, etc ...
+        We can make a comparison with static site generators, but here, you can enrich the website with php.
     </p>
 
     <p>
-        Les dépendances PHP sont réduites à l'essentiel pour obtenir un fichier PHAR le plus petit possible.<br>
-        Sa taille sur cette démo est de <code>{{ (simplesite_phar_size / 1024)|round }}&nbsp;Ko</code>.
+        PHP dependencies are reduced to the essentials to obtain the smallest possible PHAR file.<br>
+        The phar size is <code>{{ (simplesite_phar_size / 1024)|round }}&nbsp;KB</code>.
     </p>
 
-    <h2>Pré-requis</h2>
+    <h2>Prerequisites</h2>
 
-    <p>Avoir la bonne version de PHP pour le <code>simplesite.phar</code> concerné.</p>
-
-    <ul>
-        <li>connaitre évidemment : HTML, CSS, voire JS</li>
-        <li>le templating <a href="{{ url_twig }}" target="_blank">Twig</a></li>
-    </ul>
-
-    <p>Pour profiter du maximum de fonctionnalités, il vous faudra connaitre en plus:</p>
+    <p>Have the right PHP version for <code>simplesite.phar</code> concerned.</p>
 
     <ul>
-        <li>le format de fichier <a href="{{ url_yaml }}" target="_blank">YAML</a></li>
-        <li>le langage de programmation <a href="{{ url_php }}" target="_blank">PHP</a></li>
+        <li>knowledge of: HTML, CSS, JS</li>
+        <li>templating: <a href="{{ url_twig }}" target="_blank">Twig</a></li>
     </ul>
 
-    <h2>Etat d'esprit</h2>
+    <p>To take advantage of the maximum features, you will need to know:</p>
+
+    <ul>
+        <li>file format <a href="{{ url_yaml }}" target="_blank">YAML</a></li>
+        <li>programming langage <a href="{{ url_php }}" target="_blank">PHP</a></li>
+    </ul>
+
+    <h2>Mindset</h2>
 
     <ul>
         <li>simple</li>
-        <li>léger</li>
-        <li>maintenance facile</li>
-        <li>pérenne</li>
-        <li>fallbacks automatiques</li>
-        <li>maximum d'ouverture</li>
+        <li>lightweight</li>
+        <li>easy maintenance</li>
+        <li>perennial</li>
+        <li>automatic fallbacks</li>
+        <li>open minded</li>
     </ul>
 
 {% endblock %}

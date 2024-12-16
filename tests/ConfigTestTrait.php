@@ -13,13 +13,16 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Tests;
 
+use Arnapou\SimpleSite\Admin\AdminConfig;
 use Arnapou\SimpleSite\Core\Config;
 use Arnapou\SimpleSite\Core\Container;
+use Arnapou\SimpleSite\Core\Sitemap;
+use Arnapou\SimpleSite\Core\TwigExtension;
 use Arnapou\SimpleSite\SimpleSite;
 
 trait ConfigTestTrait
 {
-    protected static function resetContainer(): Container
+    private static function resetContainer(): Container
     {
         $container = new Container();
 
@@ -33,10 +36,9 @@ trait ConfigTestTrait
         return $container;
     }
 
-    protected static function createConfigSite(string $baseUrl = '/'): Config
+    private static function createConfigDemo(string $baseUrl = '/'): Config
     {
         return new Config(
-            'test',
             path_public: __DIR__ . '/../demo/public',
             path_pages: __DIR__ . '/../demo/pages',
             path_cache: '/tmp/simplesite',
@@ -52,7 +54,7 @@ trait ConfigTestTrait
     /**
      * @return array{string, Config}
      */
-    protected static function createConfigTest(): array
+    private static function createConfigTest(): array
     {
         @mkdir($dir = '/tmp/' . uniqid('TEST-', true), recursive: true);
         @mkdir("$dir/public", recursive: true);
@@ -64,7 +66,6 @@ trait ConfigTestTrait
         return [
             $dir,
             new Config(
-                name: 'name',
                 path_public: "$dir/public",
                 path_pages: "$dir/pages",
                 path_cache: "$dir/cache",
@@ -78,5 +79,20 @@ trait ConfigTestTrait
                 base_path_admin: '/base_path_admin',
             ),
         ];
+    }
+
+    private function getSitemap(): Sitemap
+    {
+        return SimpleSite::container()->get(Sitemap::class);
+    }
+
+    private function getTwigExtension(): TwigExtension
+    {
+        return SimpleSite::container()->get(TwigExtension::class);
+    }
+
+    private function getAdminConfig(): AdminConfig
+    {
+        return SimpleSite::container()->get(AdminConfig::class);
     }
 }

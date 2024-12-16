@@ -40,14 +40,14 @@ final class AdminLoginController extends AdminController
     {
         return match ($request->getMethod()) {
             'GET' => match (true) {
-                $this->isAuthenticated => $this->redirectToRoute(AdminMainController::HOME),
-                '' === $this->passwordHash => $this->render('form-login.twig', ['init' => true]),
+                $this->session->isAuthenticated => $this->redirectToRoute(AdminMainController::HOME),
+                '' === $this->admin->passwordHash => $this->render('form-login.twig', ['init' => true]),
                 default => $this->render('form-login.twig'),
             },
-            'POST' => match ($params = $this->csrfRequestParams($request)) {
+            'POST' => match ($params = $this->requestParams($request)) {
                 null => $this->renderInvalidCsrf('form-login.twig'),
                 default => match (true) {
-                    '' === $this->passwordHash => $this->doInit($params),
+                    '' === $this->admin->passwordHash => $this->doInit($params),
                     default => $this->doLogin($params),
                 },
             },
@@ -70,12 +70,12 @@ final class AdminLoginController extends AdminController
     {
         $password = Enforce::string($params['password'] ?? '');
         if (\strlen($password) < 8) {
-            $this->flashMessage = 'The minimum length of the password is 8.';
+            $this->session->flashMessage = 'The minimum length of the password is 8.';
 
             return $this->render('form-login.twig', ['init' => true]);
         }
 
-        $this->passwordHash = $this->hash($password);
+        $this->admin->passwordHash = $password;
 
         return $this->redirectToRoute(self::LOGIN);
     }
@@ -85,14 +85,13 @@ final class AdminLoginController extends AdminController
      */
     private function doLogin(array $params): Response
     {
-        $password = Enforce::string($params['password'] ?? '');
-        if (!$this->hashVerify($password, $this->passwordHash)) {
-            $this->flashMessage = 'Wrong password provided.';
+        if (!$this->admin->isPasswordOk($params['password'] ?? '')) {
+            $this->session->flashMessage = 'Wrong password provided.';
 
             return $this->render('form-login.twig');
         }
 
-        $this->isAuthenticated = true;
+        $this->session->isAuthenticated = true;
 
         return $this->redirectToRoute(AdminMainController::HOME);
     }

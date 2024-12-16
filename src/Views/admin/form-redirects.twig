@@ -1,0 +1,34 @@
+{% extends "@internal/admin/form.twig" %}
+{% import "@internal/admin/form.twig" as form %}
+
+{% block main %}
+    {{ form.breadcrumb(node) }}
+
+    <form action="{{ path('admin_redirects') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        {{ form.notice(flash_message) }}
+
+        <p>
+            You must provide a valid <code>YAML</code> list of pairs <code>from</code> and <code>link</code>, which represents the redirects.
+        </p>
+
+        <p>
+                <textarea rows="40" name="source" autofocus>
+{%- if source is defined %}
+{{ source }}
+{% elseif 0 == redirects|length %}
+- from: old/page/url
+  link: target/of/the/redirect
+
+- from: another/old/page/url
+  link: https://some.external.site/
+{% else %}
+{{ redirects|yaml }}
+{% endif -%}
+                </textarea>
+        </p>
+
+        {{ form.buttons('Save', path('admin_home')) }}
+    </form>
+{% endblock %}

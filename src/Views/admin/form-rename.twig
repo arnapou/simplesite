@@ -4,7 +4,7 @@
 {% block main %}
     {{ form.breadcrumb(node, true) }}
 
-    <form action="{{ node|adminUrl('admin_rename') }}" method="POST">
+    <form action="{{ node|admin_url('admin_rename') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
         {{ form.notice(flash_message) }}
@@ -19,6 +19,6 @@
             But note that you cannot move files and folders outside the @scopes.
         </p>
 
-        {{ form.buttons('Rename', node.parent|adminUrl) }}
+        {{ form.buttons('Rename', node.parent|admin_url) }}
     </form>
 {% endblock %}

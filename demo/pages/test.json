@@ -1,0 +1,29 @@
+[
+    {
+        "name": "Angelo Price",
+        "info": {
+            "title": "Mr.",
+            "age": 49,
+            "phone": "+18796843831",
+            "email": "predovic.loma@yahoo.com"
+        }
+    },
+    {
+        "name": "Clovis Thiel",
+        "info": {
+            "title": "Dr.",
+            "age": 33,
+            "phone": "(581) 499-0786 x30667",
+            "email": "xbahringer@hotmail.com"
+        }
+    },
+    {
+        "name": "Eduardo Little",
+        "info": {
+            "title": "Ms.",
+            "age": 57,
+            "phone": "952.738.3338",
+            "email": "clair.bode@gmail.com"
+        }
+    }
+]

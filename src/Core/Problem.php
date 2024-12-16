@@ -15,14 +15,12 @@ namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError;
 use Arnapou\Psr\Psr7HttpMessage\Status\StatusServerError;
-use Exception;
-use Throwable;
 
-class Problem extends Exception
+class Problem extends \Exception
 {
     private StatusClientError|StatusServerError|null $status;
 
-    public function __construct(string $message = '', int|StatusClientError|StatusServerError $code = 0, ?Throwable $previous = null)
+    public function __construct(string $message = '', int|StatusClientError|StatusServerError $code = 0, ?\Throwable $previous = null)
     {
         if (\is_int($code)) {
             $this->status = null;

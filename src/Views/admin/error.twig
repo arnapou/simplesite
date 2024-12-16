@@ -31,7 +31,7 @@
             <summary>Details</summary>
 
             <div>
-                class: <code>{{ error|getclass }}</code><br>
+                class: <code>{{ error|debug_type }}</code><br>
                 file: <code>{{ error.file }}</code><br>
                 line: <code>{{ error.line }}</code><br>
             </div>
@@ -40,7 +40,7 @@
             {% if error.previous %}
                 <div>
                     message: <code>{{ error.previous.message }}</code><br>
-                    class: <code>{{ error.previous|getclass }}</code><br>
+                    class: <code>{{ error.previous|debug_type }}</code><br>
                     file: <code>{{ error.previous.file }}</code><br>
                     line: <code>{{ error.previous.line }}</code><br>
                 </div>
@@ -49,5 +49,5 @@
         </details>
     {% endif %}
 
-    <p class="error">{{ 'icon-error'|svgUse }}</p>
+    <p class="error">{{ 'icon-error'|svg_use }}</p>
 {% endblock %}

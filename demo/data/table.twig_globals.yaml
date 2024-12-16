@@ -10,7 +10,7 @@
   value: 'https://gitlab.com/arnapou/project/simplesite'
 -
   id: url_twig
-  value: 'https://twig.symfony.com/'
+  value: 'https://twig.symfony.com/doc/3.x/'
 -
   id: url_yaml
   value: 'https://fr.wikipedia.org/wiki/YAML'

@@ -8,8 +8,8 @@ Arnapou simplesite
 Links
 --------------------
 
-> Demo 👉️ http://simplesite.arnapou.net <br>
-> Article 👉️ http://arnapou.net/php/site_phar/ <br>
+> Demo 👉️ https://simplesite.arnapou.net/ <br>
+> Article 👉️ https://arnapou.net/software/2019-phar-simplesite/ <br>
 > Phar file 👉️ [bin/simplesite.phar](bin/simplesite.phar)
 
 
@@ -22,7 +22,7 @@ Below is an example of a working docker compose file `compose.yaml`.
 ```yaml
 services:
   app:
-    image: registry.gitlab.com/arnapou/project/simplesite:latest
+    image: registry.gitlab.com/arnapou/project/simplesite:v8
     user: 1000:1000
     
     # For local testing / dev -> http://localhost

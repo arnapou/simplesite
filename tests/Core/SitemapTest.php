@@ -13,29 +13,35 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Tests\Core;
 
-use Arnapou\SimpleSite\Core\Pages;
+use Arnapou\SimpleSite\Core\Config;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
-class PagesTest extends TestCase
+class SitemapTest extends TestCase
 {
     use ConfigTestTrait;
 
+    protected function setUp(): void
+    {
+        $container = self::resetContainer();
+        $container->registerInstance(Config::class, self::createConfigDemo());
+    }
+
+    #[RunInSeparateProcess]
     public function testList(): void
     {
-        $pages = new Pages(self::createConfigSite());
-
-        $list = iterator_to_array($pages->list());
+        $list = iterator_to_array($this->getSitemap()->files());
         $urls = array_keys($list);
         sort($urls);
 
         self::assertSame(
             [
                 '',
-                'menu/datas',
-                'menu/error_pages',
+                'menu/database',
+                'menu/errors',
                 'menu/images',
-                'menu/logs',
+                'menu/pages',
                 'menu/php',
                 'menu/templating',
             ],

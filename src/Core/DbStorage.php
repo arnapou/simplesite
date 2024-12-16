@@ -19,15 +19,15 @@ use Arnapou\PFDB\Storage\CachedFileStorage;
 use Arnapou\PFDB\Storage\YamlFileStorage;
 use Arnapou\Psr\Psr7HttpMessage\Status\StatusServerError;
 
-final class DatabaseStorage extends CachedFileStorage
+final class DbStorage extends CachedFileStorage
 {
     public function __construct(Config $config)
     {
         try {
-            $pathYaml = $config->path_data ?? throw Problem::emptyVariable('path_data');
-            $pathCache = $config->pathCache('data');
-
-            parent::__construct(new YamlFileStorage($pathYaml), $pathCache);
+            parent::__construct(
+                new YamlFileStorage($config->path_data ?? throw Problem::emptyVariable('path_data')),
+                $config->pathCache('data'),
+            );
         } catch (DirectoryNotFoundException|InvalidTableNameException $e) {
             throw new Problem($e->getMessage(), StatusServerError::InternalServerError, $e);
         }

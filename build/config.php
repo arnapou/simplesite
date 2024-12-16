@@ -68,7 +68,7 @@ return new BuildConfig(
         '*/vendor/symfony/http-client-contracts/Test/*',
         '*/vendor/symfony/service-contracts/Test/*',
         '*/vendor/symfony/translation-contracts/Test/*',
-        '*/bin/yaml-lint',
+        '*/vendor/bin/*',
         '*/.git/*',
         '*/.github/*',
     ]

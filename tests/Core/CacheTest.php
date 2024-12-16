@@ -23,7 +23,7 @@ class CacheTest extends TestCase
 
     public function testFrom(): void
     {
-        $cache = new Cache(self::createConfigSite());
+        $cache = new Cache(self::createConfigDemo());
 
         $count = 0;
         $factory = function () use (&$count) {
@@ -48,7 +48,7 @@ class CacheTest extends TestCase
 
     public function testScenario(): void
     {
-        $cache = new Cache(self::createConfigSite());
+        $cache = new Cache(self::createConfigDemo());
         $key = uniqid('TEST', true);
 
         self::assertFalse($cache->has($key));

@@ -14,75 +14,41 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\Encoder\Encoder;
-use Arnapou\PFDB\Database;
 use Arnapou\PFDB\Storage\StorageInterface;
 use Arnapou\Psr\Psr11Container\ServiceLocator;
-use Arnapou\Psr\Psr14EventDispatcher\PhpHandlers;
-use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
 use Arnapou\Psr\Psr3Logger\Decorator\MinimumLevelLogger;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
 use Arnapou\Psr\Psr3Logger\FileLogger;
 use Arnapou\Psr\Psr3Logger\Utils\Rotation;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Twig\Environment;
+use Twig\Extension\ExtensionInterface;
 use Twig\Loader\LoaderInterface;
 
 /**
- * Allows to expose a PSR-11 Container with magic getters for Twig.
- *
- * `$container->NAME` is equivalent to `$container->get('NAME')`.
+ * Internal SimpleSite container.
  */
 final class Container extends ServiceLocator
 {
     public function __construct()
     {
-        // Named aliases
-        $this->registerAlias('config', Config::class);
-        $this->registerAlias('container', ContainerInterface::class);
-        $this->registerAlias('db', Database::class);
-        $this->registerAlias('database', Database::class);
-        $this->registerAlias('img', Image::class);
-        $this->registerAlias('image', Image::class);
-        $this->registerAlias('logger', ThrowableLogger::class);
-        $this->registerAlias('phpHandlers', PhpHandlers::class);
-        $this->registerAlias('request', ServerRequestInterface::class);
-        $this->registerAlias('router', HttpRouteHandler::class);
-        $this->registerAlias('twig', Environment::class);
-        $this->registerAlias('twigEnvironment', Environment::class);
-        $this->registerAlias('twigExtension', TwigExtension::class);
-        $this->registerAlias('twigLoader', LoaderInterface::class);
+        // Self
+        $this->registerInstance(ContainerInterface::class, $this);
+        $this->registerInstance(__CLASS__, $this);
+
+        // DI factories
+        $this->registerFactory(ThrowableLogger::class, $this->factoryLogger(...));
 
         // Class aliases
         $this->registerAlias(LoggerInterface::class, ThrowableLogger::class);
         $this->registerAlias(CacheInterface::class, Cache::class);
-        $this->registerAlias(StorageInterface::class, DatabaseStorage::class);
+        $this->registerAlias(StorageInterface::class, DbStorage::class);
         $this->registerAlias(Environment::class, TwigEnvironment::class);
         $this->registerAlias(LoaderInterface::class, TwigLoader::class);
+        $this->registerAlias(ExtensionInterface::class, TwigExtension::class);
         $this->registerAlias(Encoder::class, UrlEncoder::class);
-
-        // Self
-        $this->registerInstance(ContainerInterface::class, $this);
-
-        // DI factories
-        $this->registerFactory(ThrowableLogger::class, $this->factoryLogger(...));
-    }
-
-    public function __get(string $name): mixed
-    {
-        return $this->get($name);
-    }
-
-    public function __set(string $name, mixed $value): void
-    {
-        // Nothing to do.
-    }
-
-    public function __isset(string $name): bool
-    {
-        return $this->has($name);
     }
 
     private function factoryLogger(): ThrowableLogger

@@ -4,7 +4,7 @@
 {% block main %}
     {{ form.breadcrumb(node) }}
 
-    <form action="{{ node|adminUrl(folder ? 'admin_create_folder' : 'admin_create_file') }}" method="POST">
+    <form action="{{ node|admin_url(folder ? 'admin_create_folder' : 'admin_create_file') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
         {{ form.notice(flash_message) }}
@@ -14,6 +14,6 @@
             <input type="text" name="name" id="name" value="" style="width: 100%" autofocus>
         </p>
 
-        {{ form.buttons('Create', node|adminUrl) }}
+        {{ form.buttons('Create', node|admin_url) }}
     </form>
 {% endblock %}

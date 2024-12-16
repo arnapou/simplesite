@@ -9,6 +9,7 @@ FROM registry.gitlab.com/arnapou/docker/php:8.4-frankenphp as demo
 
 COPY --from=build /app/bin /app/bin
 COPY --from=build /app/demo /app/demo
+RUN sed -i -E 's#(^\s+base_path_admin.*)$#//\1#' /app/demo/public/index.php
 RUN sed -i -E 's#(^\s+root +[^ ]+ +).*public#\1/app/demo/public#' /etc/caddy/Caddyfile
 
 

@@ -4,7 +4,7 @@
 {% block main %}
     {{ form.breadcrumb(node) }}
 
-    <form action="{{ node|adminUrl }}" method="POST">
+    <form action="{{ node|admin_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
         {{ form.notice(flash_message) }}
@@ -13,6 +13,6 @@
             <textarea rows="40" name="source" autofocus>{{ source ?: source(node)|escape }}</textarea>
         </p>
 
-        {{ form.buttons('Save', node.parent|adminUrl) }}
+        {{ form.buttons('Save', node.parent|admin_url) }}
     </form>
 {% endblock %}

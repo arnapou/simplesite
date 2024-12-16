@@ -4,56 +4,56 @@
 
     <h1>Php</h1>
 
-    <p>On peut personnaliser le comportement du site à l'aide de PHP.<br>
-        Pour cela on met des fichiers php dans le dossier de config <code>path_php</code> et on respecte quelques principes de programmation PHP.</p>
+    <p>The behavior of the site can be customized using PHP.<br>
+        To do this, we put PHP files in the config folder <code>path_php</code> and we respect some PHP programming principles.</p>
 
-    <p>Les fichiers php intégrés avec un comportement doivent retourner un objet, cet objet peut être de deux types.</p>
+    <p>PHP files embedded with some custom code must return an object, this object can be of two types.</p>
 
 
 
-    <h3>L'objet retourné implémente l'interface <code>Arnapou\SimpleSite\<mark>PhpCode</mark></code></h3>
+    <h3>The returned object implements the interface <code>Arnapou\SimpleSite\<mark>PhpCode</mark></code></h3>
 
     <pre>
 interface Arnapou\SimpleSite\PhpCode
 {
     public function init(): void;
 }</pre>
-    <p>Comme dans l'exemple <code>php/twig_globals.php</code> qui injecte en variable global twig des données d'une table yaml :</p>
-    {{ _self.code_source('twig_globals.php') }}
+    <p>Like in the <code>php/twig.php</code> example which injects data from a yaml table into a global twig variable:</p>
+    {{ _self.source_code('twig.php') }}
 
 
 
 
 
-    <h3>L'objet retourné étend la classe <code>Arnapou\SimpleSite\<mark>Controller</mark></code></h3>
+    <h3>The returned object extends the class <code>Arnapou\SimpleSite\<mark>Controller</mark></code></h3>
 
-    <p>Obligation d'implémenter la méthode abstraite configure (pour les routes) :</p>
+    <p>Requirement to implement the abstract configure method (for routes):</p>
     <pre>
 abstract class Arnapou\SimpleSite\Controller
 {
     abstract public function configure(): void;
 }</pre>
-    <p>Comme dans l'exemple <code>php/controller.php</code> qui déclare une route <code>hello</code> pour afficher une page bidon :</p>
-    {{ _self.code_source('controller.php') }}
+    <p>Like in the <code>php/controller.php</code> example which declares a route <code>hello</code> to render a dummy page:</p>
+    {{ _self.source_code('controller.php') }}
 
     <p>
-        Exemple de page :
+        Example of page:
         <a href="{{ path('hello', { name: 'world'}) }}" target="_blank"><button>
             {{ path('hello', { name: 'world'}) }}
         </button></a>
-        lien produit avec <code>{% verbatim %}{{ path('hello', { name: 'world'}) }}{% endverbatim %}</code>
+        link generated with <code>{% verbatim %}{{ path('hello', { name: 'world'}) }}{% endverbatim %}</code>
     </p>
 
 
 
 
-    <h3>Custom listener sur les routes</h3>
+    <h3>Custom listener on routes</h3>
 
-    <p>On peut ajouter des listeners custom pour changer le comportement du site : changer la réponse par exemple et/ou court-circuiter le routing.</p>
+    <p>Custom listeners can be added to change the behavior of the site: change the response for example and/or bypass the routing.</p>
 
-    <p>Exemple <code>php/event_hook.php</code> qui court-circuite le routing pour envoyer une autre page :
-        {{ _self.code_source('event_hook.php') }}
-    <p>Tester la page :
+    <p>Example <code>php/event_hook.php</code> which bypasses the routing to send another page:
+        {{ _self.source_code('event_hook.php') }}
+    <p>Tester la page:
         <a href="{{ path('hello', { name: 'world'}) }}?killme=1" target="_blank"><button>
             {{ path('hello', { name: 'world'}) }}?killme=1
         </button></a>
@@ -62,6 +62,6 @@ abstract class Arnapou\SimpleSite\Controller
 
 {% endblock %}
 
-{% macro code_source(file) %}
+{% macro source_code(file) %}
     <pre>{{ source('@php/'~file) | preg_replace('#\\n/\\*.*\\*/\\n#s', '') | escape }}</pre>
 {% endmacro %}

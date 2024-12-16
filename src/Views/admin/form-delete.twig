@@ -4,7 +4,7 @@
 {% block main %}
     {{ form.breadcrumb(node, true) }}
 
-    <form action="{{ node|adminUrl('admin_delete') }}" method="POST">
+    <form action="{{ node|admin_url('admin_delete') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
         {{ form.notice(flash_message) }}
@@ -13,6 +13,6 @@
             Are you sure to delete the <code>{{ node.name }}</code> {{ node.dir ? 'folder' : 'file' }}?
         </p>
 
-        {{ form.buttons('Delete', node.parent|adminUrl) }}
+        {{ form.buttons('Delete', node.parent|admin_url) }}
     </form>
 {% endblock %}

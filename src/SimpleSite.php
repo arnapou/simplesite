@@ -21,9 +21,9 @@ use Arnapou\Psr\Psr17HttpFactories\HttpFactory;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
+use Arnapou\SimpleSite\Core\Helper;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Throwable;
 use Twig\Environment;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -35,23 +35,9 @@ final class SimpleSite
     /**
      * @throws Core\Problem
      */
-    public static function run(
-        string $name,
-        string $path_public,
-        string $path_pages,
-        string $path_cache,
-        string $path_data = '',
-        string $path_templates = '',
-        string $path_php = '',
-        string $log_path = '',
-        int $log_max_files = 7,
-        string $log_level = 'notice',
-        string $base_path_root = '',
-        string $base_path_admin = '',
-    ): void {
-        $config = new Core\Config($name, $path_public, $path_pages, $path_cache, $path_data, $path_templates, $path_php, $log_path, $log_max_files, $log_level, $base_path_root, $base_path_admin);
-
-        self::handle($config)->send();
+    public static function run(string $path_public, string $path_pages, string $path_cache, string $path_data = '', string $path_templates = '', string $path_php = '', string $log_path = '', int $log_max_files = 7, string $log_level = 'notice', string $base_path_root = '', string $base_path_admin = ''): void
+    {
+        self::handle(new Core\Config($path_public, $path_pages, $path_cache, $path_data, $path_templates, $path_php, $log_path, $log_max_files, $log_level, $base_path_root, $base_path_admin))->send();
     }
 
     public static function handle(Core\Config $config, ?ServerRequestInterface $request = null): Response
@@ -67,7 +53,7 @@ final class SimpleSite
             self::loadPhpFiles();
 
             return new Response(self::router()->handle($request));
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             [$code, $text] = match (true) {
                 $e instanceof NoResponseFound => [404, 'Not Found'],
                 $e instanceof Core\Problem => [$e->getStatus()->value ?? 500, $e->getStatus()->name ?? 'Internal Server Error'],
@@ -99,9 +85,14 @@ final class SimpleSite
         return self::$container ??= new Core\Container();
     }
 
-    public static function database(): Database
+    public static function db(): Database
     {
         return self::container()->get(Database::class);
+    }
+
+    public static function helper(): Helper
+    {
+        return self::container()->get(Helper::class);
     }
 
     public static function logger(): ThrowableLogger
@@ -119,33 +110,20 @@ final class SimpleSite
         return self::container()->get(HttpRouteHandler::class);
     }
 
-    public static function twigEnvironment(): Environment
+    public static function twig(): Environment
     {
         return self::container()->get(Environment::class);
-    }
-
-    public static function twigExtension(): Core\TwigExtension
-    {
-        return self::container()->get(Core\TwigExtension::class);
-    }
-
-    public static function yamlContext(): Core\YamlContext
-    {
-        return self::container()->get(Core\YamlContext::class);
     }
 
     private static function loadPhpFiles(): void
     {
         $config = self::config();
         $container = self::container();
-        $phpLoader = static function (string $phpfile) use ($container) {
+        $phpLoader = static function (string $phpfile) {
             $obj = include_once $phpfile;
 
             if ($obj instanceof PhpCode) {
                 $obj->init();
-            }
-            if ($obj instanceof YamlContextLoader) {
-                $container->get(Core\YamlContext::class)->addLoader($obj);
             }
         };
 
@@ -165,7 +143,7 @@ final class SimpleSite
         }
     }
 
-    private static function error(int $code, Throwable $e, string $text): Response
+    private static function error(int $code, \Throwable $e, string $text): Response
     {
         $view = match (true) {
             400 <= $code && $code < 500 => 'error.40x.twig',
@@ -175,14 +153,15 @@ final class SimpleSite
         $context = [
             'exception' => $e,
             'code' => $code,
-            'text' => ucfirst(strtr(new Core\Helper()->toSnakeCase($text), ['_' => ' '])),
+            'text' => ucfirst(strtr(self::helper()->toSnakeCase($text), ['_' => ' '])),
             'content' => $e instanceof Core\Problem || $e instanceof \Twig\Error\LoaderError ? $e->getMessage() : null,
+            'detail' => self::helper()->throwableToText($e),
         ];
 
         try {
-            $html = self::twigEnvironment()->render("@templates/$view", $context);
-        } catch (Throwable) {
-            $html = self::twigEnvironment()->render("@internal/$view", $context);
+            $html = self::twig()->render("@templates/$view", $context);
+        } catch (\Throwable) {
+            $html = self::twig()->render("@internal/$view", $context);
         }
 
         return new HtmlResponse($html, $code);

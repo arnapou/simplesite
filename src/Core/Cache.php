@@ -17,8 +17,6 @@ use Arnapou\Ensure\Ensure;
 use Arnapou\Psr\Psr16SimpleCache\Decorated\GcPrunableSimpleCache;
 use Arnapou\Psr\Psr16SimpleCache\FileSimpleCache;
 use Arnapou\Psr\Psr16SimpleCache\Utils\MultipleTrait;
-use Closure;
-use DateInterval;
 use Psr\SimpleCache\CacheInterface;
 
 final readonly class Cache implements CacheInterface
@@ -35,7 +33,7 @@ final readonly class Cache implements CacheInterface
         );
     }
 
-    public function from(string $key, Closure $factory, ?int $ttl = null): string
+    public function from(string $key, \Closure $factory, ?int $ttl = null): string
     {
         $content = $this->get($key);
 
@@ -52,7 +50,7 @@ final readonly class Cache implements CacheInterface
         return $this->internal->get($key, $default);
     }
 
-    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
+    public function set(string $key, mixed $value, \DateInterval|int|null $ttl = null): bool
     {
         return $this->internal->set($key, $value, $ttl);
     }

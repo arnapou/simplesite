@@ -50,7 +50,6 @@ final readonly class Config
      * @throws Problem
      */
     public function __construct(
-        public string $name,
         string $path_public,
         string $path_pages,
         string $path_cache,

@@ -17,8 +17,8 @@ use Arnapou\SimpleSite\PhpCode;
 return new class() implements PhpCode {
     public function init(): void
     {
-        $twig = SimpleSite::twigEnvironment();
-        $parameters = SimpleSite::database()->getTable('twig_globals');
+        $twig = SimpleSite::twig();
+        $parameters = SimpleSite::db()->getTable('twig_globals');
 
         foreach ($parameters as $key => $data) {
             $twig->addGlobal($key, $data['value'] ?? '');

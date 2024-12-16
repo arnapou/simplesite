@@ -13,20 +13,12 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
-use AppendIterator;
-use CallbackFilterIterator;
-use FilesystemIterator;
-use Iterator;
-use IteratorIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use SplFileInfo;
-use Traversable;
 
 /**
  * @extends \IteratorIterator<int, SplFileInfo, \Traversable<int, SplFileInfo>>
  */
-final class BuildFilesIterator extends IteratorIterator
+final class BuildFilesIterator extends \IteratorIterator
 {
     public function __construct(private readonly BuildConfig $config)
     {
@@ -34,33 +26,33 @@ final class BuildFilesIterator extends IteratorIterator
     }
 
     /**
-     * @return Traversable<int, SplFileInfo>
+     * @return \Traversable<int, \SplFileInfo>
      */
-    private function buildIterator(): Traversable
+    private function buildIterator(): \Traversable
     {
         $paths = array_map(
             fn ($dir) => $this->config->projectRootDir . "/$dir",
             $this->config->includedDirectories,
         );
 
-        /** @var AppendIterator<int, SplFileInfo, Iterator<int, SplFileInfo>> $iterator */
-        $iterator = new AppendIterator();
+        /** @var \AppendIterator<int, \SplFileInfo, \Iterator<int, \SplFileInfo>> $iterator */
+        $iterator = new \AppendIterator();
         foreach ($paths as $path) {
             $iterator->append(
-                new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator(
+                new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator(
                         $path,
-                        FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_FILEINFO,
+                        \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO,
                     ),
-                    RecursiveIteratorIterator::LEAVES_ONLY,
+                    \RecursiveIteratorIterator::LEAVES_ONLY,
                 ),
             );
         }
 
-        return new CallbackFilterIterator($iterator, $this->filter(...));
+        return new \CallbackFilterIterator($iterator, $this->filter(...));
     }
 
-    private function filter(SplFileInfo $file): bool
+    private function filter(\SplFileInfo $file): bool
     {
         if ($file->isDir()) {
             return false;

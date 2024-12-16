@@ -1,0 +1,91 @@
+{% extends "@templates/base.twig" %}
+
+{% block content %}
+    <h1>Pages</h1>
+
+    <p>
+        Pages are store in the <code>path_pages</code> config.<br>
+        This file structure represents the pages available in the website.
+    </p>
+
+    <p>
+        The pages extensions are <code>twig</code> or <code>html</code>.
+    </p>
+
+    <table class="fixed">
+        <thead>
+        <tr>
+            <th>File</th>
+            <th>Relative public url</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>@pages/{relative}.twig</code></td>
+            <td><code>/{relative}</code></td>
+        </tr>
+        <tr>
+            <td><code>@pages/{relative}.html</code></td>
+            <td><code>/{relative}</code></td>
+        </tr>
+        <tr>
+            <td><code>@pages/menu/images.twig</code></td>
+            <td><code>/menu/images</code></td>
+        </tr>
+        <tr>
+            <td><code>@pages/menu/php.html</code></td>
+            <td><code>/menu/php</code></td>
+        </tr>
+        <tr>
+            <td><code>@pages/index.twig</code></td>
+            <td><code>/</code></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Autoloaded context</h2>
+
+    <p>
+        If you have a <code>yaml</code> file of the same name of the page, then the context of the page
+        is automatically loaded into the context of the page.
+    </p>
+
+    <p>Example of this demo page <code>@pages/menu/pages.twig</code>:</p>
+    <pre style="overflow: auto;max-height: 15rem">{{ source('@pages/menu/pages.twig')|escape }}</pre>
+
+    <p>With the associated data <code>@pages/menu/pages.yaml</code>:</p>
+    <pre style="overflow: auto;max-height: 15rem">{{ source('@pages/menu/pages.yaml')|escape }}</pre>
+
+    <table class="fixed">
+        <thead>
+        <tr>
+            <th>variable</th>
+            <th>example</th>
+            <th>result</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>invoice_number</code></td>
+            <td><code>{% verbatim %}{{ invoice_number }}{% endverbatim %}</code></td>
+            <td><code>{{ invoice_number }}</code></td>
+        </tr>
+        <tr>
+            <td><code>name</code></td>
+            <td><code>{% verbatim %}{{ name }}{% endverbatim %}</code></td>
+            <td><code>{{ name }}</code></td>
+        </tr>
+        <tr>
+            <td><code>address.city</code></td>
+            <td><code>{% verbatim %}{{ address.city }}{% endverbatim %}</code></td>
+            <td><code>{{ address.city }}</code></td>
+        </tr>
+        <tr>
+            <td><code>order_items</code></td>
+            <td><code>{% verbatim %}{{ order_items|join(', ') }}{% endverbatim %}</code></td>
+            <td><code>{{ order_items|join(', ') }}</code></td>
+        </tr>
+        </tbody>
+    </table>
+
+{% endblock %}

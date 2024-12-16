@@ -38,54 +38,55 @@
 
     {{ form.notice(flash_message) }}
 
-    {% if node.list|length %}
+    {% set items = node.list %}
+    {% if items|length %}
         <table>
             <tbody>
-            {% for item in node.list %}
+            {% for item in items %}
                 <tr>
                     <td>
                         {% if item.dir %}
-                            <a href="{{ item|adminUrl }}"><i>{{ item.symbol|svgUse }}</i>{{ item.name }}/</a>
+                            <a href="{{ item|admin_url }}"><i>{{ item.symbol|svg_use }}</i>{{ item.name }}/</a>
                         {% else %}
-                            <i>{{ item.symbol|svgUse }}</i>{{ item.name }}
+                            <i>{{ item.symbol|svg_use }}</i>{{ item.name }}
                         {% endif %}
                     </td>
                     <td class="size"><small>{{ item.size }}</small></td>
                     <td class="center"><small>{{ item.time }}</small></td>
                     <td class="center">
                         {% if item.canDownload %}
-                            <a href="{{ item|adminUrl('admin_download') }}" target="_blank" title="download"><i>{{ 'action-download'|svgUse }}</i></a>
+                            <a href="{{ item|admin_url('admin_download') }}" target="_blank" title="download"><i>{{ 'action-download'|svg_use }}</i></a>
                         {% else %}
-                            <i>{{ ''|svgUse }}</i>
+                            <i>{{ ''|svg_use }}</i>
                         {% endif %}
                     </td>
                     <td class="center">
                         {% set url = item.publicUrl %}
                         {% if url %}
-                            <a href="{{ url }}" target="_blank" title="open in another tab"><i>{{ 'action-goto'|svgUse }}</i></a>
+                            <a href="{{ url }}" target="_blank" title="open in another tab"><i>{{ 'action-goto'|svg_use }}</i></a>
                         {% else %}
-                            <i>{{ ''|svgUse }}</i>
+                            <i>{{ ''|svg_use }}</i>
                         {% endif %}
                     </td>
                     <td class="center">
                         {% if item.canRename %}
-                            <a href="{{ item|adminUrl('admin_rename') }}" title="rename"><i>{{ 'action-rename'|svgUse }}</i></a>
+                            <a href="{{ item|admin_url('admin_rename') }}" title="rename"><i>{{ 'action-rename'|svg_use }}</i></a>
                         {% else %}
-                            <i>{{ ''|svgUse }}</i>
+                            <i>{{ ''|svg_use }}</i>
                         {% endif %}
                     </td>
                     <td class="center">
                         {% if item.canEdit %}
-                            <a href="{{ item|adminUrl }}" title="edit"><i>{{ 'action-edit'|svgUse }}</i></a>
+                            <a href="{{ item|admin_url }}" title="edit"><i>{{ 'action-edit'|svg_use }}</i></a>
                         {% else %}
-                            <i>{{ ''|svgUse }}</i>
+                            <i>{{ ''|svg_use }}</i>
                         {% endif %}
                     </td>
                     <td class="center">
                         {% if item.canDelete %}
-                            <a href="{{ item|adminUrl('admin_delete') }}" title="delete"><i>{{ 'action-delete'|svgUse }}</i></a>
+                            <a href="{{ item|admin_url('admin_delete') }}" title="delete"><i>{{ 'action-delete'|svg_use }}</i></a>
                         {% else %}
-                            <i>{{ ''|svgUse }}</i>
+                            <i>{{ ''|svg_use }}</i>
                         {% endif %}
                     </td>
                 </tr>
@@ -94,19 +95,19 @@
         </table>
     {% else %}
         <p class="notice">
-            <i>{{ 'icon-error'|svgUse }}</i> <code>Empty folder ...</code>
+            <i>{{ 'icon-error'|svg_use }}</i> <code>Empty folder ...</code>
         </p>
     {% endif %}
 
     <p style="float: right">
         <small>
             {% if node.canCreate %}
-                <a href="{{ node|adminUrl('admin_create_folder') }}"><i>{{ 'action-create'|svgUse }}</i>Create folder</a>
-                <i>{{ ''|svgUse }}</i>
-                <a href="{{ node|adminUrl('admin_create_file') }}"><i>{{ 'action-create'|svgUse }}</i>Create file</a>
-                <i>{{ ''|svgUse }}</i>
+                <a href="{{ node|admin_url('admin_create_folder') }}"><i>{{ 'action-create'|svg_use }}</i>Create folder</a>
+                <i>{{ ''|svg_use }}</i>
+                <a href="{{ node|admin_url('admin_create_file') }}"><i>{{ 'action-create'|svg_use }}</i>Create file</a>
+                <i>{{ ''|svg_use }}</i>
             {% endif %}
-            <a href="{{ node|adminUrl('admin_upload') }}"><i>{{ 'action-upload'|svgUse }}</i>Upload</a>
+            <a href="{{ node|admin_url('admin_upload') }}"><i>{{ 'action-upload'|svg_use }}</i>Upload</a>
         </small>
     </p>
 {% endblock %}

@@ -6,7 +6,6 @@ include __DIR__ . '/../../bin/simplesite.phar';
 
 SimpleSite::run(
     // mandatory
-    name: 'Arnapou simple site',
     path_public: __DIR__,
     path_pages: \dirname(__DIR__) . '/pages',
     path_cache: '/tmp/simplesite',
@@ -28,7 +27,9 @@ SimpleSite::run(
     // log_level: 'alert',
     // log_level: 'emergency',
 
-    // optional parameters
-    base_path_root: '',
+    // if for some reason, you installed manually this project on a base path
+    // base_path_root: 'base/root/',
+
+    // if you want to activate the "admin" GUI, set the base path
     base_path_admin: 'admin',
 );

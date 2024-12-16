@@ -16,16 +16,15 @@ namespace Arnapou\SimpleSite\Controllers;
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Controller;
-use Arnapou\SimpleSite\Core\Config;
-use Arnapou\SimpleSite\Core\Image;
+use Arnapou\SimpleSite\Core;
 
 final class ImagesController extends Controller
 {
     private const string REGEX_EXT = '[jJ][pP][gG]|[pP][nN][gG]|[gG][iI][fF]';
 
     public function __construct(
-        private readonly Config $config,
-        private readonly Image $image,
+        private readonly Core\Container $container,
+        private readonly Core\Config $config,
     ) {
     }
 
@@ -42,7 +41,10 @@ final class ImagesController extends Controller
         $filename = $this->findFile($path, $ext) ?? throw new NoResponseFound();
         $intsize = $this->getSize($size) ?? throw new NoResponseFound();
 
-        return $this->image->thumbnail($filename, $ext, $intsize) ?? throw new NoResponseFound();
+        /** @var Core\Image $image */
+        $image = $this->container->get(Core\Image::class);
+
+        return $image->thumbnail($filename, $ext, $intsize) ?? throw new NoResponseFound();
     }
 
     private function findFile(string $path, string $ext): ?string

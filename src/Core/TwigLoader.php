@@ -17,25 +17,23 @@ use Twig\Loader\FilesystemLoader;
 
 final class TwigLoader extends FilesystemLoader
 {
-    public function __construct(
-        Config $config,
-    ) {
+    public function __construct(Config $config)
+    {
         parent::__construct();
 
-        /** @var array<string, string> $namespaces */
         $namespaces = [
-            self::MAIN_NAMESPACE => $config->path_pages,
-            'internal' => __DIR__ . '/../Views',
+            self::MAIN_NAMESPACE => Scope::default()->toPath($config, false),
+            'pages' => Scope::pages->toPath($config, false),
+            'public' => Scope::public->toPath($config, false),
+            'templates' => Scope::templates->toPath($config, false),
             'data' => $config->path_data,
             'logs' => $config->log_path,
-            'pages' => $config->path_pages,
-            'public' => $config->path_public,
             'php' => $config->path_php,
-            'templates' => $config->path_templates,
+            'internal' => __DIR__ . '/../Views',
         ];
 
         foreach ($namespaces as $namespace => $path) {
-            if ('' !== $path) {
+            if (\is_string($path)) {
                 $this->addPath($path, $namespace);
             }
         }

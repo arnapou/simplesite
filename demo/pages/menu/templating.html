@@ -2,52 +2,60 @@
 
 {% block content %}
 
-    <h1>Templating Twig</h1>
+    <h1>Twig Templating</h1>
 
-    <h2>Syntaxe</h2>
+    <h2>Syntax</h2>
 
-    <p>Exemples de base :</p>
+    <p>Basic examples:</p>
     <ul>
         {% verbatim %}
             <li><code>{{ foo.bar }}</code> variable</li>
-            <li><code>{% set foo = 'foo' %}</code> affectation de variable</li>
-            <li><code>{{ name|striptags|title }}</code> filtres</li>
-            <li><code>{% for item in items %}...{% endfor %}</code> boucle sur des élements</li>
+            <li><code>{% set foo = 'foo' %}</code> assign variable</li>
+            <li><code>{{ name|striptags|title }}</code> filters</li>
+            <li><code>{% for item in items %}...{% endfor %}</code> loop on elements</li>
         {% endverbatim %}
-        <li>le reste sur la <a href="{{ url_twig }}">documentation officielle</a></li>
+        <li>remaining on <a href="{{ url_twig }}">the official documentation</a></li>
     </ul>
 
-    <h2>Les templates</h2>
+    <h2>Templates</h2>
 
-    <p>Si vous voulez utiliser des templates twig non accessibles depuis le dossier public, vous devez utiliser un
-        dossier de templates à part dans la config du site via le paramètre <code>path_templates</code>.<br>
-        Ce dossier a comme nom de namespace twig <code>templates</code>.<br>
-        Si vous n'utilisez pas de namespace, twig cherchera les fichiers dans le dossier <code>path_public</code></p>
+    <p>
+        If you want to use twig templates not accessible from the public folder,
+        you must use a separate template folder in the site config via the <code>path_templates</code> parameter.<br>
+        This folder has the twig namespace <code>@templates</code>.<br>
+        If you don't use a twig namespace, twig will look for files in the directory <code>path_pages</code></p>
 
-    <p>Exemple d'héritage de template : {% verbatim %}<code>{% extends "@templates/base.twig" %}</code>{% endverbatim %}</p>
+    <p>Example of template inheritance : {% verbatim %}<code>{% extends "@templates/base.twig" %}</code>{% endverbatim %}</p>
 
 
-    <h2>Fourni avec ce projet de site</h2>
+    <h2>Provided with this project</h2>
 
-    <h3>Variables</h3>
+    <h3>Variable <code>app</code></h3>
+
+    <p>The <code>app</code> variable is a readonly service container which exposes only a few services.</p>
 
     <table class="examples">
         <thead>
         <tr>
             <th></th>
             <th>description</th>
-            <th>exemple</th>
-            <th>résultat</th>
+            <th>example</th>
+            <th>result</th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td><code>app</code></td>
-            <td colspan="3">variable du conteneur de services</td>
+            <td rowspan="2"><code>app.config</code></td>
+            <td rowspan="2">website config</td>
+            <td>{% verbatim %}<code>{{ app.config.path_public }}</code>{% endverbatim %}</td>
+            <td>{{ app.config.path_public }}</td>
         </tr>
         <tr>
+            <td>{% verbatim %}<code>{{ app.config.log_max_files }}</code>{% endverbatim %}</td>
+            <td>{{ app.config.log_max_files }}</td>
+        <tr>
             <td rowspan="2"><code>app.db</code></td>
-            <td rowspan="2">objet de db qui permet d'accéder à toutes les tables yaml</td>
+            <td rowspan="2">db object that allows access to all yaml tables</td>
             <td>{% verbatim %}<code>{{ app.db.table('persons').get(10).name }}</code>{% endverbatim %}</td>
             <td>{{ app.db.table('persons').get(10).name }}</td>
         </tr>
@@ -57,13 +65,13 @@
         </tr>
         <tr>
             <td><code>app.logger</code></td>
-            <td>pour logger des choses</td>
-            <td>{% verbatim %}<code>{{ app.logger.info('Hello World !') }}</code>{% endverbatim %}</td>
-            <td>{{ app.logger.info('Hello World !') }}</td>
+            <td>for logging</td>
+            <td>{% verbatim %}<code>{{ app.logger.error('Hello World !') }}</code>{% endverbatim %}</td>
+            <td>{{ app.logger.error('Hello World !') }}</td>
         </tr>
         <tr>
             <td rowspan="2"><code>app.request</code></td>
-            <td rowspan="2">objet <code>ServerRequestInterface</code> de la <a href="{{ url_psr_7 }}">PSR-7 HTTP message interfaces</a></td>
+            <td rowspan="2">object <code>ServerRequestInterface</code> of <a href="{{ url_psr_7 }}">PSR-7 HTTP message interfaces</a></td>
             <td>{% verbatim %}<code>{{ app.request.uri.path }}</code>{% endverbatim %}</td>
             <td>{{ app.request.uri.path }}</td>
         </tr>
@@ -71,51 +79,144 @@
             <td>{% verbatim %}<code>{{ app.request.uri }}</code>{% endverbatim %}</td>
             <td>{{ app.request.uri }}</td>
         </tr>
-        <tr>
-            <td rowspan="2"><code>app.router</code></td>
-            <td rowspan="2">objet <code>HttpRouteHandler</code> de <a href="{{ url_routing }}">arnapou/psr-http</a></td>
-            <td>{% verbatim %}<code>{{ app.router.generateUrl('static_page', { path: 'menu/templating' }) }}</code>{% endverbatim %}</td>
-            <td>{{ app.router.generateUrl('static_page', { path: 'menu/templating' }) }}</td>
-        </tr>
-        <tr>
-            <td>{% verbatim %}<code>{{ app.router.generateUrl('static_dir', { path: 'menu/pages' }) }}</code>{% endverbatim %}</td>
-            <td>{{ app.router.generateUrl('static_dir', { path: 'menu/pages' }) }}</td>
-        </tr>
-        <tr>
-            <td rowspan="2"><code>app.config</code></td>
-            <td rowspan="2">config du site</td>
-            <td>{% verbatim %}<code>{{ app.config.name }}</code>{% endverbatim %}</td>
-            <td>{{ app.config.name }}</td>
-        </tr>
-        <tr>
-            <td>{% verbatim %}<code>{{ app.config.log_max_files }}</code>{% endverbatim %}</td>
-            <td>{{ app.config.log_max_files }}</td>
-        </tr>
         </tbody>
 
     </table>
 
-    <h3>Fonctions</h3>
+    <h3>Variable <code>view</code></h3>
+
+<p>The <code>view</code> variable is an immutable object which represents the current view.</p>
 
     <table class="examples">
         <thead>
         <tr>
             <th></th>
             <th>description</th>
-            <th>exemple</th>
-            <th>résultat</th>
+            <th>example</th>
+            <th>result</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>view.scope</code></td>
+            <td>string $scope</td>
+            <td>{% verbatim %}<code>{{ view.scope }}</code>{% endverbatim %}</td>
+            <td>{{ view.scope }}</td>
+        </tr>
+        <tr>
+            <td><code>view.path</code></td>
+            <td>string $path</td>
+            <td>{% verbatim %}<code>{{ view.path }}</code>{% endverbatim %}</td>
+            <td>{{ view.path }}</td>
+        </tr>
+        <tr>
+            <td><code>view.name</code></td>
+            <td>string $name</td>
+            <td>{% verbatim %}<code>{{ view.name }}</code>{% endverbatim %}</td>
+            <td>{{ view.name }}</td>
+        </tr>
+        <tr>
+            <td><code>view.isDir</code></td>
+            <td>bool $isDir</td>
+            <td>{% verbatim %}<code>{{ view.isDir|json_encode }}</code>{% endverbatim %}</td>
+            <td>{{ view.isDir|json_encode }}</td>
+        </tr>
+        <tr>
+            <td><code>view.isFile</code></td>
+            <td>bool $isFile</td>
+            <td>{% verbatim %}<code>{{ view.isFile|json_encode }}</code>{% endverbatim %}</td>
+            <td>{{ view.isFile|json_encode }}</td>
+        </tr>
+        <tr>
+            <td><code>view.exists</code></td>
+            <td>bool $exists</td>
+            <td>{% verbatim %}<code>{{ view.exists|json_encode }}</code>{% endverbatim %}</td>
+            <td>{{ view.exists|json_encode }}</td>
+        </tr>
+        <tr>
+            <td><code>view.root</code></td>
+            <td>root(): self</td>
+            <td>{% verbatim %}<code>{{ view.root }}</code>{% endverbatim %}</td>
+            <td>{{ view.root }}</td>
+        </tr>
+        <tr>
+            <td rowspan="3"><code>view.dirname</code></td>
+            <td rowspan="3">dirname(int $levels = 1): self</td>
+            <td>{% verbatim %}<code>{{ view.dirname }}</code>{% endverbatim %}</td>
+            <td>{{ view.dirname }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ view.dirname(1).basename }}</code>{% endverbatim %}</td>
+            <td>{{ view.dirname(1).basename }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ view.dirname(2) }}</code>{% endverbatim %}</td>
+            <td>{{ view.dirname(2) }}</td>
+        </tr>
+        <tr>
+            <td><code>view.basename</code></td>
+            <td>basename(): string</td>
+            <td>{% verbatim %}<code>{{ view.basename }}</code>{% endverbatim %}</td>
+            <td>{{ view.basename }}</td>
+        </tr>
+        <tr>
+            <td><code>view.extension</code></td>
+            <td>extension(): string</td>
+            <td>{% verbatim %}<code>{{ view.extension }}</code>{% endverbatim %}</td>
+            <td>{{ view.extension }}</td>
+        </tr>
+        <tr>
+            <td><code>view.relative</code></td>
+            <td>relative(string $relative): self</td>
+            <td>{% verbatim %}<code>{{ view.relative('../foo.ext') }}</code>{% endverbatim %}</td>
+            <td>{{ view.relative('../foo.ext') }}</td>
+        </tr>
+        <tr>
+            <td><code>view.list</code></td>
+            <td>list(): array&lt;self&gt;</td>
+            <td>{% verbatim %}<code>{{  <br>
+                &nbsp; view.dirname.list<br>
+                &nbsp; | map(x => x.basename)<br>
+                &nbsp; | join("\n")<br>
+                &nbsp; | nl2br <br>
+                }}</code>{% endverbatim %}</td>
+            <td>{{ view.dirname.list|map(x => x.basename)|join("\n")|nl2br }}</td>
+        </tr>
+        </tbody>
+
+    </table>
+
+    <h3>Functions</h3>
+
+    <table class="examples">
+        <thead>
+        <tr>
+            <th></th>
+            <th>description</th>
+            <th>example</th>
+            <th>result</th>
         </tr>
         </thead>
         <tbody>
         <tr>
             <td><code>asset</code></td>
-            <td>calcule le chemin d'un asset</td>
+            <td>calculates the path of an asset</td>
             <td>{% verbatim %}<code>{{ asset('../assets/twig.png') }}</code>{% endverbatim %}</td>
             <td>{{ asset('../assets/twig.png') }}</td>
         </tr>
         <tr>
+            <td rowspan="2"><code>data</code></td>
+            <td rowspan="2">parse a file to get the data, works only for <code>yaml</code> and <code>json</code></td>
+            <td>{% verbatim %}<code>{{ data('@pages/menu/pages.yaml').address.street }}</code>{% endverbatim %}</td>
+            <td>{{ data('@pages/menu/pages.yaml').address.street }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ data('@pages/test.json').1.info.email }}</code>{% endverbatim %}</td>
+            <td>{{ data('@pages/test.json').1.info.email }}</td>
+        </tr>
+        <tr>
             <td rowspan="2"><code>path</code></td>
-            <td rowspan="2">calcule le chemin d'un lien</td>
+            <td rowspan="2">calculates the path of a link</td>
             <td>{% verbatim %}<code>{{ path('static_dir', { path: 'menu/pages' }) }}</code>{% endverbatim %}</td>
             <td>{{ path('static_dir', { path: 'menu/pages' }) }}</td>
         </tr>
@@ -125,13 +226,13 @@
         </tr>
         <tr>
             <td><code>path_dir</code></td>
-            <td>raccourci de <code>path('static_dir', ...)</code></td>
+            <td>shortcut of <code>path('static_dir', ...)</code></td>
             <td>{% verbatim %}<code>{{ path_dir('pages') }}</code>{% endverbatim %}</td>
             <td>{{ path_dir('pages') }}</td>
         </tr>
         <tr>
             <td><code>path_page</code></td>
-            <td>raccourci de <code>path('static_page', ...)</code></td>
+            <td>shortcut of <code>path('static_page', ...)</code></td>
             <td>{% verbatim %}<code>{{ path_page('menu/templating') }}</code>{% endverbatim %}</td>
             <td>{{ path_page('menu/templating') }}</td>
         </tr>
@@ -145,21 +246,51 @@
 
     </table>
 
-    <h3>Filtres</h3>
+    <h3>Filters</h3>
 
     <table class="examples">
         <thead>
         <tr>
             <th></th>
             <th>description</th>
-            <th>exemple</th>
-            <th>résultat</th>
+            <th>example</th>
+            <th>result</th>
         </tr>
         </thead>
         <tbody>
         <tr>
+            <td><code>basename</code></td>
+            <td>strip directory and suffix from filenames</td>
+            <td>{% verbatim %}<code>{{ '@pages/menu/php.html'|basename }}</code>{% endverbatim %}</td>
+            <td>{{ '@pages/menu/php.html'|basename }}</td>
+        </tr>
+        <tr>
+            <td><code>camel</code></td>
+            <td>convert a text into camelCase</td>
+            <td>{% verbatim %}<code>{{ 'Hello World!'|camel }}</code>{% endverbatim %}</td>
+            <td>{{ 'Hello World!'|camel }}</td>
+        </tr>
+        <tr>
+            <td><code>debug_type</code></td>
+            <td>display the type of the object</td>
+            <td>{% verbatim %}<code>{{ 'Hello'|debug_type }}</code>{% endverbatim %}</td>
+            <td>{{ 'Hello'|debug_type }}</td>
+        </tr>
+        <tr>
+            <td><code>dirname</code></td>
+            <td>strip last component from file name</td>
+            <td>{% verbatim %}<code>{{ '@pages/menu/php.html'|dirname }}</code>{% endverbatim %}</td>
+            <td>{{ '@pages/menu/php.html'|dirname }}</td>
+        </tr>
+        <tr>
+            <td><code>getenv</code></td>
+            <td>get the env variable</td>
+            <td>{% verbatim %}<code>{{ 'PHP_VERSION'|getenv }}</code>{% endverbatim %}</td>
+            <td>{{ 'PHP_VERSION'|getenv }}</td>
+        </tr>
+        <tr>
             <td><code>markdown_to_html</code></td>
-            <td>convertit du markdown en html</td>
+            <td>convert markdown to html</td>
             <td>{% verbatim %}<pre><code>{% apply markdown_to_html %}
 Title
 =====
@@ -176,7 +307,7 @@ Hello!
         </tr>
         <tr>
             <td><code>minify_html</code></td>
-            <td>retire les espaces html superflus</td>
+            <td>removes unnecessary html spaces</td>
             <td>{% verbatim %}<pre><code>{% apply minify_html %}
     &lt;p&gt;
         Hello &lt;b&gt;World !&lt;/b&gt;
@@ -191,49 +322,43 @@ Hello!
         </tr>
         <tr>
             <td><code>path_dir</code></td>
-            <td>url d'un chemin de dossier</td>
+            <td>url of a folder path</td>
             <td>{% verbatim %}<code>{{ 'pages'|path_dir }}</code>{% endverbatim %}</td>
             <td>{{ 'pages'|path_dir }}</td>
         </tr>
         <tr>
             <td><code>path_page</code></td>
-            <td>url d'un chemin de page</td>
+            <td>url of a page path</td>
             <td>{% verbatim %}<code>{{ 'menu/templating'|path_page }}</code>{% endverbatim %}</td>
             <td>{{ 'menu/templating'|path_page }}</td>
         </tr>
         <tr>
-            <td><code>repeat</code></td>
-            <td>répète un texte</td>
-            <td>{% verbatim %}<code>{{ 'Hello '|repeat(3) }}</code>{% endverbatim %}</td>
-            <td>{{ 'Hello '|repeat(3) }}</td>
-        </tr>
-        <tr>
-            <td><code>slugify</code></td>
-            <td>simplifie un texte en transformant les caractères (utile par exemple pour des ancres)</td>
-            <td>{% verbatim %}<code>{{ 'Wôrķšƥáçè ~~sèťtïñğš~~ 5€'|slugify }}</code>{% endverbatim %}</td>
-            <td>{{ 'Wôrķšƥáçè ~~sèťtïñğš~~ 5€'|slugify }}</td>
-        </tr>
-        <tr>
-            <td><code>camel</code></td>
-            <td>transforme un texte en camelCase</td>
-            <td>{% verbatim %}<code>{{ 'Hello World!'|camel }}</code>{% endverbatim %}</td>
-            <td>{{ 'Hello World!'|camel }}</td>
+            <td><code>slug</code></td>
+            <td>simplifies a text by converting the characters (useful for example for anchors)</td>
+            <td>{% verbatim %}<code>{{ 'Wôrķšƥáçè ~~sèťtïñğš~~ 5€'|slug }}</code>{% endverbatim %}</td>
+            <td>{{ 'Wôrķšƥáçè ~~sèťtïñğš~~ 5€'|slug }}</td>
         </tr>
         <tr>
             <td><code>snake</code></td>
-            <td>transforme un texte en snake_case</td>
+            <td>convert a text into snake_case</td>
             <td>{% verbatim %}<code>{{ 'Hello World!'|snake }}</code>{% endverbatim %}</td>
             <td>{{ 'Hello World!'|snake }}</td>
         </tr>
         <tr>
             <td><code>thumbnail</code></td>
-            <td>transforme le chemin d'une image vers celui de sa miniature</td>
+            <td>convert the path of an image to that of its thumbnail</td>
             <td>{% verbatim %}<code>{{ '../assets/twig.png'|thumbnail(50) }}</code>{% endverbatim %}</td>
             <td>{{ '../assets/twig.png'|thumbnail(50) }}</td>
+        </tr>
+        <tr>
+            <td><code>yaml</code></td>
+            <td>basically a yaml encode</td>
+            <td>{% verbatim %}<code>{{ {foo: 'bar', baz: 123}|yaml }}</code>{% endverbatim %}</td>
+            <td><pre><code>{{ {foo: 'bar', baz: 123}|yaml }}</code></pre>
+            </td>
         </tr>
         </tbody>
 
     </table>
-
 
 {% endblock %}

@@ -17,7 +17,6 @@ use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\SimpleSite\Core\UrlEncoder;
 use Arnapou\SimpleSite\SimpleSite;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
-use DOMNode;
 use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Stream;
 use Nyholm\Psr7\UploadedFile;
@@ -30,6 +29,7 @@ class AdminScenarioTest extends TestCase
     use ConfigTestTrait;
 
     private const string ADMIN_CONFIG = __DIR__ . '/../../demo/data/table.admin.config.yaml';
+    private const string ADMIN_CONFIG_BKUP = __DIR__ . '/../../demo/data/table.admin.config.yaml.bkup';
     private static Response $response;
     private static string $redirect;
     private static string $contents;
@@ -86,7 +86,7 @@ class AdminScenarioTest extends TestCase
 
             // Listing: error.
             $this->handleGet('/admin/' . $encode('@wrong-public'));
-            self::assertHtmlError("Invalid path '@wrong-public'.");
+            self::assertHtmlError('Invalid scope "@wrong-public".');
 
             // Listing.
             $this->handleGet('/admin/' . $encode('@public/'));
@@ -199,7 +199,7 @@ class AdminScenarioTest extends TestCase
 
             // Delete folder: submit.
             $this->handlePost([]);
-            self::assertRedirect('/admin/' . $encode('@public/'));
+            self::assertRedirect('/admin/' . $encode('@public'));
 
             // Listing.
             $this->handleRedirect();
@@ -209,12 +209,50 @@ class AdminScenarioTest extends TestCase
                 'test.php',
             ]);
 
+            // Redirects.
+            $this->handleGet('/admin/redirects');
+            self::assertHtmlContains('main', 'You must provide a valid YAML list of pairs from and link');
+
+            // Redirects: submit error.
+            $this->handlePost(['source' => '123']);
+            self::assertHtmlNotice('The YAML must be a list.');
+
+            // Redirects: submit error.
+            $this->handlePost(['source' => '- { foo: foo } zzzz']);
+            self::assertHtmlNotice('yaml_parse(): parsing error encountered during parsing');
+
+            // Redirects: submit error.
+            $this->handlePost(['source' => '- { foo: foo }']);
+            self::assertHtmlNotice('Missing "from".');
+
+            // Redirects: submit.
+            $this->handlePost(['source' => '- { from: "/foo/", link: "/bar" }' . "\n" . '- { from: "/qux", link: "/quux" }']);
+            self::assertRedirect('/admin/');
+
+            // Redirects: tests
+            $this->handleGet('/foo');
+            self::assertNotFound();
+
+            $this->handleGet('/foo/');
+            self::assertRedirect('/bar', 301);
+
+            $this->handleGet('/qux');
+            self::assertRedirect('/quux', 301);
+
+            $this->handleGet('/qux/');
+            self::assertRedirect('/quux', 301);
+
             // Logout.
             $this->handleGet('/admin/logout');
             self::assertRedirect('/admin/');
         } finally {
             $this->yamlAdminConfigRestore();
         }
+    }
+
+    private static function assertNotFound(): void
+    {
+        self::assertSame(404, self::$response->getStatusCode());
     }
 
     private static function assertRedirect(string $uri, int $status = 302): void
@@ -267,7 +305,7 @@ class AdminScenarioTest extends TestCase
         self::assertSame(
             $values,
             array_map(
-                fn (DOMNode $DOMNode) => trim($DOMNode->textContent),
+                fn (\DOMNode $DOMNode) => trim($DOMNode->textContent),
                 iterator_to_array($crawler->filter('table tr td:first-child')),
             ),
         );
@@ -302,8 +340,8 @@ class AdminScenarioTest extends TestCase
     private function handle(string $method, string $uri, array $data = [], string $uploadContent = '', string $uploadFilename = ''): void
     {
         self::resetContainer();
-        $config = self::createConfigSite();
-        $request = new ServerRequest($method, $uri);
+        $config = self::createConfigDemo();
+        $request = new ServerRequest($method, '/' . ltrim($uri, '/'));
 
         if ('POST' === $method) {
             $request = $request
@@ -336,16 +374,16 @@ class AdminScenarioTest extends TestCase
     private function yamlAdminConfigBackup(): void
     {
         if (is_file(self::ADMIN_CONFIG)) {
-            copy(self::ADMIN_CONFIG, self::ADMIN_CONFIG . '.bkup');
+            copy(self::ADMIN_CONFIG, self::ADMIN_CONFIG_BKUP);
             @unlink(self::ADMIN_CONFIG);
         }
     }
 
     private function yamlAdminConfigRestore(): void
     {
-        if (is_file(self::ADMIN_CONFIG . '.bkup')) {
-            copy(self::ADMIN_CONFIG . '.bkup', self::ADMIN_CONFIG);
-            @unlink(self::ADMIN_CONFIG . '.bkup');
+        if (is_file(self::ADMIN_CONFIG_BKUP)) {
+            copy(self::ADMIN_CONFIG_BKUP, self::ADMIN_CONFIG);
+            @unlink(self::ADMIN_CONFIG_BKUP);
         }
     }
 }
