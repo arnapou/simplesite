@@ -244,7 +244,7 @@
         </tr>
         <tr>
             <td><code>thumbnail</code></td>
-            <td>transforme le chemin d'une image vers celui de sa miniature</td>
+            <td>convert the image path to a thumbnail path</td>
             <td>{% verbatim %}<code>{{ thumbnail('../assets/twig.png', 50) }}</code>{% endverbatim %}</td>
             <td>{{ thumbnail('../assets/twig.png', 50) }}</td>
         </tr>
@@ -301,13 +301,15 @@
 Title
 =====
 
-Hello!
+Hello
+World!
 {% endapply %}</code></pre>{% endverbatim %}</td>
             <td><pre><code>{% apply escape %}{% apply markdown_to_html %}
                             Title
                             =====
 
                             Hello!
+                            World!
                         {% endapply %}{% endapply %}</code></pre>
             </td>
         </tr>

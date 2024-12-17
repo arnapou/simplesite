@@ -19,7 +19,7 @@
         "arnapou/psr-container": "^1.0",
         "arnapou/psr-http": "^1.0",
         "arnapou/zip": "^1.4",
-        "michelf/php-markdown": "^2.0",
+        "erusev/parsedown": "dev-master",
         "symfony/string": "^6.4",
         "symfony/translation-contracts": "^3.5",
         "symfony/yaml": "^6.4",

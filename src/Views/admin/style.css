@@ -10,12 +10,6 @@ i svg {
     margin-right: .5rem;
 }
 
-.text-info i svg {
-    width: .7rem;
-    height: .7rem;
-    margin-right: 0;
-}
-
 a:hover i svg {
     filter: brightness(.5) saturate(2) contrast(2);
 }
@@ -37,20 +31,35 @@ a:hover i svg {
     color: var(--disabled);
 }
 
+.scope-info {
+    font-size: .8rem;
+    padding-left: 1.5rem;
+    position: relative;
+    opacity: .7;
+    cursor: default;
+}
+
+.scope-info i svg {
+    width: .7rem;
+    height: .7rem;
+    margin-right: 0;
+}
+
+.scope-info code {
+    font: inherit;
+}
+
 p.text-info {
     font-size: 1rem;
     padding-left: 1.5rem;
     position: relative;
 }
 
-p.text-info::before{
+p.text-info::before {
     display: block;
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
-}
-
-p.text-info::before {
     content: "ℹ️";
 }

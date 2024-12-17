@@ -52,6 +52,11 @@ final class AdminNode implements \Stringable
         return !$this->isForbidden() && $this->exists();
     }
 
+    public function canUpload(): bool
+    {
+        return $this->canCreate();
+    }
+
     public function canEdit(): bool
     {
         return !$this->isForbidden() && !$this->isRoot() && $this->isText();
@@ -64,7 +69,7 @@ final class AdminNode implements \Stringable
 
     public function canCreate(): bool
     {
-        return $this->dir && null !== $this->view;
+        return $this->dir && null !== $this->view && $this->exists();
     }
 
     public function isRoot(): bool
@@ -118,20 +123,21 @@ final class AdminNode implements \Stringable
 
     public function publicUrl(): string
     {
-        return null !== $this->view
-            ? match ($this->view->scope) {
+        return null === $this->view ? ''
+            : match ($this->view->scope) {
                 Scope::pages->toString() => match (true) {
                     $this->dir => $this->view->path,
                     !\in_array($this->ext, Config::PAGE_EXTENSIONS, true) => '',
-                    default => substr($this->view->path, 0, -\strlen($this->ext) - 1),
+                    default => str_ends_with($path = substr($this->view->path, 0, -\strlen($this->ext) - 1), '/index')
+                        ? substr($path, 0, -5)
+                        : $path,
                 },
                 Scope::public->toString() => match (true) {
                     str_ends_with($this->view->path, '/index.php') => substr($this->view->path, 0, -9),
                     default => $this->view->path,
                 },
                 default => '',
-            }
-        : '';
+            };
     }
 
     public function size(): string

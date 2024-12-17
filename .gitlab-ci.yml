@@ -5,7 +5,9 @@ stages:
 .php:
   image: "registry.gitlab.com/arnapou/docker/php:${PHPVER}-dev"
   stage: quality
-  before_script: [ composer install --no-interaction --no-progress --quiet ]
+  before_script:
+    - echo $(git describe --tags) > src/VERSION
+    - composer install --no-interaction --no-progress --quiet
   cache:
     key: "${PHPVER}:${CI_COMMIT_REF_SLUG}:${CI_JOB_NAME}"
     paths: [vendor]
@@ -72,6 +74,7 @@ release:
   stage: build
   services: [docker:27-dind]
   before_script:
+    - echo $(git describe --tags) > src/VERSION
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 docker-build:

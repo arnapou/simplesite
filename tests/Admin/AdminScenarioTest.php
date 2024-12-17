@@ -308,7 +308,7 @@ class AdminScenarioTest extends TestCase
             $values,
             array_map(
                 fn (\DOMNode $DOMNode) => trim($DOMNode->textContent),
-                iterator_to_array($crawler->filter('table tr td:first-child')),
+                iterator_to_array($crawler->filter('table tr td:first-child > .node')),
             ),
         );
     }

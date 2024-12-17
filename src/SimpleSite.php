@@ -117,9 +117,9 @@ final class SimpleSite
 
     public static function version(): string
     {
-        $version = is_file($file = __DIR__ . '/VERSION') ? file_get_contents($file) : null;
+        $version = trim(is_file($file = __DIR__ . '/VERSION') ? (string) file_get_contents($file) : '');
 
-        return \is_string($version) && '' !== $version ? $version : '?';
+        return '' !== $version ? $version : '?';
     }
 
     private static function loadPhpFiles(): void

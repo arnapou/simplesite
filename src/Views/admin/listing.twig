@@ -46,16 +46,19 @@
                 <tr>
                     <td>
                         {% if item.dir %}
-                            <a href="{{ item|admin_url }}"><i>{{ item.symbol|svg_use }}</i>{{ item.name }}/</a>
+                            <a href="{{ item|admin_url }}" class="node"><i>{{ item.symbol|svg_use }}</i>{{ item.name }}/</a>
                         {% else %}
-                            <i>{{ item.symbol|svg_use }}</i>{{ item.name }}
+                            <span class="node"><i>{{ item.symbol|svg_use }}</i>{{ item.name }}</span>
                         {% endif %}
+                        {{ _self.scope_info(item.view) }}
                     </td>
-                    <td class="size"><small>{{ item.size }}</small></td>
-                    <td class="center"><small>{{ item.time }}</small></td>
+                    {% if item.view.path != '/' %}
+                        <td class="size"><small>{{ item.size }}</small></td>
+                        <td class="center"><small>{{ item.time }}</small></td>
+                    {% endif %}
                     <td class="center">
                         {% if item.canDownload %}
-                            <a href="{{ item|admin_url('admin_download') }}" target="_blank" title="download"><i>{{ 'action-download'|svg_use }}</i></a>
+                            <a href="{{ item|admin_url('admin_download') }}" target="_blank" title="{{ item.dir ? 'ZIP ' : '' }}download"><i>{{ 'action-download'|svg_use }}</i></a>
                         {% else %}
                             <i>{{ ''|svg_use }}</i>
                         {% endif %}
@@ -70,7 +73,7 @@
                     </td>
                     <td class="center">
                         {% if item.canRename %}
-                            <a href="{{ item|admin_url('admin_rename') }}" title="rename"><i>{{ 'action-rename'|svg_use }}</i></a>
+                            <a href="{{ item|admin_url('admin_rename') }}" title="rename / move"><i>{{ 'action-rename'|svg_use }}</i></a>
                         {% else %}
                             <i>{{ ''|svg_use }}</i>
                         {% endif %}
@@ -107,28 +110,33 @@
                 <a href="{{ node|admin_url('admin_create_file') }}"><i>{{ 'action-create'|svg_use }}</i>Create file</a>
                 <i>{{ ''|svg_use }}</i>
             {% endif %}
-            <a href="{{ node|admin_url('admin_upload') }}"><i>{{ 'action-upload'|svg_use }}</i>Upload</a>
+            {% if node.canUpload %}
+                <a href="{{ node|admin_url('admin_upload') }}"><i>{{ 'action-upload'|svg_use }}</i>Upload</a>
+            {% endif %}
         </small>
     </p>
-
-    {% if items|length and node.view %}
-        <p class="text-info">
-            <small>
-                {% if '@data' == node.view.scope %}
-                    The <code>{{ node.view.scope }}</code> scope is dedicated to the storage of <a href="https://simplesite.arnapou.net/menu/database" target="_blank">tables</a>, which can be queried with <code>app.db</code>.
-                    <br>Be careful about the format of <code>table.&lt;name&gt;.yaml</code> files if you want to query them properly.
-                {% elseif '@pages' == node.view.scope %}
-                    The <code>{{ node.view.scope }}</code> scope is dedicated to the public pages structure.
-                    <br>Each <code>twig</code> file is accessible publicly. Click on the <i>{{ 'action-goto'|svg_use }}</i> icon to see the public URL.
-                {% elseif '@public' == node.view.scope %}
-                    The <code>{{ node.view.scope }}</code> scope is 100% public: each file can be directly accessible.
-                    <br>Use this scope to store public assets.
-                    <br>Be careful about what you store here!
-                {% elseif '@templates' == node.view.scope %}
-                    The <code>{{ node.view.scope }}</code> scope is used for <code>twig</code> templates: not public and not a page.
-                    <br>For instance, use the twig <code>extends</code>, <code>include</code>, <code>embed</code> tags.
-                {% endif %}
-            </small>
-        </p>
-    {% endif %}
 {% endblock %}
+
+{% macro scope_info(view) %}
+    {% if '@data' == view.name %}
+        <div class="scope-info">
+            Dedicated to the storage of <code>yaml</code> data files.
+            <br>In particular <a href="https://simplesite.arnapou.net/menu/database" target="_blank">tables</a> you can query with <code>app.db</code> which pattern is <code>table.&lt;name&gt;.yaml</code>.
+        </div>
+    {% elseif '@pages' == view.name %}
+        <div class="scope-info">
+            Dedicated to the <a href="https://simplesite.arnapou.net/menu/pages" target="_blank">pages</a> structure which are rendered publicly.
+            <br>Click on the <i>{{ 'action-goto'|svg_use }}</i> icon of <code>twig</code> files to see the public URL.
+        </div>
+    {% elseif '@public' == view.name %}
+        <div class="scope-info">
+            Dedicated to direct public access of assets, etc...
+            <br>Be careful about what you store here!
+        </div>
+    {% elseif '@templates' == view.name %}
+        <div class="scope-info">
+            Used for twig <a href="https://simplesite.arnapou.net/menu/templating" target="_blank">templates</a>: not public and not for pages.
+            <br>Read the doc about twig <a href="https://twig.symfony.com/doc/3.x/" target="_blank">tags</a> <code>extends</code>, <code>include</code>, <code>embed</code>.
+        </div>
+    {% endif %}
+{% endmacro %}

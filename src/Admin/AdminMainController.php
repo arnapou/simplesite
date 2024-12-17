@@ -135,13 +135,13 @@ final class AdminMainController extends AdminController
 
             return match ($request->getMethod()) {
                 'GET' => match (true) {
-                    $node->dir && $node->canCreate() => $this->render('form-upload.twig', $context),
+                    $node->canUpload() => $this->render('form-upload.twig', $context),
                     default => throw Problem::fromStatus(Error::Forbidden),
                 },
                 'POST' => match ($params = $this->requestParams($request)) {
                     null => $this->renderInvalidCsrf('form-upload.twig', $context),
                     default => match (true) {
-                        $node->dir && $node->canCreate() => $this->doUpload($node, $params, $request->getUploadedFiles()),
+                        $node->canUpload() => $this->doUpload($node, $params, $request->getUploadedFiles()),
                         default => throw Problem::fromStatus(Error::Forbidden),
                     },
                 },

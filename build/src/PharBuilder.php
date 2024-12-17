@@ -45,7 +45,6 @@ final class PharBuilder
             $pharfile = $this->config->projectRootDir . '/' . ltrim($this->config->pharOutputFile, '/');
 
             $this->copyAllFilesToTmp();
-            $this->createVersionFile();
             $this->unlinkPreviousBuilds($pharfile);
 
             $phar = new \Phar($pharfile);
@@ -65,7 +64,7 @@ final class PharBuilder
 
     private function getStub(string $pharBasename): string
     {
-        return '<?php // Generated ' . date('c') . ' for PHP ' . \PHP_VERSION . "
+        return '<?php // Generated ' . gmdate('Y-m-d H:i:s') . ' UTC ┃ 🐘 PHP ' . \PHP_VERSION . ' ┃ 🚀 Simplesite ' . SimpleSite::version() . "
 if (class_exists('Phar')) {
 Phar::mapPhar(" . var_export($pharBasename, true) . ");
 Phar::interceptFileFuncs();
@@ -96,16 +95,6 @@ __HALT_COMPILER(); ?>";
         );
 
         return SimpleSite::helper();
-    }
-
-    private function createVersionFile(): void
-    {
-        if (!is_file($bin = '/usr/bin/git') || !is_executable($bin)) {
-            $this->bye('⛔ Git not found');
-        }
-
-        $VERSION = __DIR__ . '/../../src/VERSION';
-        shell_exec('git describe --tags --abbrev=0 > ' . escapeshellarg($VERSION));
     }
 
     private function copyAllFilesToTmp(): void
