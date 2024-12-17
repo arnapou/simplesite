@@ -46,6 +46,7 @@ class TwigExtensionTest extends TestCase
                 'slug',
                 'snake',
                 'thumbnail',
+                'view',
                 'yaml',
             ],
             array_map(

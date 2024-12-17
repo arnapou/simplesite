@@ -60,6 +60,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('slug', $this->helper->slugify(...)),
             new TwigFilter('snake', $this->helper->toSnakeCase(...)),
             new TwigFilter('thumbnail', $this->helper->thumbnail(...)),
+            new TwigFilter('view', static fn (string $view) => new View($view)),
             new TwigFilter('yaml', $this->helper->yamlEncode(...)),
         ];
     }

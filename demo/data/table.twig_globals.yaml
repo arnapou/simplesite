@@ -1,5 +1,5 @@
 #
-# base de variables disponibles en global dans le twig
+# Variable list loaded into Twig Globals
 #
 
 -

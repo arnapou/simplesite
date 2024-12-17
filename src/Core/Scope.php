@@ -17,6 +17,7 @@ use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError;
 
 enum Scope
 {
+    case data;
     case pages;
     case public;
     case templates;
@@ -34,6 +35,7 @@ enum Scope
     public static function tryFrom(string $scope): ?self
     {
         return match ($scope) {
+            '@data' => self::data,
             '@pages' => self::pages,
             '@public' => self::public,
             '@templates' => self::templates,
@@ -47,6 +49,7 @@ enum Scope
     public function toString(): string
     {
         return match ($this) {
+            self::data => '@data',
             self::pages => '@pages',
             self::public => '@public',
             self::templates => '@templates',
@@ -59,6 +62,7 @@ enum Scope
     public function toPath(Config $config, bool $strict = true): ?string
     {
         return match ($this) {
+            self::data => $config->path_data ?? (!$strict ? null : throw self::invalidScope($this->toString())),
             self::pages => $config->path_pages,
             self::public => $config->path_public,
             self::templates => $config->path_templates ?? (!$strict ? null : throw self::invalidScope($this->toString())),

@@ -10,6 +10,12 @@ i svg {
     margin-right: .5rem;
 }
 
+.text-info i svg {
+    width: .7rem;
+    height: .7rem;
+    margin-right: 0;
+}
+
 a:hover i svg {
     filter: brightness(.5) saturate(2) contrast(2);
 }

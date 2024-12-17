@@ -53,7 +53,7 @@ final readonly class Helper
     /**
      * @return array<mixed>
      */
-    public function data(string $view, bool $strict = true): array
+    public function data(string $view, bool $strict = false): array
     {
         if (!$strict && !$this->twigLoader->exists($view)) {
             return [];

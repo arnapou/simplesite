@@ -47,7 +47,7 @@ cat <<EOF > /app/pages/index.twig
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>SimpleSite</title><link href="/assets/css/simple.min.css?v20241113a" rel="stylesheet">
+  <title>SimpleSite</title>
   <style>{{ source('@internal/simple.css') }}</style>
 </head>
 <body>

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Arnapou\SimpleSite\Tests\Admin;
 
 use Arnapou\Psr\Psr7HttpMessage\Response;
+use Arnapou\SimpleSite\Admin\AdminConfig;
 use Arnapou\SimpleSite\Core\UrlEncoder;
 use Arnapou\SimpleSite\SimpleSite;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
@@ -28,8 +29,8 @@ class AdminScenarioTest extends TestCase
 {
     use ConfigTestTrait;
 
-    private const string ADMIN_CONFIG = __DIR__ . '/../../demo/data/table.admin.config.yaml';
-    private const string ADMIN_CONFIG_BKUP = __DIR__ . '/../../demo/data/table.admin.config.yaml.bkup';
+    private const string ADMIN_CONFIG = __DIR__ . '/../../demo/data/table.' . AdminConfig::TABLE . '.yaml';
+    private const string ADMIN_CONFIG_BKUP = __DIR__ . '/../../demo/data/table.' . AdminConfig::TABLE . '.yaml.bkup';
     private static Response $response;
     private static string $redirect;
     private static string $contents;
@@ -79,6 +80,7 @@ class AdminScenarioTest extends TestCase
             // Listing: root.
             $this->handleRedirect();
             self::assertListingContains([
+                '@data/',
                 '@pages/',
                 '@public/',
                 '@templates/',

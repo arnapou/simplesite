@@ -16,6 +16,7 @@ namespace Arnapou\SimpleSite\Core;
 use Arnapou\PFDB\Database;
 use Arnapou\Psr\Psr11Container\Exception\ServiceNotFound;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
+use Arnapou\SimpleSite\SimpleSite;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -39,6 +40,7 @@ final class ContainerForTwig implements ContainerInterface
             'db' => $this->container->get(Database::class),
             'logger' => $this->container->get(ThrowableLogger::class),
             'request' => $this->container->get(ServerRequestInterface::class),
+            'version' => SimpleSite::version(),
             default => throw ServiceNotFound::undefinedService($id),
         };
     }
@@ -50,6 +52,7 @@ final class ContainerForTwig implements ContainerInterface
             'db',
             'logger',
             'request',
+            'version',
         ], true);
     }
 

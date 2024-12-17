@@ -99,7 +99,7 @@
         </p>
     {% endif %}
 
-    <p style="float: right">
+    <p style="text-align: right">
         <small>
             {% if node.canCreate %}
                 <a href="{{ node|admin_url('admin_create_folder') }}"><i>{{ 'action-create'|svg_use }}</i>Create folder</a>
@@ -110,4 +110,25 @@
             <a href="{{ node|admin_url('admin_upload') }}"><i>{{ 'action-upload'|svg_use }}</i>Upload</a>
         </small>
     </p>
+
+    {% if items|length and node.view %}
+        <p class="text-info">
+            <small>
+                {% if '@data' == node.view.scope %}
+                    The <code>{{ node.view.scope }}</code> scope is dedicated to the storage of <a href="https://simplesite.arnapou.net/menu/database" target="_blank">tables</a>, which can be queried with <code>app.db</code>.
+                    <br>Be careful about the format of <code>table.&lt;name&gt;.yaml</code> files if you want to query them properly.
+                {% elseif '@pages' == node.view.scope %}
+                    The <code>{{ node.view.scope }}</code> scope is dedicated to the public pages structure.
+                    <br>Each <code>twig</code> file is accessible publicly. Click on the <i>{{ 'action-goto'|svg_use }}</i> icon to see the public URL.
+                {% elseif '@public' == node.view.scope %}
+                    The <code>{{ node.view.scope }}</code> scope is 100% public: each file can be directly accessible.
+                    <br>Use this scope to store public assets.
+                    <br>Be careful about what you store here!
+                {% elseif '@templates' == node.view.scope %}
+                    The <code>{{ node.view.scope }}</code> scope is used for <code>twig</code> templates: not public and not a page.
+                    <br>For instance, use the twig <code>extends</code>, <code>include</code>, <code>embed</code> tags.
+                {% endif %}
+            </small>
+        </p>
+    {% endif %}
 {% endblock %}

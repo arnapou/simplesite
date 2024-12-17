@@ -23,10 +23,10 @@ final class TwigLoader extends FilesystemLoader
 
         $namespaces = [
             self::MAIN_NAMESPACE => Scope::default()->toPath($config, false),
+            'data' => Scope::data->toPath($config, false),
             'pages' => Scope::pages->toPath($config, false),
             'public' => Scope::public->toPath($config, false),
             'templates' => Scope::templates->toPath($config, false),
-            'data' => $config->path_data,
             'logs' => $config->log_path,
             'php' => $config->path_php,
             'internal' => __DIR__ . '/../Views',

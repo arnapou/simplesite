@@ -41,10 +41,8 @@ final readonly class UrlEncoder implements Encoder
             public function getWords(): array
             {
                 return [
-                    // scopes: 3
-                    Scope::pages->toString(),
-                    Scope::public->toString(),
-                    Scope::templates->toString(),
+                    // scopes: 4
+                    ...array_map(static fn (Scope $scope) => $scope->toString(), Scope::cases()),
                     // special: 16
                     ...str_split('\' ~+-*/,.!#@&=:_'),
                     // digits: 62
@@ -62,7 +60,7 @@ final readonly class UrlEncoder implements Encoder
                     ...explode(' ', 'pr no ct us ac ot il tr ly nc et ut ss so rs un lo wa ge ie'),
                     ...explode(' ', 'wh ee wi em ad ol rt po we na ul ni ts mo ow pa im mi ai sh'),
                     ...explode(' ', 'ir su id os iv ia am fi ci vi pl ig tu ev ld ry mp fe bl ab'),
-                    ...explode(' ', 'gh ty op wo sa ay ex ke fr oo av ag if ap'),
+                    ...explode(' ', 'gh ty op wo sa ay ex ke fr oo av ag if'),
                 ];
             }
         };

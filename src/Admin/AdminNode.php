@@ -74,7 +74,12 @@ final class AdminNode implements \Stringable
 
     public function isForbidden(): bool
     {
-        return null !== $this->view && Scope::public->toString() === $this->view->scope && '/index.php' === $this->view->path;
+        if (null === $this->view) {
+            return false;
+        }
+
+        return (Scope::public->toString() === $this->view->scope && '/index.php' === $this->view->path)
+            || (Scope::data->toString() === $this->view->scope && '/table.' . AdminConfig::TABLE . '.yaml' === $this->view->path);
     }
 
     public function isPicture(): bool

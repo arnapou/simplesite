@@ -45,6 +45,7 @@ final class PharBuilder
             $pharfile = $this->config->projectRootDir . '/' . ltrim($this->config->pharOutputFile, '/');
 
             $this->copyAllFilesToTmp();
+            $this->createVersionFile();
             $this->unlinkPreviousBuilds($pharfile);
 
             $phar = new \Phar($pharfile);
@@ -95,6 +96,16 @@ __HALT_COMPILER(); ?>";
         );
 
         return SimpleSite::helper();
+    }
+
+    private function createVersionFile(): void
+    {
+        if (!is_file($bin = '/usr/bin/git') || !is_executable($bin)) {
+            $this->bye('⛔ Git not found');
+        }
+
+        $VERSION = __DIR__ . '/../../src/VERSION';
+        shell_exec('git describe --tags --abbrev=0 > ' . escapeshellarg($VERSION));
     }
 
     private function copyAllFilesToTmp(): void

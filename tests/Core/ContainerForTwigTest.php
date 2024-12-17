@@ -44,18 +44,20 @@ class ContainerForTwigTest extends TestCase
         yield ['db', Database::class];
         yield ['logger', ThrowableLogger::class];
         yield ['request', ServerRequestInterface::class];
+        yield ['version', 'string'];
     }
 
-    /**
-     * @param class-string $class
-     */
     #[DataProvider('dataServiceExist')]
     public function testServiceExist(string $name, string $class): void
     {
-        self::assertInstanceOf($class, $this->container->get($name));
+        $checkType = static fn (mixed $value) => \is_object($value)
+            ? $value instanceof $class
+            : $class === get_debug_type($value);
+
+        self::assertTrue($checkType($this->container->get($name)));
         self::assertTrue($this->container->has($name));
 
-        self::assertInstanceOf($class, $this->container->$name); // @phpstan-ignore property.dynamicName
+        self::assertTrue($checkType($this->container->$name)); // @phpstan-ignore property.dynamicName
         self::assertTrue(isset($this->container->$name)); // @phpstan-ignore property.dynamicName
     }
 

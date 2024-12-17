@@ -53,7 +53,7 @@ abstract class Controller implements PhpCode
     protected function render(string $view, array $context = []): Response
     {
         $helper = SimpleSite::helper();
-        $data = $helper->data($helper->replaceExtension($view, 'yaml'), false);
+        $data = $helper->data($helper->replaceExtension($view, 'yaml'));
 
         $data['view'] = View::tryFrom($view); // set the current view name
         unset($context['app'], $data['app']); // secure the global app variable

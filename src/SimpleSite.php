@@ -115,6 +115,13 @@ final class SimpleSite
         return self::container()->get(Environment::class);
     }
 
+    public static function version(): string
+    {
+        $version = is_file($file = __DIR__ . '/VERSION') ? file_get_contents($file) : null;
+
+        return \is_string($version) && '' !== $version ? $version : '?';
+    }
+
     private static function loadPhpFiles(): void
     {
         $config = self::config();

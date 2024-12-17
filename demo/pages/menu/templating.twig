@@ -79,13 +79,19 @@
             <td>{% verbatim %}<code>{{ app.request.uri }}</code>{% endverbatim %}</td>
             <td>{{ app.request.uri }}</td>
         </tr>
+        <tr>
+            <td><code>app.version</code></td>
+            <td>Simplesite version</td>
+            <td>{% verbatim %}<code>{{ app.version }}</code>{% endverbatim %}</td>
+            <td>{{ app.version }}</td>
+        </tr>
         </tbody>
 
     </table>
 
     <h3>Variable <code>view</code></h3>
 
-<p>The <code>view</code> variable is an immutable object which represents the current view.</p>
+    <p>The <code>view</code> variable is an immutable object which represents the current view.</p>
 
     <table class="examples">
         <thead>
@@ -351,10 +357,17 @@ Hello!
             <td>{{ '../assets/twig.png'|thumbnail(50) }}</td>
         </tr>
         <tr>
+            <td><code>view</code></td>
+            <td>get a view object from its string representation</td>
+            <td>{% verbatim %}<code>{{ '@public/assets'|view }}</code>{% endverbatim %}</td>
+            <td>{{ '@public/assets'|view }}</td>
+        </tr>
+        <tr>
             <td><code>yaml</code></td>
             <td>basically a yaml encode</td>
             <td>{% verbatim %}<code>{{ {foo: 'bar', baz: 123}|yaml }}</code>{% endverbatim %}</td>
-            <td><pre><code>{{ {foo: 'bar', baz: 123}|yaml }}</code></pre>
+            <td>
+                <pre><code>{{ {foo: 'bar', baz: 123}|yaml }}</code></pre>
             </td>
         </tr>
         </tbody>

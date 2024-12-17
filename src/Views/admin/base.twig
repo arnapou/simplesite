@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}{{ app.helper.baseUrl(app.request, false) }}{% endblock %}</title>
+    <title>{% block title %}{{ app.request.uri.host }}{% endblock %}</title>
     <link rel="icon" type="image/svg" href="{{ authenticated ? path('admin_favicon_authenticated') : path('admin_favicon_unauthenticated') }}"/>
     <style>
         {{ source('@internal/simple.css') }}
@@ -26,7 +26,10 @@
     {% block main %}{% endblock %}
 </main>
 <footer>
-    <a href="https://gitlab.com/arnapou/project/simplesite">GitLab project</a>
+    <a href="https://twig.symfony.com/doc/3.x/" target="_blank">Twig doc</a>&nbsp;&mdash;&nbsp;
+    <a href="https://simplesite.arnapou.net/" target="_blank">Simplesite doc</a>&nbsp;&mdash;&nbsp;
+    <a href="https://gitlab.com/arnapou/project/simplesite" target="_blank">GitLab project</a>&nbsp;&mdash;&nbsp;
+    Simplesite <b>{{ app.version }}</b>
 </footer>
 <!-- Icon source : https://www.svgrepo.com/collection/duotone-oval-interface-icons/ -->
 <svg style="display: none" version="2.0">
