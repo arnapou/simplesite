@@ -15,7 +15,6 @@ namespace Arnapou\SimpleSite\Admin;
 
 use Arnapou\Ensure\Enforce;
 use Arnapou\Ensure\Ensure;
-use Arnapou\PFDB\Database;
 use Arnapou\SimpleSite\Core;
 use Random\Randomizer;
 
@@ -28,7 +27,7 @@ final class AdminConfig
         set => $this->set('password_hash', $this->hash($value));
     }
 
-    public function __construct(private Core\Container $container)
+    public function __construct(private readonly Core\Container $container)
     {
     }
 
@@ -134,8 +133,8 @@ final class AdminConfig
         return $value;
     }
 
-    private function db(): Database
+    private function db(): Core\Db
     {
-        return $this->container->get(Database::class);
+        return $this->container->get(Core\Db::class);
     }
 }

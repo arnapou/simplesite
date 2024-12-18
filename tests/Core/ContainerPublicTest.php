@@ -13,27 +13,27 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Tests\Core;
 
-use Arnapou\PFDB\Database;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
 use Arnapou\SimpleSite\Core\Config;
 use Arnapou\SimpleSite\Core\Container;
-use Arnapou\SimpleSite\Core\ContainerForTwig;
+use Arnapou\SimpleSite\Core\ContainerPublic;
+use Arnapou\SimpleSite\Core\DbPublic;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ContainerForTwigTest extends TestCase
+class ContainerPublicTest extends TestCase
 {
     use ConfigTestTrait;
 
-    private ContainerForTwig $container;
+    private ContainerPublic $container;
 
     protected function setUp(): void
     {
         [, $config] = self::createConfigTest();
-        $this->container = new ContainerForTwig($container = new Container());
+        $this->container = new ContainerPublic($container = new Container());
         $container->registerInstance(Config::class, $config);
         $container->registerInstance(ServerRequestInterface::class, new ServerRequest('GET', '/'));
     }
@@ -41,7 +41,7 @@ class ContainerForTwigTest extends TestCase
     public static function dataServiceExist(): \Generator
     {
         yield ['config', Config::class];
-        yield ['db', Database::class];
+        yield ['db', DbPublic::class];
         yield ['logger', ThrowableLogger::class];
         yield ['request', ServerRequestInterface::class];
         yield ['version', 'string'];

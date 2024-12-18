@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Core;
 
-use Arnapou\PFDB\Database;
 use Arnapou\Psr\Psr11Container\Exception\ServiceNotFound;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
 use Arnapou\SimpleSite\SimpleSite;
@@ -27,7 +26,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * - exposes only a specific whitelist of classes to keep the others private.
  * - is 100% readonly to avoid twig messing with the internal real container.
  */
-final class ContainerForTwig implements ContainerInterface
+final class ContainerPublic implements ContainerInterface
 {
     public function __construct(private readonly ContainerInterface $container)
     {
@@ -37,7 +36,7 @@ final class ContainerForTwig implements ContainerInterface
     {
         return match ($id) {
             'config' => $this->container->get(Config::class),
-            'db' => $this->container->get(Database::class),
+            'db' => $this->container->get(DbPublic::class),
             'logger' => $this->container->get(ThrowableLogger::class),
             'request' => $this->container->get(ServerRequestInterface::class),
             'version' => SimpleSite::version(),

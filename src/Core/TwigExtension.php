@@ -30,7 +30,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function getGlobals(): array
     {
         return [
-            'app' => new ContainerForTwig($this->container),
+            'app' => new ContainerPublic($this->container),
         ];
     }
 

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite;
 
-use Arnapou\PFDB\Database;
 use Arnapou\Psr\Psr14EventDispatcher\PhpHandlers;
 use Arnapou\Psr\Psr15HttpHandlers\Exception\NoResponseFound;
 use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
@@ -21,7 +20,6 @@ use Arnapou\Psr\Psr17HttpFactories\HttpFactory;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
 use Arnapou\Psr\Psr7HttpMessage\HtmlResponse;
 use Arnapou\Psr\Psr7HttpMessage\Response;
-use Arnapou\SimpleSite\Core\Helper;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
@@ -85,14 +83,14 @@ final class SimpleSite
         return self::$container ??= new Core\Container();
     }
 
-    public static function db(): Database
+    public static function db(): Core\Db
     {
-        return self::container()->get(Database::class);
+        return self::container()->get(Core\Db::class);
     }
 
-    public static function helper(): Helper
+    public static function helper(): Core\Helper
     {
-        return self::container()->get(Helper::class);
+        return self::container()->get(Core\Helper::class);
     }
 
     public static function logger(): ThrowableLogger
