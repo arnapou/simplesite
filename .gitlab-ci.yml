@@ -2,11 +2,11 @@ stages:
   - quality
   - build
 
-.php:
+.php: &php
   image: "registry.gitlab.com/arnapou/docker/php:${PHPVER}-dev"
   stage: quality
   before_script:
-    - echo $(git describe --tags) > src/VERSION
+    - &VERSION echo $(git describe --tags | sed 's/-.*/@dev/') > src/VERSION
     - composer install --no-interaction --no-progress --quiet
   cache:
     key: "${PHPVER}:${CI_COMMIT_REF_SLUG}:${CI_JOB_NAME}"
@@ -15,16 +15,14 @@ stages:
     matrix:
       - PHPVER: [ '8.4' ]
 
-cs:
-  extends: .php
-  script: composer run cs
-
-sa:
-  extends: .php
-  script: composer run sa
+cs + sa:
+  <<: *php
+  script:
+    - composer run cs
+    - composer run sa
 
 test:
-  extends: .php
+  <<: *php
   script:
     - sudo -Eu www-data composer run test:ci
   coverage: '/^\s*Lines:\s*\d+.\d+\%/'
@@ -37,7 +35,7 @@ test:
         path: phpunit-coverage.xml
 
 simplesite.phar:
-  extends: .php
+  <<: *php
   rules: [{ if: $CI_COMMIT_TAG }]
   stage: build
   script:
@@ -69,16 +67,16 @@ release:
         - name: 'simplesite.phar'
           url: 'https://gitlab.com/arnapou/project/simplesite/-/jobs/${ARTIFACT_JOB_ID}/artifacts/file/bin/simplesite.phar'
 
-.docker:
+.docker: &docker
   image: docker:27
   stage: build
   services: [docker:27-dind]
   before_script:
-    - echo $(git describe --tags) > src/VERSION
+    - *VERSION
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 docker-build:
-  extends: .docker
+  <<: *docker
   rules:
     - if: $CI_COMMIT_TAG
   script:
@@ -91,11 +89,14 @@ docker-build:
 
 
 docker-demo:
-  extends: .docker
+  <<: *docker
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
   script:
+    # registry.gitlab.com/arnapou/project/simplesite:latest
+    - docker build -t $CI_REGISTRY_IMAGE:latest --target=final .
+    - docker push $CI_REGISTRY_IMAGE:latest
     # registry.gitlab.com/arnapou/project/simplesite:demo
     - docker build -t $CI_REGISTRY_IMAGE:demo --target=demo .
     - docker push $CI_REGISTRY_IMAGE:demo
