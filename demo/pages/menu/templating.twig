@@ -178,15 +178,26 @@
             <td>{{ view.relative('../foo.ext') }}</td>
         </tr>
         <tr>
-            <td><code>view.list</code></td>
-            <td>list(): array&lt;self&gt;</td>
-            <td>{% verbatim %}<code>{{  <br>
-                &nbsp; view.dirname.list<br>
-                &nbsp; | map(x => x.basename)<br>
-                &nbsp; | join("\n")<br>
-                &nbsp; | nl2br <br>
-                }}</code>{% endverbatim %}</td>
+            <td rowspan="3"><code>view.list</code></td>
+            <td rowspan="3">
+                <p>list(): array&lt;self&gt;<br><small> &nbsp; ╰─ dirs, then files</small></p>
+                <p>list(<span>'d'</span>): array&lt;self&gt;<br><small> &nbsp; ╰─ only dirs</small></p>
+                <p>list(<span>'f'</span>): array&lt;self&gt;<br><small> &nbsp; ╰─ only files</small></p>
+            </td>
+            <td>{% verbatim %}<code>{{ view.dirname.list<br>
+                &nbsp;&nbsp; | map(x => x.basename)<br>
+                &nbsp;&nbsp; | join("\n") | nl2br }}</code>{% endverbatim %}</td>
             <td>{{ view.dirname.list|map(x => x.basename)|join("\n")|nl2br }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ view.relative('..').list('d')<br>
+                &nbsp;&nbsp; | join("\n") | nl2br }}</code>{% endverbatim %}</td>
+            <td>{{ view.relative('..').list('d')|join("\n")|nl2br }}</td>
+        </tr>
+        <tr>
+            <td>{% verbatim %}<code>{{ view.relative('..').list('f')<br>
+                &nbsp;&nbsp; | join("\n") | nl2br }}</code>{% endverbatim %}</td>
+            <td>{{ view.relative('..').list('f')|join("\n")|nl2br }}</td>
         </tr>
         </tbody>
 

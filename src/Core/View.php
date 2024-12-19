@@ -92,11 +92,22 @@ final readonly class View implements \Stringable
     /**
      * @return list<self>
      */
-    public function list(): array
+    public function list(string|bool|null $type = null): array
     {
         if (!$this->isDir) {
             return [];
         }
+
+        $typeDir = match ($type) {
+            null, true, '' => true,
+            false => false,
+            default => str_starts_with($type, 'd'),
+        };
+        $typeFile = match ($type) {
+            null, false, '' => true,
+            true => false,
+            default => str_starts_with($type, 'f'),
+        };
 
         $dirs = $files = [];
         foreach (new \DirectoryIterator($this->real) as $item) {
@@ -105,9 +116,9 @@ final readonly class View implements \Stringable
             }
 
             $view = $this->relative($item->getBasename());
-            if ($view->isDir) {
+            if ($typeDir && $view->isDir) {
                 $dirs[] = $view;
-            } else {
+            } elseif ($typeFile && $view->isFile) {
                 $files[] = $view;
             }
         }

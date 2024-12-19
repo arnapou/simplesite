@@ -13,7 +13,8 @@
 /*
  * Custom.
  */
-.examples td:last-child {
+.examples td:last-child,
+.examples td:nth-child(2) span {
     color: #17a2b8;
 }
 .examples td > pre {

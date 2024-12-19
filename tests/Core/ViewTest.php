@@ -19,6 +19,7 @@ use Arnapou\SimpleSite\Core\Problem;
 use Arnapou\SimpleSite\Core\Scope;
 use Arnapou\SimpleSite\Core\View;
 use Arnapou\SimpleSite\Tests\ConfigTestTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
@@ -207,28 +208,48 @@ class ViewTest extends TestCase
         self::assertSame('bar.ZiP', new View('@public/foo/bar.ZiP')->basename());
     }
 
-    public function testList(): void
+    public static function dataList(): \Generator
     {
-        $test = static fn (View $view) => array_map(
-            static fn (View $view) => [$view->isDir, $view->path],
-            $view->list(),
-        );
+        yield [
+            null,
+            '@templates/demo/',
+            [false, '/demo/hello.twig'],
+            [false, '/demo/hello.yaml'],
+        ];
 
+        // default
+        $dirs = [[true, '/menu']];
+        $files = [[false, '/index.twig'], [false, '/php.png'], [false, '/test.json']];
+        yield [null, '@pages', ...$dirs, ...$files];
+        yield ['', '@pages', ...$dirs, ...$files];
+
+        // only dirs
+        yield [true, '@pages', ...$dirs];
+        yield ['d', '@pages', ...$dirs];
+        yield ['dir', '@pages', ...$dirs];
+
+        // only files
+        yield [false, '@pages', ...$files];
+        yield ['f', '@pages', ...$files];
+        yield ['files', '@pages', ...$files];
+
+        // none because wrong string
+        yield ['zzz', '@pages'];
+    }
+
+    /**
+     * @param array<mixed> ...$expected
+     */
+    #[DataProvider('dataList')]
+    public function testList(string|bool|null $type, string $name, array ...$expected): void
+    {
+        $view = new View($name);
         self::assertSame(
-            [
-                [true, '/menu'],
-                [false, '/index.twig'],
-                [false, '/php.png'],
-                [false, '/test.json'],
-            ],
-            $test(new View('@pages')),
-        );
-        self::assertSame(
-            [
-                [false, '/demo/hello.twig'],
-                [false, '/demo/hello.yaml'],
-            ],
-            $test(new View('@templates/demo/')),
+            $expected,
+            array_map(
+                static fn (View $view) => [$view->isDir, $view->path],
+                $view->list($type),
+            ),
         );
     }
 
