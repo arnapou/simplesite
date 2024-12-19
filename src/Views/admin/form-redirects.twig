@@ -14,19 +14,7 @@
         </p>
 
         <p>
-                <textarea rows="40" name="source" autofocus>
-{%- if source is defined %}
-{{ source }}
-{% elseif 0 == redirects|length %}
-- from: old/page/url
-  link: target/of/the/redirect
-
-- from: another/old/page/url
-  link: https://some.external.site/
-{% else %}
-{{ redirects|yaml }}
-{% endif -%}
-                </textarea>
+            <textarea rows="40" name="source" autofocus spellcheck="false">{{ source }}</textarea>
         </p>
 
         {{ form.buttons('Save', path('admin_home')) }}

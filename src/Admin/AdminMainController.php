@@ -81,9 +81,9 @@ final class AdminMainController extends AdminController
     {
         return $this->firewall(function () use ($request) {
             return match ($request->getMethod()) {
-                'GET' => $this->render('form-redirects.twig', ['redirects' => $this->admin->getRedirects()]),
+                'GET' => $this->render('form-redirects.twig', ['source' => $this->getAdminRedirectsAsSource()]),
                 'POST' => match ($params = $this->requestParams($request)) {
-                    null => $this->renderInvalidCsrf('form-redirects.twig', ['redirects' => $this->admin->getRedirects()]),
+                    null => $this->renderInvalidCsrf('form-redirects.twig', ['source' => $this->getAdminRedirectsAsSource()]),
                     default => $this->doRedirects($params),
                 },
                 default => throw Problem::fromStatus(Error::MethodNotAllowed),
@@ -242,7 +242,9 @@ final class AdminMainController extends AdminController
             return $this->render('form-redirects.twig', ['source' => $source]);
         }
 
-        if (!\is_array($decoded = $this->helper->yamlDecode($source))) {
+        $decoded = $this->helper->yamlDecode($source);
+        $decoded = '' === $decoded || null === $decoded ? [] : $decoded;
+        if (!\is_array($decoded)) {
             $this->session->flashMessage = 'The YAML must be a list.';
 
             return $this->render('form-redirects.twig', ['source' => $source]);
@@ -511,5 +513,23 @@ final class AdminMainController extends AdminController
         if (!is_dir($dir) && !mkdir($dir, 0o777, true) && !is_dir($dir)) {
             throw new Problem(\sprintf('Directory "%s" was not created', $dir));
         }
+    }
+
+    private function getAdminRedirectsAsSource(): string
+    {
+        return [] !== ($redirects = $this->admin->getRedirects()) ? $this->helper->yamlEncode($redirects)
+            : <<<TEXT
+                #
+                # The redirects list is empty.
+                # Below is an *example* of the expected YAML format.
+                #
+
+                - from: some/non-existent/page1
+                  link: target/of/the/redirect
+                  
+                - from: some/non-existent/page2
+                  link: https://some.external.site/
+
+                TEXT;
     }
 }

@@ -228,10 +228,15 @@ final readonly class Helper
 
     public function yamlEncode(mixed $data): string
     {
-        return match (true) {
+        $yaml = match (true) {
             \function_exists('yaml_emit') => yaml_emit($data, YAML_UTF8_ENCODING, YAML_LN_BREAK),
             default => Yaml::dump($data),
         };
+
+        $yaml = (string) preg_replace('!^---\n!', '', $yaml);
+        $yaml = (string) preg_replace('!\n\.\.\.$!', "\n", $yaml);
+
+        return rtrim($yaml) . "\n";
     }
 
     public function yamlValidate(string $source): bool|string

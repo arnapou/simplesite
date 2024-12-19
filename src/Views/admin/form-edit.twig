@@ -10,7 +10,7 @@
         {{ form.notice(flash_message) }}
 
         <p>
-            <textarea rows="40" name="source" autofocus>{{ source ?: source(node)|escape }}</textarea>
+            <textarea rows="40" name="source" autofocus spellcheck="false">{{ source ?: source(node)|escape }}</textarea>
         </p>
 
         {{ form.buttons('Save', node.parent|admin_url) }}
