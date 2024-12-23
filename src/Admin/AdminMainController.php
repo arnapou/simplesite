@@ -378,7 +378,7 @@ final class AdminMainController extends AdminController
 
     private function doDownload(AdminNode $node): Response
     {
-        session_write_close();
+        $this->session->close();
 
         if ($node->dir) {
             $filename = $node->name() . '.zip';

@@ -37,6 +37,7 @@ final class AdminSession
         get => Ensure::int($_SESSION['csrf_time'] ?? 0);
         set => $_SESSION['csrf_time'] = $value;
     }
+    private bool $closed = false;
 
     /**
      * Avoids brute-force attacks by time-gating them: not bothersome for humans.
@@ -63,8 +64,32 @@ final class AdminSession
     public function start(): void
     {
         if ('' === (string) session_id()) {
-            session_start();
+            session_start([
+                'cookie_lifetime' => 86_400,
+                'cookie_secure' => true,
+                'cookie_httponly' => true,
+                'cookie_samesite' => 'strict',
+                'gc_probability' => 1,
+                'gc_divisor' => 100,
+                'gc_maxlifetime' => 86_400,
+                // 'referer_check' => 'to-do-later',
+                // 'read_and_close'  => true,
+            ]);
         }
+    }
+
+    public function close(): void
+    {
+        if (!$this->closed) {
+            $this->closed = true;
+            session_write_close();
+        }
+    }
+
+    public function destroy(): void
+    {
+        $_SESSION = [];
+        $this->close();
     }
 
     /**

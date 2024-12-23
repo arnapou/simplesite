@@ -57,8 +57,7 @@ final class AdminLoginController extends AdminController
 
     private function routeLogout(): Response
     {
-        $_SESSION = [];
-        session_write_close();
+        $this->session->destroy();
 
         return $this->redirectToRoute(AdminMainController::HOME);
     }
