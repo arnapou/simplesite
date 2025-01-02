@@ -16,8 +16,8 @@ namespace Arnapou\SimpleSite\Admin;
 use Arnapou\Encoder\Encoder;
 use Arnapou\Ensure\Ensure;
 use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
-use Arnapou\Psr\Psr15HttpHandlers\Routing\Endpoint\EndpointInterface;
-use Arnapou\Psr\Psr15HttpHandlers\Routing\PrefixDecorator\PrefixEndpoint;
+use Arnapou\Psr\Psr15HttpHandlers\Routing\Endpoint\EndpointsProviderInterface;
+use Arnapou\Psr\Psr15HttpHandlers\Routing\PrefixDecorator\PrefixEndpointsProvider;
 use Arnapou\Psr\Psr3Logger\Decorator\ThrowableLogger;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\Psr\Psr7HttpMessage\Status\StatusRedirect;
@@ -26,7 +26,7 @@ use Arnapou\SimpleSite\Core;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\TwigFilter;
 
-abstract class AdminController extends Controller
+abstract class AdminController extends Controller implements EndpointsProviderInterface
 {
     protected readonly string $baseUrl;
 
@@ -48,15 +48,8 @@ abstract class AdminController extends Controller
     {
         $this->initOnce();
 
-        foreach ($this->getEndpoints() as $endpoint) {
-            $this->router->addEndpoint(new PrefixEndpoint("$this->baseUrl/", $endpoint));
-        }
+        $this->router->addEndpoints(new PrefixEndpointsProvider("$this->baseUrl/", $this));
     }
-
-    /**
-     * @return array<EndpointInterface>
-     */
-    abstract protected function getEndpoints(): array;
 
     final protected function node(string $dir): AdminNode
     {

@@ -43,7 +43,7 @@ class AdminScenarioTest extends TestCase
         try {
             // Access the admin without trailing slash.
             $this->handleGet('/admin');
-            self::assertRedirect('/admin/', 301);
+            self::assertRedirect('/admin/', 302);
 
             // Access the admin with trailing slash.
             $this->handleRedirect();

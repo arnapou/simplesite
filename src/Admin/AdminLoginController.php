@@ -26,7 +26,7 @@ final class AdminLoginController extends AdminController
 {
     public const string LOGIN = 'admin_login';
 
-    protected function getEndpoints(): array
+    public function getEndpoints(): iterable
     {
         return [
             new Endpoint(new Route('login', self::LOGIN)->setMethods('GET', 'POST'), $this->routeLogin(...)),

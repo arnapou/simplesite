@@ -35,7 +35,7 @@ final class AdminMainController extends AdminController
     public const string HOME = 'admin_home';
     public const string MAIN = 'admin_listing';
 
-    protected function getEndpoints(): array
+    public function getEndpoints(): iterable
     {
         $common = static fn (Route $route) => $route
             ->setMethods('GET', 'POST')
