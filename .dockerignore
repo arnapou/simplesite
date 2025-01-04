@@ -10,7 +10,6 @@ compose.override.yaml
 compose.yaml
 doc
 Dockerfile
-files
 icon.png
 icon.svg
 phpstan.neon

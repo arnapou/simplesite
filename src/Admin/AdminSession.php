@@ -20,22 +20,32 @@ final class AdminSession
 {
     private const int CSRF_TTL = 1800; // 30 minutes
 
-    public bool $isAuthenticated = false {
-        get => Ensure::bool($_SESSION['authenticated'] ?? false);
-        set => $_SESSION['authenticated'] = $value;
-    }
-    public string $flashMessage = '' {
+    public bool $isAuthenticated {
         get {
-            $value = Ensure::string($_SESSION['flash_message'] ?? '');
-            $_SESSION['flash_message'] = '';
-
-            return $value;
-        }
-        set => $_SESSION['flash_message'] = $value;
+        return Ensure::bool($_SESSION['authenticated'] ?? false);
     }
-    public int $csrfTime = 0 {
-        get => Ensure::int($_SESSION['csrf_time'] ?? 0);
-        set => $_SESSION['csrf_time'] = $value;
+    set {
+        $_SESSION['authenticated'] = $value;
+    }
+    }
+    public string $flashMessage {
+        get {
+        $value = Ensure::string($_SESSION['flash_message'] ?? '');
+        $_SESSION['flash_message'] = '';
+
+        return $value;
+    }
+    set {
+        $_SESSION['flash_message'] = $value;
+    }
+    }
+    public int $csrfTime {
+        get {
+        return Ensure::int($_SESSION['csrf_time'] ?? 0);
+    }
+    set {
+        $_SESSION['csrf_time'] = $value;
+    }
     }
     private bool $closed = false;
 

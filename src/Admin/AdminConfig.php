@@ -22,9 +22,13 @@ final class AdminConfig
 {
     public const string TABLE = 'admin.config';
 
-    public string $passwordHash = '' {
-        get => Ensure::string($this->get('password_hash') ?? '');
-        set => $this->set('password_hash', $this->hash($value));
+    public string $passwordHash {
+        get {
+        return Ensure::string($this->get('password_hash') ?? '');
+    }
+    set {
+        $this->set('password_hash', $this->hash($value));
+    }
     }
 
     public function __construct(private readonly Core\Container $container)

@@ -18,6 +18,7 @@
         "arnapou/psr-cache": "^1.0",
         "arnapou/psr-container": "^1.0",
         "arnapou/psr-http": "^1.0",
+        "arnapou/psr-log": "^1.1",
         "arnapou/zip": "^1.4",
         "erusev/parsedown": "dev-master",
         "symfony/string": "^6.4",
