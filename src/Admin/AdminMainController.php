@@ -19,10 +19,10 @@ use Arnapou\Psr\Psr15HttpHandlers\Routing\Endpoint\Endpoint;
 use Arnapou\Psr\Psr15HttpHandlers\Routing\Route;
 use Arnapou\Psr\Psr7HttpMessage\FileResponse;
 use Arnapou\Psr\Psr7HttpMessage\Header\ContentDisposition;
-use Arnapou\Psr\Psr7HttpMessage\MimeType;
 use Arnapou\Psr\Psr7HttpMessage\Response;
 use Arnapou\Psr\Psr7HttpMessage\Status\StatusClientError as Error;
 use Arnapou\SimpleSite\Core\Problem;
+use Arnapou\Zip\Psr\Prs7ZipResponse;
 use Arnapou\Zip\Psr\Prs7ZipResponseStream;
 use Arnapou\Zip\Writing\Zipped\ZippedFile;
 use Arnapou\Zip\ZipReader;
@@ -376,20 +376,21 @@ final class AdminMainController extends AdminController
         return $this->redirect($this->adminUrl($created));
     }
 
-    private function doDownload(AdminNode $node): Response
+    private function doDownload(AdminNode $node): ResponseInterface
     {
         $this->session->close();
+        set_time_limit(1800);
 
-        if ($node->dir) {
-            $filename = $node->name() . '.zip';
-            $response = new FileResponse($stream = new Prs7ZipResponseStream(), MimeType::detect($filename));
-            $this->doDownloadAddNode($stream, $node, \strlen($node->path) + 1);
-        } else {
-            $filename = $node->name();
-            $response = FileResponse::fromFilename($node->path);
+        if (!$node->dir) {
+            return FileResponse::fromFilename($node->path)
+                ->withHeader(ContentDisposition::attachment($node->name()));
         }
 
-        return $response->withHeader(ContentDisposition::attachment($filename));
+        $filename = $node->name() . '.zip';
+        $response = Prs7ZipResponse::create(new Response(), $filename);
+        $this->doDownloadAddNode($response->stream, $node, \strlen($node->path) + 1);
+
+        return $response;
     }
 
     private function doDownloadAddNode(Prs7ZipResponseStream $stream, AdminNode $node, int $trim): void
