@@ -52,8 +52,13 @@ final class SimpleSite
 
             return new Response(self::router()->handle($request));
         } catch (\Throwable $e) {
+            if ($e instanceof NoResponseFound) {
+                self::logger()->warning('404 Not Found');
+
+                return self::error(404, $e, 'Not Found');
+            }
+
             [$code, $text] = match (true) {
-                $e instanceof NoResponseFound => [404, 'Not Found'],
                 $e instanceof Core\Problem => [$e->getStatus()->value ?? 500, $e->getStatus()->name ?? 'Internal Server Error'],
                 default => [500, 'Internal Server Error'],
             };
