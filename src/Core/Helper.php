@@ -39,12 +39,12 @@ final readonly class Helper
         $parsed = parse_url((string) $request->getUri());
         $scheme = Enforce::string($parsed['scheme'] ?? 'http');
         $host = Enforce::string($parsed['host'] ?? 'localhost');
-        $port = Enforce::string($parsed['port'] ?? '80');
+        $port = Enforce::string($parsed['port'] ?? '');
 
         $domain = match ($scheme) {
             'http' => \in_array($port, ['80', ''], true) ? $host : "$host:$port",
             'https' => \in_array($port, ['443', ''], true) ? $host : "$host:$port",
-            default => "$host:$port",
+            default => '' === $port ? $host : "$host:$port",
         };
 
         return $withScheme ? "$scheme://$domain/" : $domain;
