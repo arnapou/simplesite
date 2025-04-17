@@ -193,7 +193,7 @@ final readonly class Helper
             $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
         }
 
-        return $this->asset($path);
+        return $path;
     }
 
     public function toCamelCase(string $str, bool $ucfirst = false): string

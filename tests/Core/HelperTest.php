@@ -175,17 +175,17 @@ class HelperTest extends TestCase
     #[RunInSeparateProcess]
     public function testThumbnail(): void
     {
-        self::assertSame('/', self::createHelper()->thumbnail('', 20));
+        self::assertSame('', self::createHelper()->thumbnail('', 20));
         self::assertSame('/', self::createHelper()->thumbnail('/', 20));
 
         // no base url
-        self::assertSame('/foo/bar', self::createHelper()->thumbnail('foo/bar', 20));
-        self::assertSame('/file.20.jpg', self::createHelper()->thumbnail('file.jpg', 20));
+        self::assertSame('foo/bar', self::createHelper()->thumbnail('foo/bar', 20));
+        self::assertSame('file.20.jpg', self::createHelper()->thumbnail('file.jpg', 20));
 
         // with base url
-        self::assertSame('/zzz/foo/bar', self::createHelper('zzz')->thumbnail('foo/bar', 20));
-        self::assertSame('/zzz/foo/bar', self::createHelper('zzz/')->thumbnail('foo/bar', 20));
-        self::assertSame('/zzz/file.20.jpg', self::createHelper('zzz/')->thumbnail('file.jpg', 20));
+        self::assertSame('foo/bar', self::createHelper('zzz')->thumbnail('foo/bar', 20));
+        self::assertSame('foo/bar', self::createHelper('zzz/')->thumbnail('foo/bar', 20));
+        self::assertSame('file.20.jpg', self::createHelper('zzz/')->thumbnail('file.jpg', 20));
     }
 
     #[RunInSeparateProcess]
