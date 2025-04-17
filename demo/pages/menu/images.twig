@@ -19,11 +19,25 @@
 
     <h3>Resized image</h3>
 
+    <p><b>Max(width, height)</b></p>
     <ul>
         <li>Twig code: <code>{% verbatim %}&lt;img src="{{ thumbnail('../assets/twig.png', 200) }}"&gt;{% endverbatim %}</code></li>
         <li>Rendering: <img src="{{ thumbnail('../assets/twig.png', 200) }}"></li>
     </ul>
 
+    <p><b>Force width</b></p>
+    <ul>
+        <li>Twig code: <code>{% verbatim %}&lt;img src="{{ thumbnail('../assets/twig.png', 'w80') }}"&gt;{% endverbatim %}</code></li>
+        <li>Rendering: <img src="{{ thumbnail('../assets/twig.png', 'w80') }}"></li>
+    </ul>
+
+    <p><b>Force height</b></p>
+    <ul>
+        <li>Twig code: <code>{% verbatim %}&lt;img src="{{ thumbnail('../assets/twig.png', 'h80') }}"&gt;{% endverbatim %}</code></li>
+        <li>Rendering: <img src="{{ thumbnail('../assets/twig.png', 'h80') }}"></li>
+    </ul>
+
+    <p><b>Note</b></p>
     <p>
         Coming from the <code>pages</code> folder and not <code>public</code>, only access via resize is possible:
     </p>
@@ -49,6 +63,14 @@
         <tr>
             <td><code>some/path/image.jpg</code></td>
             <td><code>some/path/image.512.jpg</code></td>
+        </tr>
+        <tr>
+            <td><code>some/path/image.jpg</code></td>
+            <td><code>some/path/image.w512.jpg</code></td>
+        </tr>
+        <tr>
+            <td><code>some/path/image.jpg</code></td>
+            <td><code>some/path/image.h512.jpg</code></td>
         </tr>
         </tbody>
     </table>

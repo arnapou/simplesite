@@ -31,45 +31,32 @@ final class Image
      * @throws InvalidArgumentException
      * @throws \ImagickException
      */
-    public function thumbnail(string $filename, string $ext, ?int $size): ?Response
+    public function thumbnail(string $filename, string $ext, int $size, string $flag = ''): ?Response
     {
         if (!is_file($filename)) {
             return null;
         }
 
         $filemtime = (int) filemtime($filename);
-        if (null === $size) {
-            $content = (string) file_get_contents($filename);
-        } else {
-            $content = $this->cache->from(
-                'arnapou.simplesite.' . sha1($filename) . ".$size.$ext.$filemtime." . filesize($filename),
-                function () use ($filename, $ext, $size) {
-                    $content = $this->imgResize($filename, strtolower($ext), $size);
-                    $this->logger->notice('Image resize', ['size' => $size]);
+        $content = $this->cache->from(
+            'arnapou.simplesite.' . sha1($filename) . ".$flag$size.$ext.$filemtime." . filesize($filename),
+            function () use ($filename, $ext, $size, $flag) {
+                $content = $this->tryResizeImagick($filename, $size, $flag)
+                    ?? $this->tryResizeGD($filename, strtolower($ext), $size, $flag)
+                    ?? throw new Problem();
+                $this->logger->notice('Image resize', ['size' => $size]);
 
-                    return $content;
-                },
-            );
-        }
+                return $content;
+            },
+        );
 
         return new FileResponse($content, Config::IMAGE_MIME_TYPES[strtolower($ext)]);
     }
 
     /**
-     * @throws Problem
      * @throws \ImagickException
      */
-    private function imgResize(string $filename, string $ext, int $size): string
-    {
-        return $this->tryResizeImagick($filename, $size)
-            ?? $this->tryResizeGD($filename, $ext, $size)
-            ?? throw new Problem();
-    }
-
-    /**
-     * @throws \ImagickException
-     */
-    private function tryResizeImagick(string $filename, int $size): ?string
+    private function tryResizeImagick(string $filename, int $size, string $flag): ?string
     {
         if (!\extension_loaded('imagick')) {
             return null;
@@ -77,7 +64,7 @@ final class Image
 
         $img = new \Imagick($filename);
         [$w1, $h1] = [$img->getImageWidth(), $img->getImageHeight()];
-        [$w2, $h2] = $this->newSize($w1, $h1, $size);
+        [$w2, $h2] = $this->newSize($w1, $h1, $size, $flag);
         $img->resizeImage($w2, $h2, \Imagick::FILTER_LANCZOS, 1);
 
         return $img->getImageBlob();
@@ -86,19 +73,19 @@ final class Image
     /**
      * @throws Problem
      */
-    private function tryResizeGD(string $filename, string $ext, int $size): ?string
+    private function tryResizeGD(string $filename, string $ext, int $size, string $flag): ?string
     {
         if (!\extension_loaded('gd')) {
             return null;
         }
 
-        $resize = function (false|\GdImage $img) use ($size): \GdImage {
+        $resize = function (false|\GdImage $img) use ($size, $flag): \GdImage {
             if (false === $img) {
                 throw Problem::imageError();
             }
 
             [$w1, $h1] = [imagesx($img), imagesy($img)];
-            [$w2, $h2] = $this->newSize($w1, $h1, $size);
+            [$w2, $h2] = $this->newSize($w1, $h1, $size, $flag);
             $dst = imagecreate(max(1, $w2), max(1, $h2));
             if (false === $dst) {
                 throw Problem::imageError();
@@ -129,10 +116,14 @@ final class Image
     /**
      * @return array{int, int}
      */
-    private function newSize(int $width, int $height, int $size): array
+    private function newSize(int $width, int $height, int $size, string $flag): array
     {
-        return $width > $height
-            ? [$size, (int) floor($size * $height / $width)]
-            : [(int) floor($size * $width / $height), $size];
+        return match ($flag) {
+            'w' => [$size, (int) round($height * $size / $width)],
+            'h' => [(int) round($width * $size / $height), $size],
+            default => $width > $height
+                ? [$size, (int) round($size * $height / $width)]
+                : [(int) round($size * $width / $height), $size],
+        };
     }
 }

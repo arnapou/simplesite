@@ -15,6 +15,7 @@ namespace Arnapou\SimpleSite\Core;
 
 use Arnapou\Ensure\Enforce;
 use Arnapou\Psr\Psr15HttpHandlers\HttpRouteHandler;
+use Arnapou\SimpleSite\Controllers\ImagesController;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Yaml\Yaml;
@@ -187,10 +188,13 @@ final readonly class Helper
         return "\n$text\n";
     }
 
-    public function thumbnail(string $path, int $size = 200): string
+    public function thumbnail(string $path, string $size = '200'): string
     {
         if (\array_key_exists($ext = strtolower($this->fileExtension($path)), Config::IMAGE_MIME_TYPES)) {
-            $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
+            $parsed = ImagesController::parseSize($size);
+            if (null !== $parsed) {
+                $path = substr($path, 0, -\strlen($ext)) . $size . '.' . substr($path, -\strlen($ext));
+            }
         }
 
         return $path;

@@ -175,17 +175,17 @@ class HelperTest extends TestCase
     #[RunInSeparateProcess]
     public function testThumbnail(): void
     {
-        self::assertSame('', self::createHelper()->thumbnail('', 20));
-        self::assertSame('/', self::createHelper()->thumbnail('/', 20));
+        self::assertSame('', self::createHelper()->thumbnail('', '20'));
+        self::assertSame('/', self::createHelper()->thumbnail('/', '20'));
 
         // no base url
-        self::assertSame('foo/bar', self::createHelper()->thumbnail('foo/bar', 20));
-        self::assertSame('file.20.jpg', self::createHelper()->thumbnail('file.jpg', 20));
+        self::assertSame('foo/bar', self::createHelper()->thumbnail('foo/bar', '20'));
+        self::assertSame('file.20.jpg', self::createHelper()->thumbnail('file.jpg', '20'));
 
         // with base url
-        self::assertSame('foo/bar', self::createHelper('zzz')->thumbnail('foo/bar', 20));
-        self::assertSame('foo/bar', self::createHelper('zzz/')->thumbnail('foo/bar', 20));
-        self::assertSame('file.20.jpg', self::createHelper('zzz/')->thumbnail('file.jpg', 20));
+        self::assertSame('foo/bar', self::createHelper('zzz')->thumbnail('foo/bar', '20'));
+        self::assertSame('foo/bar', self::createHelper('zzz/')->thumbnail('foo/bar', '20'));
+        self::assertSame('file.20.jpg', self::createHelper('zzz/')->thumbnail('file.jpg', '20'));
     }
 
     #[RunInSeparateProcess]
@@ -208,6 +208,8 @@ class HelperTest extends TestCase
         self::assertSame('/favicon.ico', self::createHelper()->path('favicon'));
         self::assertSame('/robots.txt', self::createHelper()->path('robots_txt'));
         self::assertSame('/test.20.JpG', self::createHelper()->path('images', ['path' => 'test', 'size' => 20, 'ext' => 'JpG']));
+        self::assertSame('/test.w20.JpG', self::createHelper()->path('images', ['path' => 'test', 'size' => 'w20', 'ext' => 'JpG']));
+        self::assertSame('/test.h20.JpG', self::createHelper()->path('images', ['path' => 'test', 'size' => 'h20', 'ext' => 'JpG']));
 
         // with base url
         self::assertSame('/zzz/favicon.ico', self::createHelper('zzz/')->path('favicon'));
