@@ -74,7 +74,7 @@ final class LogFormatter implements \Arnapou\Psr\Psr3Logger\Formatter\LogFormatt
             $serverParams = $serverRequest->getServerParams();
 
             $common['url'] = (string) $serverRequest->getUri();
-            $common['ip'] = $serverParams['REMOTE_ADDR'] ?? '?';
+            $common['ip'] = $serverParams['HTTP_X_FORWARDED_FOR'] ?? $serverParams['REMOTE_ADDR'] ?? '?';
 
             if (isset($serverParams['HTTP_REFERER'])) {
                 $common['referer'] = $serverParams['HTTP_REFERER'];
