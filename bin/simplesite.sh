@@ -74,4 +74,4 @@ fi
 
 # Start FrankenPHP.
 
-exec frankenphp run --config /etc/caddy/Caddyfile
+exec frankenphp run --config /etc/frankenphp/Caddyfile

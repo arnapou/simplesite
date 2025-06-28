@@ -6,7 +6,6 @@ services:
       target: demo
     ports:
       - '8080:80'
-    user: 1000:1000
     environment:
       APP_ENV: 'dev'
     volumes: &volumes
@@ -15,5 +14,4 @@ services:
   # Use the container below for development tools (composer, ...)
   dev:
     image: registry.gitlab.com/arnapou/docker/php:8.4-dev
-    user: 1000:1000
     volumes: *volumes
