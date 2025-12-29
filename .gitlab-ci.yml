@@ -13,7 +13,7 @@ stages:
     paths: [vendor]
   parallel:
     matrix:
-      - PHPVER: [ '8.4' ]
+      - PHPVER: [ '8.5' ]
 
 cs + sa:
   <<: *php
@@ -68,9 +68,9 @@ release:
           url: 'https://gitlab.com/arnapou/project/simplesite/-/jobs/${ARTIFACT_JOB_ID}/artifacts/file/bin/simplesite.phar'
 
 .docker: &docker
-  image: docker:27
+  image: docker:29
   stage: build
-  services: [docker:27-dind]
+  services: [docker:29-dind]
   before_script:
     - *VERSION
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY

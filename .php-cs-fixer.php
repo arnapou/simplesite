@@ -27,6 +27,7 @@ $rules = [
     '@PHP82Migration' => true,
     '@PHP83Migration' => true,
     '@PHP84Migration' => true,
+    '@PHP85Migration' => true,
     'declare_strict_types' => true,
     'concat_space' => ['spacing' => 'one'],
     'ordered_imports' => ['sort_algorithm' => 'alpha', 'imports_order' => ['const', 'class', 'function']],
@@ -43,6 +44,7 @@ $rules = [
 ];
 
 return new PhpCsFixer\Config()
+    ->setUnsupportedPhpVersionAllowed(true)
     ->setCacheFile(sys_get_temp_dir() . '/.php-cs-fixer.cache')
     ->setRiskyAllowed(true)
     ->setRules($rules)

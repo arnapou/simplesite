@@ -24,11 +24,11 @@ final class AdminConfig
 
     public string $passwordHash {
         get {
-        return Ensure::string($this->get('password_hash') ?? '');
-    }
-    set {
-        $this->set('password_hash', $this->hash($value));
-    }
+            return Ensure::string($this->get('password_hash') ?? '');
+        }
+        set {
+            $this->set('password_hash', $this->hash($value));
+        }
     }
 
     public function __construct(private readonly Core\Container $container)

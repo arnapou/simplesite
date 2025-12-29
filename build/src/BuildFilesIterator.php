@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Arnapou\SimpleSite\Build;
 
-use SplFileInfo;
-
 /**
- * @extends \IteratorIterator<int, SplFileInfo, \Traversable<int, SplFileInfo>>
+ * @extends \IteratorIterator<int, \SplFileInfo, \Traversable<int, \SplFileInfo>>
  */
 final class BuildFilesIterator extends \IteratorIterator
 {

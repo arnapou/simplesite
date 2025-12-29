@@ -22,30 +22,30 @@ final class AdminSession
 
     public bool $isAuthenticated {
         get {
-        return Ensure::bool($_SESSION['authenticated'] ?? false);
-    }
-    set {
-        $_SESSION['authenticated'] = $value;
-    }
+            return Ensure::bool($_SESSION['authenticated'] ?? false);
+        }
+        set {
+            $_SESSION['authenticated'] = $value;
+        }
     }
     public string $flashMessage {
         get {
-        $value = Ensure::string($_SESSION['flash_message'] ?? '');
-        $_SESSION['flash_message'] = '';
+            $value = Ensure::string($_SESSION['flash_message'] ?? '');
+            $_SESSION['flash_message'] = '';
 
-        return $value;
-    }
-    set {
-        $_SESSION['flash_message'] = $value;
-    }
+            return $value;
+        }
+        set {
+            $_SESSION['flash_message'] = $value;
+        }
     }
     public int $csrfTime {
         get {
-        return Ensure::int($_SESSION['csrf_time'] ?? 0);
-    }
-    set {
-        $_SESSION['csrf_time'] = $value;
-    }
+            return Ensure::int($_SESSION['csrf_time'] ?? 0);
+        }
+        set {
+            $_SESSION['csrf_time'] = $value;
+        }
     }
     private bool $closed = false;
 

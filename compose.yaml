@@ -13,5 +13,5 @@ services:
 
   # Use the container below for development tools (composer, ...)
   dev:
-    image: registry.gitlab.com/arnapou/docker/php:8.4-dev
+    image: registry.gitlab.com/arnapou/docker/php:8.5-dev
     volumes: *volumes

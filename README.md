@@ -22,7 +22,7 @@ Below is an example of a working docker compose file `compose.yaml`.
 ```yaml
 services:
   app:
-    image: registry.gitlab.com/arnapou/project/simplesite:v8
+    image: registry.gitlab.com/arnapou/project/simplesite:v9
     user: 1000:1000
     
     # For local testing / dev -> http://localhost
@@ -62,7 +62,7 @@ Web server
 --------------------
 
 You can directly use our php image if you want something working out of the box :
-- `registry.gitlab.com/arnapou/docker/php:8.4-frankenphp`
+- `registry.gitlab.com/arnapou/docker/php:8.5-frankenphp`
 
 We recommend 
 - [FrankenPHP](https://frankenphp.dev/)
@@ -89,13 +89,14 @@ RewriteRule . index.php [L,QSA]
 Php versions
 --------------------
 
-| Date       | Ref       | 8.4 | 8.3 | 8.2 | 8.1 | 8.0 | 7.2 |
-|------------|-----------|:---:|:---:|:---:|:---:|:---:|:---:|
-| 10/12/2024 | 8.x, main |  ×  |     |     |     |     |     |
-| 25/11/2024 | 7.x       |  ×  |     |     |     |     |     |
-| 26/11/2023 | 6.x       |     |  ×  |     |     |     |     |
-| 11/10/2023 | 5.x       |     |     |  ×  |     |     |     |
-| 19/12/2022 | 4.x       |     |     |  ×  |     |     |     |
-| 30/01/2022 | 3.x       |     |     |     |  ×  |     |     |
-| 15/05/2021 | 2.x       |     |     |     |     |  ×  |     |
-| 07/12/2019 | 1.x       |     |     |     |     |     |  ×  |
+| Date       | Ref       | 8.4 | 8.4 | 8.3 | 8.2 | 8.1 | 8.0 | 7.2 |
+|------------|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 29/12/2025 | 9.x, main |  ×  |     |     |     |     |     |     |
+| 10/12/2024 | 8.x       |     |  ×  |     |     |     |     |     |
+| 25/11/2024 | 7.x       |     |  ×  |     |     |     |     |     |
+| 26/11/2023 | 6.x       |     |     |  ×  |     |     |     |     |
+| 11/10/2023 | 5.x       |     |     |     |  ×  |     |     |     |
+| 19/12/2022 | 4.x       |     |     |     |  ×  |     |     |     |
+| 30/01/2022 | 3.x       |     |     |     |     |  ×  |     |     |
+| 15/05/2021 | 2.x       |     |     |     |     |     |  ×  |     |
+| 07/12/2019 | 1.x       |     |     |     |     |     |     |  ×  |
